@@ -8,6 +8,11 @@ import random
 from torch.nn.init import kaiming_uniform
 import torch.nn.init as init
 import time
+###########################################################
+#GPU OPTION
+###########################################################
+import torch.backends.cudnn as cudnn
+###########################################################
 class EXP_EMB_LSTM(nn.Module):
 	def __init__(self,emb_size,voc_size,lstm_hidden_size,f0_dim,linear_h1):
 		super(EXP_EMB_LSTM, self).__init__()
