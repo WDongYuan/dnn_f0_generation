@@ -9,4 +9,4 @@ if __name__=="__main__":
 		m = "debug"
 	os.system("git add "+f)
 	os.system("git commit -m \""+m+"\"")
-	os.system("git push origin co_att_multi_glimpse")
+	os.system("git push origin master")
