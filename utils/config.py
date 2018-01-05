@@ -1,13 +1,13 @@
-learning_rate = 0.001
+learning_rate = 0.01
 decay_step = 10
 decay_rate = 0.3
 epoch_num = 100
 voc_size = 2500
-batch_size = 10
-emb_size = 50
+batch_size = 20
+emb_size = 20
 lstm_hidden_size = 100
 f0_dim = 10
-linear_h1 = 50
+linear_h1 = 200
 
 
 #################

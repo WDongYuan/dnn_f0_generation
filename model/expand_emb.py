@@ -66,6 +66,7 @@ class EXP_EMB_LSTM(nn.Module):
 
 	def forward(self,sents,sent_length):
 		self.batch_size,self.max_length = sents.size()
+		sents = sents.unsqueeze(2).expand(self.batch_size,self.max_length,self.f0_dim).contiguous().view(self.batch_size,self.max_length*self.f0_dim)
 		emb = self.embed(sents)
 		# emb = self.embed_linear(emb)
 
@@ -75,11 +76,11 @@ class EXP_EMB_LSTM(nn.Module):
 		h_n, (h_t,c_t) = self.emb_lstm(emb,(h_0,c_0))
 		# h_n,_ = torch.nn.utils.rnn.pad_packed_sequence(h_n, batch_first=True)
 		# print("begin")
-		h_n = h_n.unsqueeze(2).expand(self.batch_size,self.max_length,self.f0_dim,self.lstm_hidden_size*self.direction
-			).contiguous().view(self.batch_size,self.max_length*self.f0_dim,self.lstm_hidden_size*self.direction)
-		c_0 = self.init_hidden()
-		h_0 = self.init_hidden()
-		h_n, (h_t,c_t) = self.f0_lstm(h_n,(h_0,c_0))
+		# h_n = h_n.unsqueeze(2).expand(self.batch_size,self.max_length,self.f0_dim,self.lstm_hidden_size*self.direction
+		# 	).contiguous().view(self.batch_size,self.max_length*self.f0_dim,self.lstm_hidden_size*self.direction)
+		# c_0 = self.init_hidden()
+		# h_0 = self.init_hidden()
+		# h_n, (h_t,c_t) = self.f0_lstm(h_n,(h_0,c_0))
 		# print("end")
 
 		h = self.l1(h_n)
