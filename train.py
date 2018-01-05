@@ -324,9 +324,8 @@ if __name__=="__main__":
 		train_f0,train_emb,train_len = get_f0_embedding("./lstm_data/train")
 		test_f0,test_emb,test_len = get_f0_embedding("./lstm_data/test")
 
-		batch_num = train_f0.shape[0]/config.batch_size
+		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
-		print(batch_num)
 
 		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
