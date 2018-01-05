@@ -74,13 +74,13 @@ class EXP_EMB_LSTM(nn.Module):
 		# emb = torch.nn.utils.rnn.pack_padded_sequence(emb, list(sent_length.data.type(torch.LongTensor)), batch_first=True)
 		h_n, (h_t,c_t) = self.emb_lstm(emb,(h_0,c_0))
 		# h_n,_ = torch.nn.utils.rnn.pad_packed_sequence(h_n, batch_first=True)
-		print("begin")
+		# print("begin")
 		h_n = h_n.unsqueeze(3).expand(self.batch_size,self.max_length,self.lstm_hidden_size*self.direction,self.f0_dim
 			).permute(0,1,3,2).contiguous().view(self.batch_size,self.max_length*self.f0_dim,self.lstm_hidden_size*self.direction)
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 		h_n, (h_t,c_t) = self.f0_lstm(h_n,(h_0,c_0))
-		print("end")
+		# print("end")
 
 		h = self.l1(h_n)
 		h = self.non_linear(h)
