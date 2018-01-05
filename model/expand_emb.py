@@ -56,7 +56,8 @@ class EXP_EMB_LSTM(nn.Module):
 		layer.bias.data.uniform_(-1, 1)
 	def init_hidden(self):
 		direction = 2 if self.bidirectional_flag else 1
-		return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		# return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
 
 	def forward(self,sents,sent_length):
 		self.batch_size,self.max_length = sents.size()
@@ -86,7 +87,12 @@ class EXP_EMB_LSTM(nn.Module):
 
 def Train(train_emb,train_f0,train_len,val_emb,val_f0,val_len,\
 	model,optimizer,learning_rate,decay_step,decay_rate,epoch_num):
-	# print(train_emb)
+	###########################################################
+	#GPU OPTION
+	###########################################################
+	cudnn.benchmark = True
+	model.cuda()
+	###########################################################
 	LF = nn.MSELoss()
 	min_loss = 100000000
 	print("begin training...")
@@ -96,9 +102,17 @@ def Train(train_emb,train_f0,train_len,val_emb,val_f0,val_len,\
 		for i in range(len(train_emb)):
 			# if i==6:
 			# 	return
-			train_emb_batch = Variable(train_emb[i])
-			train_f0_batch = Variable(train_f0[i])
-			train_len_batch = Variable(train_len[i])
+			###########################################################
+			#GPU OPTION
+			###########################################################
+			train_emb_batch = Variable(train_emb[i].cuda(async=True))
+			train_f0_batch = Variable(train_f0[i].cuda(async=True))
+			train_len_batch = Variable(train_len[i].cuda(async=True))
+			###########################################################
+			# train_emb_batch = Variable(train_emb[i])
+			# train_f0_batch = Variable(train_f0[i])
+			# train_len_batch = Variable(train_len[i])
+			###########################################################
 
 			optimizer.zero_grad()
 			outputs = model(train_emb_batch,train_len_batch)
@@ -127,12 +141,20 @@ def Train(train_emb,train_f0,train_len,val_emb,val_f0,val_len,\
 		print("#####################################")
 
 def Validate(model,val_emb,val_f0,val_len,save_prediction=""):
+	model.cuda()
 	model.eval()
 	val_f0_shape = val_f0.size()
 	batch_size = val_f0_shape[0]
 
-	result = model(Variable(val_emb),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
-	val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	###########################################################
+	#GPU OPTION
+	###########################################################
+	result = model(Variable(val_emb.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	###########################################################
+	# result = model(Variable(val_emb),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	# val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	###########################################################
 	val_len = val_len.numpy()
 	loss = []
 

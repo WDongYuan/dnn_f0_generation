@@ -15,6 +15,11 @@ from model import embedding_lstm
 from model import feature_lstm
 from utils import config
 from model import expand_emb
+###########################################################
+#GPU OPTION
+###########################################################
+import torch.backends.cudnn as cudnn
+###########################################################
 
 
 def Validate(model,val_data,val_label,dct_flag=False):
