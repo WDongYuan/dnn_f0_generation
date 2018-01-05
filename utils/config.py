@@ -1,4 +1,4 @@
-learning_rate = 0.01
+learning_rate = 0.001
 decay_step = 1
 decay_rate = 0.9
 epoch_num = 100
