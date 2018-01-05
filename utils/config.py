@@ -1,4 +1,4 @@
-learning_rate = 0.01
+learning_rate = 0.001
 decay_step = 10
 decay_rate = 0.3
 epoch_num = 100
@@ -7,7 +7,7 @@ batch_size = 20
 emb_size = 20
 lstm_hidden_size = 200
 f0_dim = 10
-linear_h1 = 200
+linear_h1 = 100
 
 
 #################
