@@ -7,7 +7,7 @@ batch_size = 20
 emb_size = 20
 lstm_hidden_size = 100
 f0_dim = 10
-linear_h1 = 200
+linear_h1 = 100
 
 
 #################
