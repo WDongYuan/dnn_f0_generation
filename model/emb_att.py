@@ -48,7 +48,7 @@ class EMB_ATT(nn.Module):
 		self.relu = nn.ReLU()
 		self.sigmoid = nn.Sigmoid()
 		self.tanh = nn.Tanh()
-		self.drop = nn.Dropout(0.5)
+		self.drop = nn.Dropout(0.7)
 
 		self.l1_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
 		self.linear_init(self.l1_1)
@@ -92,11 +92,11 @@ class EMB_ATT(nn.Module):
 		h_1 = self.drop(h_1)
 		h_1 = self.l1_2(h_1)
 
+		tune_value = Variable((torch.ones(self.batch_size,self.max_length,self.f0_dim)*50).cuda(async=True))
 		h_n_2 = self.drop(h_n_2)
 		h_2 = self.l2_1(h_n_2)
 		h_2 = self.tanh(h_2)
 		h_2 = self.drop(h_2)
-		tune_value = Variable((torch.ones(self.batch_size,self.max_length,self.f0_dim)*50).cuda(async=True))
 		h_2 = torch.mul(h_2,tune_value)
 
 		h = h_1+h_2
