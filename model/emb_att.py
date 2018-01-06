@@ -64,14 +64,14 @@ class EMB_ATT(nn.Module):
 		self.linear_init(self.l1_2)
 
 		self.l2_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
-		self.linear_init(self.l2_1,-1,0)
+		self.linear_init(self.l2_1,-10,10)
 		self.l2_2 = nn.Linear(self.linear_h,self.f0_dim)
-		self.linear_init(self.l2_2,-1,0)
+		self.linear_init(self.l2_2,-10,10)
 
 		self.l3_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
-		self.linear_init(self.l3_1,0,1)
+		self.linear_init(self.l3_1,-10,10)
 		self.l3_2 = nn.Linear(self.linear_h,self.f0_dim)
-		self.linear_init(self.l3_2,0,1)
+		self.linear_init(self.l3_2,-10,10)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
