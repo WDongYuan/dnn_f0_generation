@@ -88,18 +88,18 @@ class EMB_MEAN_STD(nn.Module):
 		h_0 = self.init_hidden()
 
 		h_n_shape, (h_t,c_t) = self.shape_lstm(emb,(h_0,c_0))
-		h_n_mean, (h_t,c_t) = self.mean_lstm(emb,(h_0,c_0))
-		h_n_std, (h_t,c_t) = self.std_lstm(emb,(h_0,c_0))
+		# h_n_mean, (h_t,c_t) = self.mean_lstm(emb,(h_0,c_0))
+		# h_n_std, (h_t,c_t) = self.std_lstm(emb,(h_0,c_0))
 
 		h_shape = self.shape_l1(h_n_shape)
 		h_shape = self.non_linear(h_shape)
 		h_shape = self.shape_l2(h_shape)
 
-		h_mean = self.mean_l1(h_n_mean)
+		h_mean = self.mean_l1(h_n_shape)
 		h_mean = self.non_linear(h_mean)
 		h_mean = self.mean_l2(h_mean)
 
-		h_std = self.std_l1(h_n_std)
+		h_std = self.std_l1(h_n_shape)
 		h_std = self.non_linear(h_std)
 		h_std = self.std_l2(h_std)
 
