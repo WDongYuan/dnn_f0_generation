@@ -36,13 +36,9 @@ class EMB_ATT(nn.Module):
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 
-		self.att_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.lstm1 = nn.LSTM(self.emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.lstm2 = nn.LSTM(self.emb_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.lstm3 = nn.LSTM(self.emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
@@ -51,12 +47,7 @@ class EMB_ATT(nn.Module):
 		self.non_linear = nn.ReLU()
 		self.relu = nn.ReLU()
 		self.sigmoid = nn.Sigmoid()
-
-		self.latt_1 = nn.Linear(self.lstm_hidden_size*self.direction*2,self.linear_h)
-		self.linear_init(self.latt_1)
-		self.latt_2 = nn.Linear(self.linear_h,3)
-		self.linear_init(self.latt_2)
-		self.softmax = nn.Softmax()
+		self.tanh = nn.Tanh()
 
 		self.l1_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
 		self.linear_init(self.l1_1)
@@ -64,15 +55,9 @@ class EMB_ATT(nn.Module):
 		self.linear_init(self.l1_2)
 
 		self.l2_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
-		self.linear_init(self.l2_1,-10,10)
+		self.linear_init(self.l2_1,-0.01,0.01)
 		self.l2_2 = nn.Linear(self.linear_h,self.f0_dim)
-		self.linear_init(self.l2_2,-10,10)
-
-		self.l3_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
-		self.linear_init(self.l3_1,-10,10)
-		self.l3_2 = nn.Linear(self.linear_h,self.f0_dim)
-		self.linear_init(self.l3_2,-10,10)
-
+		self.linear_init(self.l2_2,-0.01,0.01)
 
 	def linear_init(self,layer,lower=-1,upper=1):
 		layer.weight.data.uniform_(upper, lower)
@@ -96,33 +81,18 @@ class EMB_ATT(nn.Module):
 		h_0 = self.init_hidden()
 
 
-		h_n_att, (h_t,c_t) = self.att_lstm(emb,(h_0,c_0))
 		h_n_1, (h_t,c_t) = self.lstm1(emb,(h_0,c_0))
-		# h_n_2, (h_t,c_t) = self.lstm2(emb,(h_0,c_0))
-		# h_n_3, (h_t,c_t) = self.lstm3(emb,(h_0,c_0))
-
-		h_n_att = torch.cat((h_n_att,h_n_1),dim=2)
-		h_att = self.latt_1(h_n_att)
-		h_att = self.non_linear(h_att)
-		h_att = self.latt_2(h_att)
-		h_att = h_att.view(self.batch_size*self.max_length,3)
-		h_att = self.softmax(h_att)
+		h_n_2, (h_t,c_t) = self.lstm2(emb,(h_0,c_0))
 
 		h_1 = self.l1_1(h_n_1)
-		h_1 = self.non_linear(h_1)
+		h_1 = self.relu(h_1)
 		h_1 = self.l1_2(h_1)
 
-		h_2 = self.l2_1(h_n_1)
-		h_2 = self.sigmoid(h_2)
+		h_2 = self.l2_1(h_n_2)
+		h_2 = self.tanh(h_2)
 		h_2 = self.l2_2(h_2)
 
-		h_3 = self.l3_1(h_n_1)
-		h_3 = self.sigmoid(h_3)
-		h_3 = self.l3_2(h_3)
-
-		h = torch.cat((h_1,h_2,h_3),dim=2).view(self.batch_size*self.max_length,3,self.f0_dim)
-		h_att = h_att.unsqueeze(1)
-		h = torch.bmm(h_att,h)
+		h = h_1+h_2
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
