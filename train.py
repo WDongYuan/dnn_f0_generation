@@ -176,6 +176,9 @@ if __name__=="__main__":
 		test_map = args.test_map
 		txt_file = args.txt_file
 
+		normalize = True
+		predict_val = "shape"
+
 		# encode_feature = EncodeFeature(desc_file)
 		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
 		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
@@ -195,14 +198,35 @@ if __name__=="__main__":
 		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_len = train_len[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size))
-		train_emb = torch.LongTensor(train_emb.tolist())
-		train_f0 = torch.FloatTensor(train_f0.tolist())
-		train_len = torch.LongTensor(train_len.tolist())
 
 		test_f0 = test_f0.reshape((len(test_f0),-1))
 		test_emb = test_emb.reshape((len(test_emb),-1))
 		test_len = test_len
+
+
+		if normalize:
+			train_mean = train_f0.mean(axis=2).reshape((-1,config.batch_size,1))
+			train_std = train_f0.std(axis=2).reshape((-1,config.batch_size,1))
+			train_f0 = (train_f0-train_mean)/train_std
+			test_mean = test_f0.mean(axis=1).reshape((-1,1))
+			test_std = test_f0.std(axis=1).reshape((-1,1))
+			test_f0 = (test_f0-test_mean)/test_std
+			if predict_val == "shape":
+				train_f0 = train_f0
+				test_f0 = test_f0
+			elif predict_val == "mean":
+				train_f0 = train_mean
+				test_f0 = test_mean
+				config.f0_dim = 1
+			elif predict_val == "std":
+				train_f0 = train_std
+				test_f0 = test_std
+				config.f0_dim = 1
+
 		# print(np.sum(test_len))
+		train_emb = torch.LongTensor(train_emb.tolist())
+		train_f0 = torch.FloatTensor(train_f0.tolist())
+		train_len = torch.LongTensor(train_len.tolist())
 		test_emb = torch.LongTensor(test_emb.tolist())
 		test_f0 = torch.FloatTensor(test_f0.tolist())
 		test_len = torch.LongTensor(test_len.tolist())
@@ -218,6 +242,7 @@ if __name__=="__main__":
 				emb_att.Validate(model,test_emb,test_f0,test_len,"./model_prediction")
 			exit()
 		model = None
+		train_func = None
 		if mode=="train_emb_lstm":
 			model = embedding_lstm.EMB_LSTM(config.emb_size,config.voc_size,
 				config.lstm_hidden_size,config.f0_dim,config.linear_h1)

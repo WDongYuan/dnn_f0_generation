@@ -11,7 +11,7 @@ import time
 ###########################################################
 #GPU OPTION
 ###########################################################
-import torch.backends.cudnn as cudnn
+# import torch.backends.cudnn as cudnn
 ###########################################################
 class EMB_MEAN_STD(nn.Module):
 	def __init__(self,emb_size,voc_size,lstm_hidden_size,f0_dim,linear_shape,linear_mean,linear_std):
@@ -40,8 +40,9 @@ class EMB_MEAN_STD(nn.Module):
 
 		self.shape_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.mean_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
+		self.mean_lstm = nn.LSTM(self.lstm_hidden_size*self.direction, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		
 		self.std_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
@@ -77,9 +78,9 @@ class EMB_MEAN_STD(nn.Module):
 		###########################################################
 		#GPU OPTION
 		###########################################################
-		return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+		# return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
 		###########################################################
-		# return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
 		###########################################################
 
 	def forward(self,sents,sent_length):
@@ -91,23 +92,18 @@ class EMB_MEAN_STD(nn.Module):
 		h_0 = self.init_hidden()
 
 		h_n_shape, (h_t,c_t) = self.shape_lstm(emb,(h_0,c_0))
-		# h_n_mean, (h_t,c_t) = self.mean_lstm(emb,(h_0,c_0))
+		h_n_mean, (_,_) = self.mean_lstm(h_n_shape,(h_t,c_t))
 		# h_n_std, (h_t,c_t) = self.std_lstm(emb,(h_0,c_0))
 
 		h_shape = self.shape_l1(h_n_shape)
-		h_shape = self.tanh(h_shape)
+		h_shape = self.non_linear(h_shape)
 		h_shape = self.shape_l2(h_shape)
 
 		h_mean = self.mean_l1(h_n_shape)
 		h_mean = self.non_linear(h_mean)
 		h_mean = self.mean_l2(h_mean)
 
-		h_std = self.std_l1(h_n_shape)
-		h_std = self.sigmoid(h_std)
-		h_std = self.std_l2(h_std)
-
-		h = torch.mul(h_shape,h_std)+h_mean
-
+		h = h_shape+h_mean
 
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
@@ -118,8 +114,8 @@ def Train(train_emb,train_f0,train_len,val_emb,val_f0,val_len,\
 	###########################################################
 	#GPU OPTION
 	###########################################################
-	cudnn.benchmark = True
-	model.cuda()
+	# cudnn.benchmark = True
+	# model.cuda()
 	###########################################################
 	LF = nn.MSELoss()
 	min_loss = 100000000
@@ -133,13 +129,13 @@ def Train(train_emb,train_f0,train_len,val_emb,val_f0,val_len,\
 			###########################################################
 			#GPU OPTION
 			###########################################################
-			train_emb_batch = Variable(train_emb[i].cuda(async=True))
-			train_f0_batch = Variable(train_f0[i].cuda(async=True))
-			train_len_batch = Variable(train_len[i].cuda(async=True))
+			# train_emb_batch = Variable(train_emb[i].cuda(async=True))
+			# train_f0_batch = Variable(train_f0[i].cuda(async=True))
+			# train_len_batch = Variable(train_len[i].cuda(async=True))
 			###########################################################
-			# train_emb_batch = Variable(train_emb[i])
-			# train_f0_batch = Variable(train_f0[i])
-			# train_len_batch = Variable(train_len[i])
+			train_emb_batch = Variable(train_emb[i])
+			train_f0_batch = Variable(train_f0[i])
+			train_len_batch = Variable(train_len[i])
 			###########################################################
 
 			optimizer.zero_grad()
@@ -176,11 +172,11 @@ def Validate(model,val_emb,val_f0,val_len,save_prediction=""):
 	###########################################################
 	#GPU OPTION
 	###########################################################
-	result = model(Variable(val_emb.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
-	val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	# result = model(Variable(val_emb.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	# val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	###########################################################
-	# result = model(Variable(val_emb),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
-	# val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	result = model(Variable(val_emb),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	###########################################################
 	val_len = val_len.numpy()
 	loss = []
