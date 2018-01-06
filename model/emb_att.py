@@ -89,7 +89,7 @@ class EMB_ATT(nn.Module):
 		h_1 = self.l1_2(h_1)
 
 		h_2 = self.l2_1(h_n_2)
-		h_2 = self.tanh(h_2)
+		h_2 = self.relu(h_2)
 		h_2 = self.l2_2(h_2)
 
 		h = h_1+h_2
