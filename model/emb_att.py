@@ -55,9 +55,9 @@ class EMB_ATT(nn.Module):
 		self.linear_init(self.l1_2)
 
 		self.l2_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
-		self.linear_init(self.l2_1,-0.01,0.01)
+		self.linear_init(self.l2_1,-0.001,0.001)
 		self.l2_2 = nn.Linear(self.linear_h,self.f0_dim)
-		self.linear_init(self.l2_2,-0.01,0.01)
+		self.linear_init(self.l2_2,-0.001,0.001)
 
 	def linear_init(self,layer,lower=-1,upper=1):
 		layer.weight.data.uniform_(upper, lower)
