@@ -229,6 +229,21 @@ def get_f0_feature(data_dir):
 		f0_arr[i,0:len(f0[i]),:] = f0[i]
 	return f0_arr,feature_arr,length_arr.astype(np.int64)
 
+def get_shape_mean_std(f0_arr,len_arr):
+	shape_arr = np.zeros((f0_arr.shape[0],f0_arr.shape[1],1))
+	mean_arr = np.zeros((f0_arr.shape[0],f0_arr.shape[1],1))
+	std_arr = np.zeros((f0_arr.shape[0],f0_arr.shape[1],1))
+	for utt_id in range(f0_arr.shape[0]):
+		utt_len = len_arr[utt_id]
+		tmp_mean = f0_arr[utt_id,0:utt_len,:].mean(axis=1).reshape((-1,1))
+		tmp_std = f0_arr[utt_id,0:utt_len,:].std(axis=1).reshape((-1,1))
+		tmp_shape = (f0_arr[utt_id,0:utt_len,:]-tmp_mean)/(tmp_std+0.000001)
+		shape_arr[utt_id,0:utt_len,:] = tmp_shape
+		mean_arr[utt_id,0:utt_len,:] = tmp_mean
+		std_arr[utt_id,0:utt_len,:] = tmp_std
+	return shape_arr,mean_arr,std_arr
+
+
 
 
 

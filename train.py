@@ -191,6 +191,20 @@ if __name__=="__main__":
 		print("--->get the numpy data for training")
 		train_f0,train_emb,train_len = get_f0_embedding("./lstm_data/train")
 		test_f0,test_emb,test_len = get_f0_embedding("./lstm_data/test")
+		if normalize:
+			train_shape,train_mean,train_std = get_shape_mean_std(train_f0,train_len)
+			test_shape,test_mean,test_std = get_shape_mean_std(test_f0,test_len)
+			if predict_val=="shape":
+				train_f0 = train_shape
+				test_f0 = test_shape
+			elif predict_val=="mean":
+				train_f0 = train_mean
+				test_f0 = test_mean
+				config.f0_dim = 1
+			elif predict_val=="std":
+				train_f0 = train_std
+				test_f0 = test_std
+				config.f0_dim = 1
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = int(train_emb.shape[1])
@@ -203,25 +217,6 @@ if __name__=="__main__":
 		test_emb = test_emb.reshape((len(test_emb),-1))
 		test_len = test_len
 
-
-		if normalize:
-			train_mean = train_f0.mean(axis=2).reshape((-1,config.batch_size,1))
-			train_std = train_f0.std(axis=2).reshape((-1,config.batch_size,1))
-			train_f0 = (train_f0-train_mean)/train_std
-			test_mean = test_f0.mean(axis=1).reshape((-1,1))
-			test_std = test_f0.std(axis=1).reshape((-1,1))
-			test_f0 = (test_f0-test_mean)/test_std
-			if predict_val == "shape":
-				train_f0 = train_f0
-				test_f0 = test_f0
-			elif predict_val == "mean":
-				train_f0 = train_mean
-				test_f0 = test_mean
-				config.f0_dim = 1
-			elif predict_val == "std":
-				train_f0 = train_std
-				test_f0 = test_std
-				config.f0_dim = 1
 
 		# print(np.sum(test_len))
 		train_emb = torch.LongTensor(train_emb.tolist())
