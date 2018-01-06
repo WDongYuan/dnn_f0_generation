@@ -230,7 +230,7 @@ def get_f0_feature(data_dir):
 	return f0_arr,feature_arr,length_arr.astype(np.int64)
 
 def get_shape_mean_std(f0_arr,len_arr):
-	shape_arr = np.zeros((f0_arr.shape[0],f0_arr.shape[1],1))
+	shape_arr = np.zeros(f0_arr.shape)
 	mean_arr = np.zeros((f0_arr.shape[0],f0_arr.shape[1],1))
 	std_arr = np.zeros((f0_arr.shape[0],f0_arr.shape[1],1))
 	for utt_id in range(f0_arr.shape[0]):
