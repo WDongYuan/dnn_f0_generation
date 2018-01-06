@@ -13,8 +13,10 @@ from utils.data_processing import *
 from model.mlp import MLP
 from model import embedding_lstm
 from model import feature_lstm
+from model import emb_mean_std
+from model import emb_att
 from utils import config
-from model import expand_emb
+# from model import expand_emb
 ###########################################################
 #GPU OPTION
 ###########################################################
@@ -106,7 +108,7 @@ if __name__=="__main__":
 			" --test_label ./data/dev_data_f0_vector"+
 			" --test_map ./data/dev_syllable_map")
 		print("python train.py"+
-			" --mode train_embedding_lstm/embedding_lstm_predict"+
+			" --mode train_emb_lstm/emb_lstm_predict"+
 			" --desc_file ../mandarine/gen_f0/train_dev_data_vector/feature_desc_vector"+
 			" --txt_file ../mandarine/txt.done.data-all"+
 			" --train_data ../mandarine/gen_f0/train_dev_data_vector/train_data/dct_0"+
@@ -164,7 +166,7 @@ if __name__=="__main__":
 		print("test loss: "+str(test_loss))
 		np.savetxt("prediction",result,fmt="%.3f")
 		################################################################################
-	elif mode=="train_embedding_lstm" or mode=="embedding_lstm_predict":
+	elif "train_emb" in mode or ("emb" in mode and "predict" in mode):
 		desc_file = args.desc_file
 		train_data = args.train_data
 		train_label = args.train_label
@@ -205,20 +207,36 @@ if __name__=="__main__":
 		test_f0 = torch.FloatTensor(test_f0.tolist())
 		test_len = torch.LongTensor(test_len.tolist())
 
-		if mode=="embedding_lstm_predict":
+		if "predict" in mode:
 			print("predicting...")
 			model = torch.load("./my_best_model_.model")
-			embedding_lstm.Validate(model,test_emb,test_f0,test_len,"./model_prediction")
+			if mode=="emb_lstm_predict":
+				embedding_lstm.Validate(model,test_emb,test_f0,test_len,"./model_prediction")
+			elif mode=="emb_mean_std_predict":
+				emb_mean_std.Validate(model,test_emb,test_f0,test_len,"./model_prediction")
+			elif mode=="emb_att_predict":
+				emb_att.Validate(model,test_emb,test_f0,test_len,"./model_prediction")
 			exit()
+		model = None
+		if mode=="train_emb_lstm":
+			model = embedding_lstm.EMB_LSTM(config.emb_size,config.voc_size,
+				config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+			train_func = embedding_lstm.Train
+		elif mode=="train_emb_mean_std":
+			model = emb_mean_std.EMB_MEAN_STD(config.emb_size,config.voc_size,
+			config.lstm_hidden_size,config.f0_dim,config.linear_shape,config.linear_mean,config.linear_std)
+			train_func = emb_mean_std.Train
+		elif mode=="train_emb_att":
+			model = emb_att.EMB_ATT(config.emb_size,config.voc_size,
+				config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+			train_func = emb_att.Train
 
-		model = embedding_lstm.EMB_LSTM(config.emb_size,config.voc_size,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		learning_rate = config.learning_rate
 		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 		decay_step = config.decay_step
 		decay_rate = config.decay_rate
 		epoch_num = config.epoch_num
-		embedding_lstm.Train(
+		train_func(
 			train_emb,
 			train_f0,
 			train_len,
@@ -292,74 +310,6 @@ if __name__=="__main__":
 			train_f0,
 			train_len,
 			test_feat,
-			test_f0,
-			test_len,
-			model,
-			optimizer,
-			learning_rate,
-			decay_step,
-			decay_rate,
-			epoch_num)
-
-	elif mode=="train_expand_emb" or mode=="expand_emb_predict":
-		desc_file = args.desc_file
-		train_data = args.train_data
-		train_label = args.train_label
-		train_map = args.train_map
-		test_data = args.test_data
-		test_label = args.test_label
-		test_map = args.test_map
-		txt_file = args.txt_file
-
-		# encode_feature = EncodeFeature(desc_file)
-		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
-		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
-
-		os.system("mkdir lstm_data")
-		print("--->collect data according to the data name")
-		# word_index = word2index(txt_file,config.voc_size)
-		# collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
-		# collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
-		print("--->get the numpy data for training")
-		train_f0,train_emb,train_len = get_f0_embedding("./lstm_data/train")
-		test_f0,test_emb,test_len = get_f0_embedding("./lstm_data/test")
-
-		batch_num = int(train_f0.shape[0]/config.batch_size)
-		max_length = train_emb.shape[1]
-
-		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
-		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
-		train_len = train_len[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size))
-		train_emb = torch.LongTensor(train_emb.tolist())
-		train_f0 = torch.FloatTensor(train_f0.tolist())
-		train_len = torch.LongTensor(train_len.tolist())
-
-		test_f0 = test_f0.reshape((len(test_f0),-1))
-		test_emb = test_emb.reshape((len(test_emb),-1))
-		test_len = test_len
-		# print(np.sum(test_len))
-		test_emb = torch.LongTensor(test_emb.tolist())
-		test_f0 = torch.FloatTensor(test_f0.tolist())
-		test_len = torch.LongTensor(test_len.tolist())
-
-		if mode=="expand_emb_predict":
-			print("predicting...")
-			model = torch.load("./my_best_model_.model")
-			expand_emb.Validate(model,test_emb,test_f0,test_len,"./model_prediction")
-			exit()
-
-		model = expand_emb.EXP_EMB_LSTM(config.emb_size,config.voc_size,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
-		learning_rate = config.learning_rate
-		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-		decay_step = config.decay_step
-		decay_rate = config.decay_rate
-		epoch_num = config.epoch_num
-		expand_emb.Train(
-			train_emb,
-			train_f0,
-			train_len,
-			test_emb,
 			test_f0,
 			test_len,
 			model,
