@@ -54,10 +54,10 @@ class EMB_ATT(nn.Module):
 		self.l1_2 = nn.Linear(self.linear_h,self.f0_dim)
 		self.linear_init(self.l1_2)
 
-		self.l2_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
-		self.linear_init(self.l2_1,-0.001,0.001)
+		self.l2_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.f0_dim)
+		self.linear_init(self.l2_1)
 		self.l2_2 = nn.Linear(self.linear_h,self.f0_dim)
-		self.linear_init(self.l2_2,-0.001,0.001)
+		self.linear_init(self.l2_2)
 
 	def linear_init(self,layer,lower=-1,upper=1):
 		layer.weight.data.uniform_(upper, lower)
@@ -89,8 +89,9 @@ class EMB_ATT(nn.Module):
 		h_1 = self.l1_2(h_1)
 
 		h_2 = self.l2_1(h_n_2)
-		h_2 = self.relu(h_2)
-		h_2 = self.l2_2(h_2)
+		h_2 = self.tanh(h_2)
+		tune_value = Variable((torch.ones(self.batch_size,self.max_length,self.f0_dim)*50).cuda(async=True))
+		h_2 = torch.mal(h_2,tune_value)
 
 		h = h_1+h_2
 
