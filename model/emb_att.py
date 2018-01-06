@@ -91,7 +91,7 @@ class EMB_ATT(nn.Module):
 		h_2 = self.l2_1(h_n_2)
 		h_2 = self.tanh(h_2)
 		tune_value = Variable((torch.ones(self.batch_size,self.max_length,self.f0_dim)*50).cuda(async=True))
-		h_2 = torch.mal(h_2,tune_value)
+		h_2 = torch.mul(h_2,tune_value)
 
 		h = h_1+h_2
 
