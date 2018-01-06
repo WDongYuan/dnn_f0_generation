@@ -34,8 +34,8 @@ class EMB_MEAN_STD(nn.Module):
 
 
 		##LSTM
-		self.lstm_layer = 1
-		self.bidirectional_flag = False
+		self.lstm_layer = 2
+		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 
 		self.shape_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
