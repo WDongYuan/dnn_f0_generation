@@ -34,7 +34,7 @@ class EMB_MEAN_STD(nn.Module):
 
 
 		##LSTM
-		self.lstm_layer = 2
+		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 
@@ -49,6 +49,9 @@ class EMB_MEAN_STD(nn.Module):
 		# self.non_linear = nn.Tanh()
 		# self.non_linear = nn.Sigmoid()
 		self.non_linear = nn.ReLU()
+		self.tanh = nn.Tanh()
+		self.sigmoid = nn.Sigmoid()
+		self.relu = nn.ReLU()
 		self.shape_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_shape)
 		self.linear_init(self.shape_l1)
 		self.shape_l2 = nn.Linear(self.linear_shape,self.f0_dim)
@@ -92,7 +95,7 @@ class EMB_MEAN_STD(nn.Module):
 		# h_n_std, (h_t,c_t) = self.std_lstm(emb,(h_0,c_0))
 
 		h_shape = self.shape_l1(h_n_shape)
-		h_shape = self.non_linear(h_shape)
+		h_shape = self.tanh(h_shape)
 		h_shape = self.shape_l2(h_shape)
 
 		h_mean = self.mean_l1(h_n_shape)
@@ -100,7 +103,7 @@ class EMB_MEAN_STD(nn.Module):
 		h_mean = self.mean_l2(h_mean)
 
 		h_std = self.std_l1(h_n_shape)
-		h_std = self.non_linear(h_std)
+		h_std = self.sigmoid(h_std)
 		h_std = self.std_l2(h_std)
 
 		h = torch.mul(h_shape,h_std)+h_mean
