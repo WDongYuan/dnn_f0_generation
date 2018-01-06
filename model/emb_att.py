@@ -48,7 +48,7 @@ class EMB_ATT(nn.Module):
 		self.relu = nn.ReLU()
 		self.sigmoid = nn.Sigmoid()
 		self.tanh = nn.Tanh()
-		self.drop = nn.Dropout(0.9)
+		self.drop = nn.Dropout(0.5)
 
 		self.l1_1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h)
 		self.linear_init(self.l1_1)
