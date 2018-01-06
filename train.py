@@ -177,7 +177,7 @@ if __name__=="__main__":
 		txt_file = args.txt_file
 
 		normalize = True
-		predict_val = "shape"
+		predict_val = "mean"
 
 		# encode_feature = EncodeFeature(desc_file)
 		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
