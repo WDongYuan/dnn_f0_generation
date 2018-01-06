@@ -5,7 +5,7 @@ epoch_num = 100
 voc_size = 2500
 batch_size = 20
 emb_size = 20
-lstm_hidden_size = 100
+lstm_hidden_size = 50
 f0_dim = 10
 linear_h1 = 100
 
