@@ -216,18 +216,19 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 
 		self.emb_concat_size = self.emb_size+self.pos_emb_size+self.feat_size
 
+		##CNN CONFIG
+		self.kernel_size = 5
+		self.padding_size = int((self.kernel_size-1)/2)
+		self.out_channel = 20
 
 		##LSTM
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_concat_size, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_concat_size+self.out_channel, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 		##CONV
-		self.kernel_size = 5
-		self.padding_size = int((self.kernel_size-1)/2)
-		self.out_channel = 20
 		self.conv1 = nn.Sequential(
 			nn.Conv1d(1,self.out_channel,self.kernel_size*self.emb_concat_size,stride=self.emb_concat_size,padding=self.padding_size*self.emb_concat_size),
 			#nn.BatchNorm2d(self.out_channel),
