@@ -264,7 +264,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		emb = torch.cat((emb,pos,feat),dim=2)
 
 		conv_result = self.conv1(emb.view(self.batch_size,1,self.max_length*self.emb_concat_size))
-		conv_result = self.conv2(conv_result.view(self.batch_size,1,self.max_length*self.emb_concat_size)).permute(0,2,1)
+		conv_result = self.conv2(conv_result).permute(0,2,1)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
