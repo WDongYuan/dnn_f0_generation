@@ -219,7 +219,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		##CNN CONFIG
 		self.kernel_size = 5
 		self.padding_size = int((self.kernel_size-1)/2)
-		self.out_channel = 100
+		self.out_channel = 50
 
 		##LSTM
 		self.lstm_layer = 1
@@ -240,10 +240,12 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.conv1 = nn.Sequential(
 			nn.Conv1d(self.emb_concat_size,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
 			#nn.BatchNorm2d(self.out_channel),
-			nn.Tanh())
+			nn.Tanh(),
+			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
 		self.conv2 = nn.Sequential(
 			nn.Conv1d(self.out_channel,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
-			nn.Tanh())
+			nn.Tanh(),
+			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
 
 
 
