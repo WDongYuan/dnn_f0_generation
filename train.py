@@ -1,4 +1,4 @@
-cuda_flag = False
+cuda_flag = True
 import numpy as np
 import torch
 from torch.autograd import Variable
