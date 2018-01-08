@@ -270,7 +270,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 
 		concat_emb = torch.cat((emb,pos,feat),dim=2)
 
-		conv_result = self.conv1(emb.view(self.batch_size,1,self.max_length*self.emb_concat_size)).permute(0,2,1)
+		conv_result = self.conv1(emb.view(self.batch_size,1,self.max_length*self.emb_size)).permute(0,2,1)
 		conv_result = self.conv2(conv_result.contiguous().view(self.batch_size,1,self.max_length*self.out_channel)).permute(0,2,1)
 		conv_h = self.conv_l1(conv_result)
 		conv_h = self.non_linear(conv_h)
