@@ -1,4 +1,4 @@
-cuda_flag = True
+cuda_flag = False
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -83,18 +83,17 @@ def concat_seq_feature(in_file,map_file,out_file):
 def word2index(txt_file,voc_size):
 	##return a dictionary for word-count
 	dic = {}
-	with open(txt_file,encoding='utf-8') if cuda_flag else open(txt_file) as f:
+	with open(txt_file) as f:
 		for line in f:
-			line = line.split(" ")[2][1:-1] if cuda_flag else line.split(" ")[2].decode("utf-8")[1:-1]
+			line = line.split(" ")[2].decode("utf-8")[1:-1]
 			for word in line:
 				word = word.encode("utf-8")
 				if word not in dic:
 					dic[word] = 0
 				dic[word] += 1
+
 	word_list = []
 	for word,count in dic.items():
-		print(word),
-		print(count)
 		word_list.append([word,count])
 	word_list = sorted(word_list,key=lambda tup: tup[1],reverse=True)
 
@@ -314,6 +313,7 @@ def append_pos_to_feature(feat_dir,pos_file):
 				print(pos_list)
 				for tk in token:
 					print(tk.encode("utf-8")),
+				print("")
 	pos_dic = {}
 	for key,val in data_dic.items():
 		for pos in val:

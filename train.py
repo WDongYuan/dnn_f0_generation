@@ -1,3 +1,4 @@
+cuda_flag = False
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -24,7 +25,7 @@ from utils import predict_mean_tool
 ###########################################################
 #GPU OPTION
 ###########################################################
-if config.cuda:
+if cuda_flag:
 	import torch.backends.cudnn as cudnn
 ###########################################################
 

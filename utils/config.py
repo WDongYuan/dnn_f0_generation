@@ -1,4 +1,4 @@
-cuda = True
+cuda = False
 learning_rate = 0.001
 decay_step = 20
 decay_rate = 0.3
