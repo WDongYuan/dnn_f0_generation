@@ -1,4 +1,4 @@
-cuda_flag = False
+cuda_flag = True
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -459,7 +459,7 @@ if __name__=="__main__":
 		collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
 
 		# parse_txt_file(txt_file,"./lstm_data/txt_token_pos")
-		
+
 		pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
 		print("pos_num: "+str(pos_num))
 		append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")

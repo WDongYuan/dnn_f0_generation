@@ -1,4 +1,4 @@
-cuda_flag = False
+cuda_flag = True
 
 import matplotlib
 matplotlib.use('TkAgg')
