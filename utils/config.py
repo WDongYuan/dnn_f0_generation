@@ -70,8 +70,8 @@ linear_h1 = 200
 
 ##emb_pos_feat
 # learning_rate = 0.001
-# decay_step = 10
-# decay_rate = 0.3
+# decay_step = 1
+# decay_rate = 0.95
 # epoch_num = 100
 # voc_size = 2500
 # batch_size = 20
@@ -79,5 +79,5 @@ linear_h1 = 200
 # pos_emb_size = 10
 # lstm_hidden_size = 100
 # f0_dim = 10
-# linear_h1 = 100
-##28.6
+# linear_h1 = 200
+##28.2
