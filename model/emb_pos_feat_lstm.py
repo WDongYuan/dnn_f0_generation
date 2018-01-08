@@ -222,7 +222,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.conv = nn.Sequential(
 			nn.Conv1d(1,self.out_channel,self.kernel_size*self.emb_concat_size,stride=self.emb_concat_size,padding=self.padding_size*self.emb_concat_size),
 			#nn.BatchNorm2d(self.out_channel),
-			nn.ReLU())
+			nn.Tanh())
 
 		##LSTM
 		self.lstm_layer = 1
