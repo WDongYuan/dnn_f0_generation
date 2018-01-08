@@ -285,7 +285,6 @@ def Train(train_emb,train_pos,train_feat,train_f0,train_len,val_emb,val_pos,val_
 	###########################################################
 	#GPU OPTION
 	###########################################################
-	print(cuda_flag)
 	if cuda_flag:
 		torch.backends.cudnn.benchmark = True
 		model.cuda()

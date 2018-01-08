@@ -1,6 +1,6 @@
 learning_rate = 0.001
-decay_step = 20
-decay_rate = 0.3
+decay_step = 10
+decay_rate = 0.1
 epoch_num = 100
 voc_size = 2500
 batch_size = 20
