@@ -384,7 +384,7 @@ if __name__=="__main__":
 		test_emb = test_feat[:,:,-1].astype(np.int32)
 		test_feat = test_feat[:,:,0:-1]
 
-		batch_num = train_f0.shape[0]/config.batch_size
+		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_feat.shape[1]
 		feat_num = train_feat.shape[2]
 
