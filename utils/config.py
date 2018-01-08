@@ -1,6 +1,6 @@
 cuda = True
 learning_rate = 0.001
-decay_step = 10
+decay_step = 15
 decay_rate = 0.3
 epoch_num = 100
 voc_size = 2500
@@ -65,3 +65,19 @@ linear_h1 = 100
 # lstm_hidden_size = 100
 # f0_dim = 10
 # linear_h1 = 200
+
+
+##emb_pos_feat
+# cuda = True
+# learning_rate = 0.001
+# decay_step = 10
+# decay_rate = 0.3
+# epoch_num = 100
+# voc_size = 2500
+# batch_size = 20
+# emb_size = 20
+# pos_emb_size = 10
+# lstm_hidden_size = 100
+# f0_dim = 10
+# linear_h1 = 100
+##29.0
