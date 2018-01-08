@@ -110,6 +110,7 @@ def Train(train_emb,train_feat,train_f0,train_len,val_emb,val_feat,val_f0,val_le
 			###########################################################
 			if cuda_flag:
 				train_emb_batch = Variable(train_emb[i].cuda(async=True))
+				train_feat_batch = Variable(train_feat[i].cuda(async=True))
 				train_f0_batch = Variable(train_f0[i].cuda(async=True))
 				train_len_batch = Variable(train_len[i].cuda(async=True))
 			else:
@@ -155,7 +156,8 @@ def Validate(model,val_emb,val_feat,val_f0,val_len,save_prediction=""):
 	#GPU OPTION
 	###########################################################
 	if cuda_flag:
-		result = model(Variable(val_emb.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		result = model(Variable(val_emb.cuda(async=True)),Variable(val_feat.cuda(async=True)),
+			Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 		val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	else:
 		result = model(Variable(val_emb),Variable(val_feat),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
