@@ -1,4 +1,4 @@
-cuda_flag = True
+cuda_flag = False
 
 import numpy as np
 import torch

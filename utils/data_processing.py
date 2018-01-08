@@ -1,4 +1,4 @@
-cuda_flag = True
+cuda_flag = False
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -309,11 +309,11 @@ def append_pos_to_feature(feat_dir,pos_file):
 				for j in range(len(token[i]) if cuda_flag else len(token[i].decode("utf-8"))):
 					pos_list.append(pos[i])
 			data_dic[data_name] = pos_list
-			if data_name=="data_00001":
-				print(pos_list)
-				for tk in token:
-					print(tk.encode("utf-8")),
-				print("")
+			# if data_name=="data_00001":
+			# 	print(pos_list)
+			# 	for tk in token:
+			# 		print(tk.encode("utf-8")),
+			# 	print("")
 	pos_dic = {}
 	for key,val in data_dic.items():
 		for pos in val:
