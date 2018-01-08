@@ -458,10 +458,10 @@ if __name__=="__main__":
 		# collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
 
 		# parse_txt_file(txt_file,"./lstm_data/txt_token_pos")
-		pos_num = -1
-		pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
-		print("pos_num: "+str(pos_num))
-		append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")
+		pos_num = 32
+		# pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
+		# print("pos_num: "+str(pos_num))
+		# append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")

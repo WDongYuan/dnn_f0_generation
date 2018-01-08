@@ -311,7 +311,8 @@ def append_pos_to_feature(feat_dir,pos_file):
 			data_dic[data_name] = pos_list
 			if data_name=="data_00001":
 				print(pos_list)
-				print([tk.encode("utf-8") for tk in token])
+				for tk in token:
+					print(tk.encode("utf-8")),
 	pos_dic = {}
 	for key,val in data_dic.items():
 		for pos in val:

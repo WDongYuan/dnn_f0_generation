@@ -3,13 +3,13 @@ learning_rate = 0.01
 decay_step = 10
 decay_rate = 0.3
 epoch_num = 100
-voc_size = 3000
+voc_size = 2500
 batch_size = 20
 emb_size = 20
-pos_emb_size = 20
+pos_emb_size = 10
 lstm_hidden_size = 100
 f0_dim = 10
-linear_h1 = 200
+linear_h1 = 100
 
 
 #################
@@ -53,3 +53,15 @@ linear_h1 = 200
 # linear_shape = 100
 # linear_mean = 50
 # linear_std = 50
+
+##emb_feat
+# learning_rate = 0.01
+# decay_step = 10
+# decay_rate = 0.3
+# epoch_num = 100
+# voc_size = 3000
+# batch_size = 20
+# emb_size = 20
+# lstm_hidden_size = 100
+# f0_dim = 10
+# linear_h1 = 200
