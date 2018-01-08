@@ -93,7 +93,8 @@ def word2index(txt_file,voc_size):
 				dic[word] += 1
 	word_list = []
 	for word,count in dic.items():
-		print(word+" "+str(count))
+		print(word),
+		print(count)
 		word_list.append([word,count])
 	word_list = sorted(word_list,key=lambda tup: tup[1],reverse=True)
 
