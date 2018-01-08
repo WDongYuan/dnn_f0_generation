@@ -166,8 +166,8 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 		pos_h_n, (h_t,c_t) = self.pos_lstm(pos,(h_0,c_0))
-		emb_h_n, (h_t,c_t) = self.emb_lstm(emb,(h_t,c_t))
-		feat_h_n, (h_t,c_t) = self.feat_lstm(feat,(h_t,c_t))
+		emb_h_n, (h_t,c_t) = self.emb_lstm(emb,(h_0,c_0))
+		feat_h_n, (h_t,c_t) = self.feat_lstm(feat,(h_0,c_0))
 
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.non_linear(emb_h)
@@ -182,6 +182,8 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		feat_h = self.feat_l2(feat_h)
 
 		h = emb_h+pos_h+feat_h
+
+		h, (h_t,c_t) = self.final_lstm(h,(h_0,c_0))
 
 		h = self.final_l1(h)
 		h = self.non_linear(h)
