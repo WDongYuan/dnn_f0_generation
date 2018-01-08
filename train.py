@@ -115,7 +115,7 @@ if __name__=="__main__":
 		print("python train.py"+
 			" --mode train_emb_lstm/emb_lstm_predict"+
 			" --desc_file ../mandarine/gen_f0/train_dev_data_vector/feature_desc_vector"+
-			" --txt_file ../mandarine/txt.done.data-all"+
+			" --txt_file ./data/txt.done.data-all"+
 			" --train_data ../mandarine/gen_f0/train_dev_data_vector/train_data/dct_0"+
 			" --train_label ../mandarine/gen_f0/train_dev_data_vector/train_data_f0_vector"+
 			" --train_map ../mandarine/gen_f0/train_dev_data_vector/train_data/syllable_map"+
