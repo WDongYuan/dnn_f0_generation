@@ -118,7 +118,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.final_lstm = nn.LSTM(self.lstm_hidden_size, self.lstm_hidden_size,
+		self.final_lstm = nn.LSTM(self.lstm_hidden_size*self.direction, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
