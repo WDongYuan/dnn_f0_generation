@@ -13,8 +13,8 @@ import time
 ###########################################################
 #GPU OPTION
 ###########################################################
-if cuda_flag:
-	import torch.backends.cudnn as cudnn
+# if cuda_flag:
+# 	import torch.backends.cudnn as cudnn
 ###########################################################
 
 # class EMB_POS_FEAT_LSTM(nn.Module):
@@ -285,8 +285,9 @@ def Train(train_emb,train_pos,train_feat,train_f0,train_len,val_emb,val_pos,val_
 	###########################################################
 	#GPU OPTION
 	###########################################################
+	print(cuda_flag)
 	if cuda_flag:
-		cudnn.benchmark = True
+		torch.backends.cudnn.benchmark = True
 		model.cuda()
 	###########################################################
 	LF = nn.MSELoss()
