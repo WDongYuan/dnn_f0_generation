@@ -1,4 +1,4 @@
-cuda_flag = True
+cuda_flag = None
 
 import numpy as np
 import torch
@@ -89,6 +89,111 @@ if cuda_flag:
 
 
 
+# class EMB_POS_FEAT_LSTM(nn.Module):
+# 	def __init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1):
+# 		super(EMB_POS_FEAT_LSTM, self).__init__()
+# 		self.emb_size = emb_size
+# 		self.feat_size = feat_size
+# 		self.pos_emb_size = pos_emb_size
+# 		self.lstm_hidden_size = lstm_hidden_size
+# 		self.f0_dim = f0_dim
+# 		self.linear_h1 = linear_h1
+# 		self.voc_size = voc_size
+# 		self.pos_num = pos_num
+# 		self.batch_size = -1
+# 		self.max_length = -1
+
+# 		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
+# 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+# 		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
+# 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+
+# 		##LSTM
+# 		self.lstm_layer = 1
+# 		self.bidirectional_flag = True
+# 		self.direction = 2 if self.bidirectional_flag else 1
+# 		self.emb_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
+# 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+# 		self.pos_lstm = nn.LSTM(self.pos_emb_size, self.lstm_hidden_size,
+# 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+# 		self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
+# 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+# 		self.final_lstm = nn.LSTM(self.lstm_hidden_size*self.direction, self.lstm_hidden_size,
+# 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+
+# 		self.non_linear = nn.ReLU()
+# 		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+# 		self.linear_init(self.emb_l1)
+# 		self.emb_l2 = nn.Linear(self.linear_h1,self.linear_h1)
+# 		self.linear_init(self.emb_l2)
+
+# 		self.pos_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+# 		self.linear_init(self.pos_l1)
+# 		self.pos_l2 = nn.Linear(self.linear_h1,self.linear_h1)
+# 		self.linear_init(self.pos_l2)
+
+# 		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+# 		self.linear_init(self.feat_l1)
+# 		self.feat_l2 = nn.Linear(self.linear_h1,self.linear_h1)
+# 		self.linear_init(self.feat_l2)
+
+# 		self.final_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+# 		self.linear_init(self.final_l1)
+# 		self.final_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+# 		self.linear_init(self.final_l2)
+
+
+# 	def linear_init(self,layer,lower=-1,upper=1):
+# 		layer.weight.data.uniform_(lower, upper)
+# 		layer.bias.data.uniform_(lower, upper)
+# 	def init_hidden(self):
+# 		direction = 2 if self.bidirectional_flag else 1
+# 		###########################################################
+# 		#GPU OPTION
+# 		###########################################################
+# 		if cuda_flag:
+# 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+# 		else:
+# 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+# 		###########################################################
+
+# 	def forward(self,sents,pos,feat,sent_length):
+# 		self.batch_size,self.max_length = sents.size()
+# 		emb = self.embed(sents)
+# 		pos = self.pos_embed(pos)
+
+# 		c_0 = self.init_hidden()
+# 		h_0 = self.init_hidden()
+# 		pos_h_n, (h_t,c_t) = self.pos_lstm(pos,(h_0,c_0))
+# 		emb_h_n, (h_t,c_t) = self.emb_lstm(emb,(h_0,c_0))
+# 		feat_h_n, (h_t,c_t) = self.feat_lstm(feat,(h_0,c_0))
+
+# 		# emb_h = self.emb_l1(emb_h_n)
+# 		# emb_h = self.non_linear(emb_h)
+# 		# emb_h = self.emb_l2(emb_h)
+
+# 		# pos_h = self.pos_l1(pos_h_n)
+# 		# pos_h = self.non_linear(pos_h)
+# 		# pos_h = self.pos_l2(pos_h)
+
+# 		# feat_h = self.feat_l1(feat_h_n)
+# 		# feat_h = self.non_linear(feat_h)
+# 		# feat_h = self.feat_l2(feat_h)
+
+# 		h = emb_h_n+pos_h_n+feat_h_n
+
+# 		h, (h_t,c_t) = self.final_lstm(h,(h_0,c_0))
+
+# 		h = self.final_l1(h)
+# 		h = self.non_linear(h)
+# 		h = self.final_l2(h)
+
+# 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
+# 		return h
+
+
+
 class EMB_POS_FEAT_LSTM(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1):
 		super(EMB_POS_FEAT_LSTM, self).__init__()
@@ -108,40 +213,30 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
 
+		self.emb_concat_size = self.emb_size+self.pos_emb_size+self.feat_size
+
+		##CONV
+		self.kernel_size = 5
+		self.padding_size = int((self.kernel_size-1)/2)
+		self.out_channel = 20
+		self.conv = nn.Sequential(
+			nn.Conv1d(1,self.out_channel,self.kernel_size*self.emb_concat_size,stride=self.emb_concat_size,padding=self.padding_size*self.emb_concat_size),
+			#nn.BatchNorm2d(self.out_channel),
+			nn.ReLU())
+
 		##LSTM
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.pos_lstm = nn.LSTM(self.pos_emb_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.final_lstm = nn.LSTM(self.lstm_hidden_size*self.direction, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_concat_size+self.out_channel, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
 		self.non_linear = nn.ReLU()
 		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.emb_l1)
-		self.emb_l2 = nn.Linear(self.linear_h1,self.linear_h1)
+		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.emb_l2)
-
-		self.pos_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.pos_l1)
-		self.pos_l2 = nn.Linear(self.linear_h1,self.linear_h1)
-		self.linear_init(self.pos_l2)
-
-		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.feat_l1)
-		self.feat_l2 = nn.Linear(self.linear_h1,self.linear_h1)
-		self.linear_init(self.feat_l2)
-
-		self.final_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.final_l1)
-		self.final_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.final_l2)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -163,34 +258,27 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		emb = self.embed(sents)
 		pos = self.pos_embed(pos)
 
+		emb = torch.cat((emb,pos,feat),dim=2)
+
+		conv_result = self.conv(emb.view(self.batch_size,1,self.max_length*self.emb_concat_size)).permute(0,2,1)
+		emb = torch.cat((emb,conv_result),dim=2)
+
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
-		pos_h_n, (h_t,c_t) = self.pos_lstm(pos,(h_0,c_0))
-		emb_h_n, (h_t,c_t) = self.emb_lstm(emb,(h_0,c_0))
-		feat_h_n, (h_t,c_t) = self.feat_lstm(feat,(h_0,c_0))
+		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 
-		# emb_h = self.emb_l1(emb_h_n)
-		# emb_h = self.non_linear(emb_h)
-		# emb_h = self.emb_l2(emb_h)
+		emb_h = self.emb_l1(emb_h_n)
+		emb_h = self.non_linear(emb_h)
+		emb_h = self.emb_l2(emb_h)
 
-		# pos_h = self.pos_l1(pos_h_n)
-		# pos_h = self.non_linear(pos_h)
-		# pos_h = self.pos_l2(pos_h)
-
-		# feat_h = self.feat_l1(feat_h_n)
-		# feat_h = self.non_linear(feat_h)
-		# feat_h = self.feat_l2(feat_h)
-
-		h = emb_h_n+pos_h_n+feat_h_n
-
-		h, (h_t,c_t) = self.final_lstm(h,(h_0,c_0))
-
-		h = self.final_l1(h)
-		h = self.non_linear(h)
-		h = self.final_l2(h)
+		h = emb_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
+
+
+
+
 
 def Train(train_emb,train_pos,train_feat,train_f0,train_len,val_emb,val_pos,val_feat,val_f0,val_len,\
 	model,optimizer,learning_rate,decay_step,decay_rate,epoch_num):

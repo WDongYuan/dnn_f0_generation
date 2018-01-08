@@ -1,4 +1,4 @@
-cuda_flag = True
+cuda_flag = False
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -10,7 +10,20 @@ from scipy.fftpack import idct, dct
 import argparse
 import time
 import os
-from utils.data_processing import *
+import utils.data_processing
+from utils.data_processing import EncodeFeature
+from utils.data_processing import convert_feature
+from utils.data_processing import concat_seq_feature
+from utils.data_processing import word2index
+from utils.data_processing import utt_content
+from utils.data_processing import collect_utt_data
+from utils.data_processing import create_train_val_data
+from utils.data_processing import get_f0_embedding
+from utils.data_processing import get_f0_feature
+from utils.data_processing import get_f0_feature_list
+from utils.data_processing import get_shape_mean_std
+from utils.data_processing import parse_txt_file
+from utils.data_processing import append_pos_to_feature
 from model.mlp import MLP
 from model import embedding_lstm
 from model import feature_lstm
@@ -28,7 +41,8 @@ from utils import predict_mean_tool
 if cuda_flag:
 	import torch.backends.cudnn as cudnn
 ###########################################################
-
+utils.data_processing.cuda_flag = cuda_flag
+emb_pos_feat_lstm.cuda_flag = cuda_flag
 
 def Validate(model,val_data,val_label,dct_flag=False):
 	model.eval()
