@@ -366,9 +366,9 @@ if __name__=="__main__":
 		test_map = args.test_map
 		txt_file = args.txt_file
 
-		encode_feature = EncodeFeature(desc_file)
-		convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
-		convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
+		# encode_feature = EncodeFeature(desc_file)
+		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
+		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
 
 		os.system("mkdir lstm_data")
 		print("--->collect data according to the data name")
