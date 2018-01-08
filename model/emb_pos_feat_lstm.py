@@ -118,6 +118,8 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		self.final_lstm = nn.LSTM(self.lstm_hidden_size, self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
 		self.non_linear = nn.ReLU()
@@ -135,6 +137,11 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.linear_init(self.feat_l1)
 		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.feat_l2)
+
+		self.final_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.final_l1)
+		self.final_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.final_l2)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -162,20 +169,23 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		emb_h_n, (h_t,c_t) = self.emb_lstm(emb,(h_t,c_t))
 		feat_h_n, (h_t,c_t) = self.feat_lstm(feat,(h_t,c_t))
 
-		# emb_h = self.emb_l1(emb_h_n)
-		# emb_h = self.non_linear(emb_h)
-		# emb_h = self.emb_l2(emb_h)
+		emb_h = self.emb_l1(emb_h_n)
+		emb_h = self.non_linear(emb_h)
+		emb_h = self.emb_l2(emb_h)
 
-		# pos_h = self.pos_l1(pos_h_n)
-		# pos_h = self.non_linear(pos_h)
-		# pos_h = self.pos_l2(pos_h)
+		pos_h = self.pos_l1(pos_h_n)
+		pos_h = self.non_linear(pos_h)
+		pos_h = self.pos_l2(pos_h)
 
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.non_linear(feat_h)
 		feat_h = self.feat_l2(feat_h)
-		h = feat_h
 
-		# h = emb_h+pos_h+feat_h
+		h = emb_h+pos_h+feat_h
+
+		h = self.final_l1(h)
+		h = self.non_linear(h)
+		h = self.final_l2(h)
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
