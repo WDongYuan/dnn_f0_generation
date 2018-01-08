@@ -125,17 +125,17 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.non_linear = nn.ReLU()
 		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.emb_l1)
-		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.emb_l2 = nn.Linear(self.linear_h1,self.linear_h1)
 		self.linear_init(self.emb_l2)
 
 		self.pos_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.pos_l1)
-		self.pos_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.pos_l2 = nn.Linear(self.linear_h1,self.linear_h1)
 		self.linear_init(self.pos_l2)
 
 		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.feat_l1)
-		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.feat_l2 = nn.Linear(self.linear_h1,self.linear_h1)
 		self.linear_init(self.feat_l2)
 
 		self.final_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
