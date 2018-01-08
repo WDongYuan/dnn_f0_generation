@@ -228,12 +228,12 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_concat_size+self.out_channel, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_concat_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
 		self.non_linear = nn.ReLU()
-		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction+self.out_channel,self.linear_h1)
 		self.linear_init(self.emb_l1)
 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.emb_l2)
@@ -261,13 +261,13 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		emb = torch.cat((emb,pos,feat),dim=2)
 
 		conv_result = self.conv(emb.view(self.batch_size,1,self.max_length*self.emb_concat_size)).permute(0,2,1)
-		emb = torch.cat((emb,conv_result),dim=2)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 
-		emb_h = self.emb_l1(emb_h_n)
+		emb_h = torch.cat((emb_h_n,conv_result),dim=2)
+		emb_h = self.emb_l1(emb_h)
 		emb_h = self.non_linear(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
