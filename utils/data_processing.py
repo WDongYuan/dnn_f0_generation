@@ -85,15 +85,15 @@ def word2index(txt_file,voc_size):
 	dic = {}
 	with open(txt_file,encoding='utf-8') if cuda_flag else open(txt_file) as f:
 		for line in f:
-			line = line.split(" ")[2].decode("utf-8")[1:-1]
+			line = line.split(" ")[2][1:-1] if cuda_flag else line.split(" ")[2].decode("utf-8")[1:-1]
 			for word in line:
 				word = word.encode("utf-8")
 				if word not in dic:
 					dic[word] = 0
 				dic[word] += 1
-
 	word_list = []
 	for word,count in dic.items():
+		print(word+" "+str(count))
 		word_list.append([word,count])
 	word_list = sorted(word_list,key=lambda tup: tup[1],reverse=True)
 
