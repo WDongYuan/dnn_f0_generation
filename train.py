@@ -24,7 +24,8 @@ from utils import predict_mean_tool
 ###########################################################
 #GPU OPTION
 ###########################################################
-import torch.backends.cudnn as cudnn
+if config.cuda:
+	import torch.backends.cudnn as cudnn
 ###########################################################
 
 

@@ -3,6 +3,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
 import numpy as np
+import config
 # from stanfordcorenlp import StanfordCoreNLP
 class EncodeFeature():
 	def __init__(self,desc):
@@ -287,7 +288,8 @@ def parse_txt_file(txt_file,out_file):
 def append_pos_to_feature(feat_dir,pos_file):
 	##read pos tag
 	data_dic = {}
-	with open(pos_file,encoding='utf-8') as f:
+
+	with open(pos_file,encoding='utf-8') if config.cuda else open(pos_file) as f:
 		sents = f.readlines()
 		row = 0
 		while row < len(sents):
@@ -303,9 +305,12 @@ def append_pos_to_feature(feat_dir,pos_file):
 			pos_list = []
 			assert len(token)==len(pos)
 			for i in range(len(token)):
-				for j in range(len(token[i].decode("utf-8"))):
+				for j in range(len(token[i].decode("utf-8")) if config.cuda else len(token[i])):
 					pos_list.append(pos[i])
 			data_dic[data_name] = pos_list
+			if data_name=="data_00001":
+				print(pos_list)
+				print(token)
 	pos_dic = {}
 	for key,val in data_dic.items():
 		for pos in val:
