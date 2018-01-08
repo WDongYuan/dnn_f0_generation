@@ -223,7 +223,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.direction = 2 if self.bidirectional_flag else 1
 		self.emb_lstm = nn.LSTM(self.emb_concat_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		
+
 		##CONV
 		self.kernel_size = 5
 		self.padding_size = int((self.kernel_size-1)/2)
@@ -287,6 +287,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		emb_h = self.emb_l1(emb_h)
 		emb_h = self.non_linear(emb_h)
 		emb_h = self.emb_l2(emb_h)
+		h = emb_h
 
 		# h = emb_h+conv_h
 
