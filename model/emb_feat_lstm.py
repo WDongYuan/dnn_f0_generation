@@ -1,3 +1,4 @@
+cuda_flag = True
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -11,7 +12,8 @@ import time
 ###########################################################
 #GPU OPTION
 ###########################################################
-# import torch.backends.cudnn as cudnn
+if cuda_flag:
+	import torch.backends.cudnn as cudnn
 ###########################################################
 class EMB_FEAT_LSTM(nn.Module):
 	def __init__(self,emb_size,feat_size,voc_size,lstm_hidden_size,f0_dim,linear_h1):
@@ -59,9 +61,10 @@ class EMB_FEAT_LSTM(nn.Module):
 		###########################################################
 		#GPU OPTION
 		###########################################################
-		# return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
-		###########################################################
-		return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		if cuda_flag:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+		else:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
 		###########################################################
 
 	def forward(self,sents,feat,sent_length):
@@ -91,8 +94,9 @@ def Train(train_emb,train_feat,train_f0,train_len,val_emb,val_feat,val_f0,val_le
 	###########################################################
 	#GPU OPTION
 	###########################################################
-	# cudnn.benchmark = True
-	# model.cuda()
+	if cuda_flag:
+		cudnn.benchmark = True
+		model.cuda()
 	###########################################################
 	LF = nn.MSELoss()
 	min_loss = 100000000
@@ -104,14 +108,15 @@ def Train(train_emb,train_feat,train_f0,train_len,val_emb,val_feat,val_f0,val_le
 			###########################################################
 			#GPU OPTION
 			###########################################################
-			# train_emb_batch = Variable(train_emb[i].cuda(async=True))
-			# train_f0_batch = Variable(train_f0[i].cuda(async=True))
-			# train_len_batch = Variable(train_len[i].cuda(async=True))
-			###########################################################
-			train_emb_batch = Variable(train_emb[i])
-			train_feat_batch = Variable(train_feat[i])
-			train_f0_batch = Variable(train_f0[i])
-			train_len_batch = Variable(train_len[i])
+			if cuda_flag:
+				train_emb_batch = Variable(train_emb[i].cuda(async=True))
+				train_f0_batch = Variable(train_f0[i].cuda(async=True))
+				train_len_batch = Variable(train_len[i].cuda(async=True))
+			else:
+				train_emb_batch = Variable(train_emb[i])
+				train_feat_batch = Variable(train_feat[i])
+				train_f0_batch = Variable(train_f0[i])
+				train_len_batch = Variable(train_len[i])
 			###########################################################
 
 
@@ -149,11 +154,12 @@ def Validate(model,val_emb,val_feat,val_f0,val_len,save_prediction=""):
 	###########################################################
 	#GPU OPTION
 	###########################################################
-	# result = model(Variable(val_emb.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
-	# val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
-	###########################################################
-	result = model(Variable(val_emb),Variable(val_feat),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
-	val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	if cuda_flag:
+		result = model(Variable(val_emb.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	else:
+		result = model(Variable(val_emb),Variable(val_feat),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	###########################################################
 	val_len = val_len.numpy()
 	loss = []

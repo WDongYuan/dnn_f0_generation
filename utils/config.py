@@ -80,4 +80,4 @@ linear_h1 = 100
 # lstm_hidden_size = 100
 # f0_dim = 10
 # linear_h1 = 100
-##29.0
+##28.6
