@@ -219,13 +219,13 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		##CONV
 		self.kernel_size = 5
 		self.padding_size = int((self.kernel_size-1)/2)
-		self.out_channel = 20
+		self.out_channel = 50
 		self.conv1 = nn.Sequential(
 			nn.Conv1d(1,self.out_channel,self.kernel_size*self.emb_concat_size,stride=self.emb_concat_size,padding=self.padding_size*self.emb_concat_size),
 			#nn.BatchNorm2d(self.out_channel),
 			nn.Tanh())
 		self.conv2 = nn.Sequential(
-			nn.Conv1d(1,self.out_channel,self.kernel_size*self.out_channel,stride=self.out_channel,padding=self.padding_size*self.out_channel),
+			nn.Conv1d(1,self.lstm_hidden_size*self.direction,self.kernel_size*self.out_channel,stride=self.out_channel,padding=self.padding_size*self.out_channel),
 			nn.Tanh())
 
 		##LSTM
@@ -272,20 +272,21 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 
 		conv_result = self.conv1(emb.view(self.batch_size,1,self.max_length*self.emb_concat_size)).permute(0,2,1)
 		conv_result = self.conv2(conv_result.contiguous().view(self.batch_size,1,self.max_length*self.out_channel)).permute(0,2,1)
-		conv_h = self.conv_l1(conv_result)
-		conv_h = self.non_linear(conv_h)
-		conv_h = self.conv_l2(conv_h)
+		conv_h = conv_result
+		# conv_h = self.conv_l1(conv_result)
+		# conv_h = self.non_linear(conv_h)
+		# conv_h = self.conv_l2(conv_h)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
-		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
+		emb_h, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 
-		# emb_h = torch.cat((emb_h_n,conv_result),dim=2)
-		emb_h = self.emb_l1(emb_h_n)
+		emb_h = emb_h+conv_h
+		emb_h = self.emb_l1(emb_h)
 		emb_h = self.non_linear(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
-		h = emb_h+conv_h
+		# h = emb_h+conv_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
