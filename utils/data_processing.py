@@ -287,7 +287,7 @@ def parse_txt_file(txt_file,out_file):
 def append_pos_to_feature(feat_dir,pos_file):
 	##read pos tag
 	data_dic = {}
-	with open(pos_file) as f:
+	with open(pos_file,encoding='utf-8') as f:
 		sents = f.readlines()
 		row = 0
 		while row < len(sents):
