@@ -3,7 +3,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-from stanfordcorenlp import StanfordCoreNLP
+# from stanfordcorenlp import StanfordCoreNLP
 class EncodeFeature():
 	def __init__(self,desc):
 		self.encode_dic = []
