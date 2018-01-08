@@ -448,22 +448,30 @@ if __name__=="__main__":
 		txt_file = args.txt_file
 		pos_num = -1
 
-		encode_feature = EncodeFeature(desc_file)
-		convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
-		convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
+		############################################
+		# encode_feature = EncodeFeature(desc_file)
+		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
+		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
+		############################################
 
-		os.system("mkdir lstm_data")
-		print("--->collect data according to the data name")
-		word_index = word2index(txt_file,config.voc_size)
-		collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
-		collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
+		############################################
+		# print("--->collect data according to the data name")
+		# os.system("mkdir lstm_data")
+		# word_index = word2index(txt_file,config.voc_size)
+		# collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
+		# collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
+		############################################
 
 		# parse_txt_file(txt_file,"./lstm_data/txt_token_pos")
 
-		pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
-		print("pos_num: "+str(pos_num))
-		append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")
-		# pos_num = 32
+		
+		############################################
+		# pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
+		# print("pos_num: "+str(pos_num))
+		# append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")
+		############################################
+		pos_num = 32
+		############################################
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
