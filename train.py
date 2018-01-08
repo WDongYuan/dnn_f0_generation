@@ -15,12 +15,16 @@ from model import embedding_lstm
 from model import feature_lstm
 from model import emb_mean_std
 from model import emb_att
+from model import classify_mean
+from model import emb_feat_lstm
+from model import emb_pos_feat_lstm
 from utils import config
+from utils import predict_mean_tool
 # from model import expand_emb
 ###########################################################
 #GPU OPTION
 ###########################################################
-import torch.backends.cudnn as cudnn
+# import torch.backends.cudnn as cudnn
 ###########################################################
 
 
@@ -177,7 +181,7 @@ if __name__=="__main__":
 		txt_file = args.txt_file
 
 		normalize = True
-		predict_val = "std"
+		predict_val = "unnorm"
 
 		# encode_feature = EncodeFeature(desc_file)
 		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
@@ -205,6 +209,18 @@ if __name__=="__main__":
 				train_f0 = train_std
 				test_f0 = test_std
 				config.f0_dim = 1
+			elif predict_val=="unnorm":
+				tmp_shape = np.loadtxt("./predict_shape",delimiter=" ")
+				tmp_mean = np.loadtxt("./predict_mean",delimiter=" ").reshape((-1,1))
+				tmp_std = np.loadtxt("./predict_std",delimiter=" ").reshape((-1,1))
+				unnorm = tmp_shape*tmp_std+tmp_mean
+				true_f0 = np.zeros(unnorm.shape)
+				count = 0
+				for utt in range(len(test_len)):
+					true_f0[count:count+test_len[utt],:] = test_f0[utt,0:test_len[utt],:]
+					count += test_len[utt]
+				print("rmse: "+str(np.sqrt(np.square(unnorm-true_f0).mean(axis=1)).mean()))
+				exit()
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = int(train_emb.shape[1])
@@ -339,6 +355,175 @@ if __name__=="__main__":
 			decay_rate,
 			epoch_num)
 
+	elif mode=="train_feat_emb_lstm" or mode=="feat_emb_lstm_predict":
+		desc_file = args.desc_file
+		train_data = args.train_data
+		train_label = args.train_label
+		train_map = args.train_map
+		test_data = args.test_data
+		test_label = args.test_label
+		test_map = args.test_map
+		txt_file = args.txt_file
 
+		encode_feature = EncodeFeature(desc_file)
+		convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
+		convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
+
+		os.system("mkdir lstm_data")
+		print("--->collect data according to the data name")
+		word_index = word2index(txt_file,config.voc_size)
+		collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
+		collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
+		print("--->get the numpy data for training")
+		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
+		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+		train_emb = train_feat[:,:,-1].astype(np.int32)
+		train_feat = train_feat[:,:,0:-1]
+		test_emb = test_feat[:,:,-1].astype(np.int32)
+		test_feat = test_feat[:,:,0:-1]
+
+		batch_num = train_f0.shape[0]/config.batch_size
+		max_length = train_feat.shape[1]
+		feat_num = train_feat.shape[2]
+
+		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_feat = train_feat[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,feat_num))
+		train_len = train_len[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size))
+
+		train_emb = torch.LongTensor(train_emb.tolist())
+		train_feat = torch.FloatTensor(train_feat.tolist())
+		train_f0 = torch.FloatTensor(train_f0.tolist())
+		train_len = torch.LongTensor(train_len.tolist())
+
+		test_f0 = test_f0.reshape((len(test_f0),-1))
+		test_emb = test_emb.reshape((len(test_emb),-1))
+		test_feat = test_feat.reshape((len(test_feat),-1,feat_num))
+		test_len = test_len
+		# print(np.sum(test_len))
+		test_emb = torch.LongTensor(test_emb.tolist())
+		test_feat = torch.FloatTensor(test_feat.tolist())
+		test_f0 = torch.FloatTensor(test_f0.tolist())
+		test_len = torch.LongTensor(test_len.tolist())
+
+		if mode=="feature_lstm_predict":
+			print("predicting...")
+			model = torch.load("./my_best_model_.model")
+			feature_lstm.Validate(model,test_feat,test_f0,test_len,"./model_prediction")
+			exit()
+
+		model = emb_feat_lstm.EMB_FEAT_LSTM(config.emb_size,feat_num,config.voc_size,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		learning_rate = config.learning_rate
+		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+		decay_step = config.decay_step
+		decay_rate = config.decay_rate
+		epoch_num = config.epoch_num
+		emb_feat_lstm.Train(
+			train_emb,
+			train_feat,
+			train_f0,
+			train_len,
+			test_emb,
+			test_feat,
+			test_f0,
+			test_len,
+			model,
+			optimizer,
+			learning_rate,
+			decay_step,
+			decay_rate,
+			epoch_num)
+
+	elif mode=="train_feat_emb_pos_lstm" or mode=="feat_emb_pos_lstm_predict":
+		desc_file = args.desc_file
+		train_data = args.train_data
+		train_label = args.train_label
+		train_map = args.train_map
+		test_data = args.test_data
+		test_label = args.test_label
+		test_map = args.test_map
+		txt_file = args.txt_file
+		pos_num = -1
+
+		# encode_feature = EncodeFeature(desc_file)
+		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
+		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
+
+		os.system("mkdir lstm_data")
+		print("--->collect data according to the data name")
+		# word_index = word2index(txt_file,config.voc_size)
+		# collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
+		# collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
+
+		# parse_txt_file(txt_file,"./lstm_data/txt_token_pos")
+		pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
+		append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")
+
+		print("--->get the numpy data for training")
+		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
+		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+
+		train_emb = train_feat[:,:,-2].astype(np.int32)
+		train_pos = train_feat[:,:,-1].astype(np.int32)
+		train_feat = train_feat[:,:,0:-2]
+
+		test_emb = test_feat[:,:,-2].astype(np.int32)
+		test_pos = test_feat[:,:,-1].astype(np.int32)
+		test_feat = test_feat[:,:,0:-2]
+
+		batch_num = int(train_f0.shape[0]/config.batch_size)
+		max_length = train_feat.shape[1]
+		feat_num = train_feat.shape[2]
+
+		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_pos = train_pos[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_feat = train_feat[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,feat_num))
+		train_len = train_len[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size))
+
+		train_emb = torch.LongTensor(train_emb.tolist())
+		train_pos = torch.LongTensor(train_pos.tolist())
+		train_feat = torch.FloatTensor(train_feat.tolist())
+		train_f0 = torch.FloatTensor(train_f0.tolist())
+		train_len = torch.LongTensor(train_len.tolist())
+
+		test_emb = test_emb.reshape((len(test_emb),-1))
+		test_pos = test_pos.reshape((len(test_pos),-1))
+		test_feat = test_feat.reshape((len(test_feat),-1,feat_num))
+		test_f0 = test_f0.reshape((len(test_f0),-1))
+		test_len = test_len
+		# print(np.sum(test_len))
+		test_emb = torch.LongTensor(test_emb.tolist())
+		test_pos = torch.LongTensor(test_pos.tolist())
+		test_feat = torch.FloatTensor(test_feat.tolist())
+		test_f0 = torch.FloatTensor(test_f0.tolist())
+		test_len = torch.LongTensor(test_len.tolist())
+
+		model = emb_pos_feat_lstm.EMB_POS_FEAT_LSTM(config.emb_size,config.pos_emb_size,feat_num,config.voc_size,pos_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		##__init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1)
+		learning_rate = config.learning_rate
+		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+		decay_step = config.decay_step
+		decay_rate = config.decay_rate
+		epoch_num = config.epoch_num
+		emb_pos_feat_lstm.Train(
+			train_emb,
+			train_pos,
+			train_feat,
+			train_f0,
+			train_len,
+			test_emb,
+			test_pos,
+			test_feat,
+			test_f0,
+			test_len,
+			model,
+			optimizer,
+			learning_rate,
+			decay_step,
+			decay_rate,
+			epoch_num)
 
 

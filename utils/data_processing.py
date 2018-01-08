@@ -3,6 +3,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
 import numpy as np
+from stanfordcorenlp import StanfordCoreNLP
 class EncodeFeature():
 	def __init__(self,desc):
 		self.encode_dic = []
@@ -217,8 +218,8 @@ def get_f0_feature(data_dir):
 		file_cont = np.loadtxt(data_dir+"/"+file,delimiter=" ")
 		max_length = max(file_cont.shape[0],max_length)
 		f0.append(file_cont[:,0:10])
-		feature.append(file_cont[:,10:-1])
-		feat_num = file_cont.shape[1]-11
+		feature.append(file_cont[:,10:])
+		feat_num = file_cont.shape[1]-10
 	feature_arr = np.zeros((len(feature),max_length,feat_num))
 	f0_arr = np.zeros((len(f0),max_length,10))
 	length_arr = np.zeros((len(feature),))
@@ -228,6 +229,31 @@ def get_f0_feature(data_dir):
 		feature_arr[i,0:len(feature[i]),:] = feature[i]
 		f0_arr[i,0:len(f0[i]),:] = f0[i]
 	return f0_arr,feature_arr,length_arr.astype(np.int64)
+
+def get_f0_feature_list(data_dir,feat_list):
+	file_list = os.listdir(data_dir)
+	feature = []
+	f0 = []
+	max_length = 0
+	feat_num = 0
+	for file in file_list:
+		if "data" not in file:
+			continue
+		file_cont = np.loadtxt(data_dir+"/"+file,delimiter=" ")
+		max_length = max(file_cont.shape[0],max_length)
+		f0.append(file_cont[:,0:10])
+		feature.append(file_cont[:,feat_list])
+		feat_num = len(feat_list)
+	feature_arr = np.zeros((len(feature),max_length,feat_num))
+	f0_arr = np.zeros((len(f0),max_length,10))
+	length_arr = np.zeros((len(feature),))
+	for i in range(len(feature)):
+		assert len(feature[i])==len(f0[i])
+		length_arr[i] = len(feature[i])
+		feature_arr[i,0:len(feature[i]),:] = feature[i]
+		f0_arr[i,0:len(f0[i]),:] = f0[i]
+	return f0_arr,feature_arr,length_arr.astype(np.int64)
+
 
 def get_shape_mean_std(f0_arr,len_arr):
 	shape_arr = np.zeros(f0_arr.shape)
@@ -242,6 +268,64 @@ def get_shape_mean_std(f0_arr,len_arr):
 		mean_arr[utt_id,0:utt_len,:] = tmp_mean
 		std_arr[utt_id,0:utt_len,:] = tmp_std
 	return shape_arr,mean_arr,std_arr
+
+def parse_txt_file(txt_file,out_file):
+	parser = StanfordCoreNLP(r'/Users/weidong/Downloads/stanford-corenlp-full-2016-10-31',lang='zh')
+	with open(txt_file) as txtf, open(out_file,"w+") as outf:
+		for line in txtf:
+			line = line.strip().split(" ")
+			data_name = line[1]
+			text = line[2].decode("utf-8")[1:-1].encode("utf-8")
+			tokens = parser.word_tokenize(text)
+			pos = parser.pos_tag(text)
+			outf.write(data_name+"\n")
+			outf.write(" ".join(tokens).encode("utf-8")+"\n")
+			outf.write(" ".join([tup[1] for tup in pos]).encode("utf-8")+"\n")
+			outf.write("\n")
+	return
+
+def append_pos_to_feature(feat_dir,pos_file):
+	##read pos tag
+	data_dic = {}
+	with open(pos_file) as f:
+		sents = f.readlines()
+		row = 0
+		while row < len(sents):
+			data_name = sents[row].strip()
+			row += 1
+			token = sents[row].strip().split(" ")
+			row += 1
+			pos = sents[row].strip().split(" ")
+			row += 1
+			row += 1
+			token.pop(-1)
+			pos.pop(-1)
+			pos_list = []
+			assert len(token)==len(pos)
+			for i in range(len(token)):
+				for j in range(len(token[i].decode("utf-8"))):
+					pos_list.append(pos[i])
+			data_dic[data_name] = pos_list
+	pos_dic = {}
+	for key,val in data_dic.items():
+		for pos in val:
+			if pos not in pos_dic:
+				pos_dic[pos] = len(pos_dic)+1
+	pos_num = len(pos_dic)+1
+	# print(pos_dic)
+
+	file_list = os.listdir(feat_dir)
+	file_list = [tmp_name for tmp_name in file_list if "data" in tmp_name]
+	for file_name in file_list:
+		pos = data_dic[file_name]
+		file_sents = None
+		with open(feat_dir+"/"+file_name) as f:
+			file_sents = f.readlines()
+		assert len(file_sents)==len(pos)
+		file_sents = [file_sents[i].strip()+" "+str(pos_dic[pos[i]])+"\n" for i in range(len(file_sents))]
+		with open(feat_dir+"/"+file_name,"w+") as f:
+			f.writelines(file_sents)
+	return pos_num
 
 
 

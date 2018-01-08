@@ -61,8 +61,14 @@ class EXP_EMB_LSTM(nn.Module):
 		layer.bias.data.uniform_(-1, 1)
 	def init_hidden(self):
 		direction = 2 if self.bidirectional_flag else 1
+		
+		###########################################################
+		#GPU OPTION
+		###########################################################
 		# return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		###########################################################
 		return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+		###########################################################
 
 	def forward(self,sents,sent_length):
 		self.batch_size,self.max_length = sents.size()

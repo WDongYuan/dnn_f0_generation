@@ -11,7 +11,7 @@ import time
 ###########################################################
 #GPU OPTION
 ###########################################################
-import torch.backends.cudnn as cudnn
+# import torch.backends.cudnn as cudnn
 ###########################################################
 class EMB_LSTM(nn.Module):
 	def __init__(self,emb_size,voc_size,lstm_hidden_size,f0_dim,linear_h1):
@@ -27,13 +27,6 @@ class EMB_LSTM(nn.Module):
 		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
 
-		self.embed_linear = nn.Sequential(
-			nn.Linear(emb_size,100),
-			nn.ReLU(),
-			nn.Linear(100,emb_size)
-			)
-
-
 		##LSTM
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
@@ -46,42 +39,37 @@ class EMB_LSTM(nn.Module):
 		# self.non_linear = nn.Sigmoid()
 		self.non_linear = nn.ReLU()
 		self.l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		# self.linear_init(self.l1,-0.01,0.01)
 		self.linear_init(self.l1)
-		self.l2 = nn.Linear(self.linear_h1,self.linear_h1)
+		self.l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		# self.linear_init(self.l2,-0.01,0.01)
 		self.linear_init(self.l2)
-		self.l3 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.l3)
 
 
-	def linear_init(self,layer):
-		layer.weight.data.uniform_(-1, 1)
-		layer.bias.data.uniform_(-1, 1)
+	def linear_init(self,layer,lower=-1,upper=1):
+		layer.weight.data.uniform_(lower, upper)
+		layer.bias.data.uniform_(lower, upper)
 	def init_hidden(self):
 		direction = 2 if self.bidirectional_flag else 1
 		###########################################################
 		#GPU OPTION
 		###########################################################
-		return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+		# return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
 		###########################################################
-		# return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
 		###########################################################
 
 	def forward(self,sents,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
-		# emb = self.embed_linear(emb)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
-		# emb = torch.nn.utils.rnn.pack_padded_sequence(emb, list(sent_length.data.type(torch.LongTensor)), batch_first=True)
 		h_n, (h_t,c_t) = self.question_lstm(emb,(h_0,c_0))
-		# h_n,_ = torch.nn.utils.rnn.pad_packed_sequence(h_n, batch_first=True)
 
 		h = self.l1(h_n)
 		h = self.non_linear(h)
-		# h = self.l2(h)
-		# h = self.non_linear(h)
-		h = self.l3(h)
+		h = self.l2(h)
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
 
@@ -90,8 +78,8 @@ def Train(train_emb,train_f0,train_len,val_emb,val_f0,val_len,\
 	###########################################################
 	#GPU OPTION
 	###########################################################
-	cudnn.benchmark = True
-	model.cuda()
+	# cudnn.benchmark = True
+	# model.cuda()
 	###########################################################
 	LF = nn.MSELoss()
 	min_loss = 100000000
@@ -103,13 +91,13 @@ def Train(train_emb,train_f0,train_len,val_emb,val_f0,val_len,\
 			###########################################################
 			#GPU OPTION
 			###########################################################
-			train_emb_batch = Variable(train_emb[i].cuda(async=True))
-			train_f0_batch = Variable(train_f0[i].cuda(async=True))
-			train_len_batch = Variable(train_len[i].cuda(async=True))
+			# train_emb_batch = Variable(train_emb[i].cuda(async=True))
+			# train_f0_batch = Variable(train_f0[i].cuda(async=True))
+			# train_len_batch = Variable(train_len[i].cuda(async=True))
 			###########################################################
-			# train_emb_batch = Variable(train_emb[i])
-			# train_f0_batch = Variable(train_f0[i])
-			# train_len_batch = Variable(train_len[i])
+			train_emb_batch = Variable(train_emb[i])
+			train_f0_batch = Variable(train_f0[i])
+			train_len_batch = Variable(train_len[i])
 			###########################################################
 
 
@@ -147,11 +135,11 @@ def Validate(model,val_emb,val_f0,val_len,save_prediction=""):
 	###########################################################
 	#GPU OPTION
 	###########################################################
-	result = model(Variable(val_emb.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
-	val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	# result = model(Variable(val_emb.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	# val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	###########################################################
-	# result = model(Variable(val_emb),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
-	# val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	result = model(Variable(val_emb),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+	val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	###########################################################
 	val_len = val_len.numpy()
 	loss = []
