@@ -216,6 +216,14 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 
 		self.emb_concat_size = self.emb_size+self.pos_emb_size+self.feat_size
 
+
+		##LSTM
+		self.lstm_layer = 1
+		self.bidirectional_flag = True
+		self.direction = 2 if self.bidirectional_flag else 1
+		self.emb_lstm = nn.LSTM(self.emb_concat_size, self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		
 		##CONV
 		self.kernel_size = 5
 		self.padding_size = int((self.kernel_size-1)/2)
@@ -228,12 +236,6 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 			nn.Conv1d(1,self.lstm_hidden_size*self.direction,self.kernel_size*self.out_channel,stride=self.out_channel,padding=self.padding_size*self.out_channel),
 			nn.Tanh())
 
-		##LSTM
-		self.lstm_layer = 1
-		self.bidirectional_flag = True
-		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_concat_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
 		self.non_linear = nn.ReLU()
