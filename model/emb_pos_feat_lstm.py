@@ -237,14 +237,13 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		# 	nn.Conv1d(1,self.out_channel,self.kernel_size*self.out_channel,stride=self.out_channel,padding=self.padding_size*self.out_channel),
 		# 	nn.Tanh())
 
-		self.conv1 = nn.Sequential(
+		self.conv = nn.Sequential(
 			nn.Conv1d(self.emb_concat_size,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
 			#nn.BatchNorm2d(self.out_channel),
-			nn.Tanh(),
-			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
-		self.conv2 = nn.Sequential(
+			nn.ReLU(),
+			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size),
 			nn.Conv1d(self.out_channel,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
-			nn.Tanh(),
+			nn.ReLU(),
 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
 
 
@@ -285,8 +284,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 
 		# conv_result = self.conv1(emb.view(self.batch_size,1,self.max_length*self.emb_concat_size)).permute(0,2,1)
 		# conv_result = self.conv2(conv_result.contiguous().view(self.batch_size,1,self.max_length*self.out_channel)).permute(0,2,1)
-		conv_result = self.conv1(emb.permute(0,2,1))
-		conv_result = self.conv2(conv_result).permute(0,2,1)
+		conv_result = self.conv(emb.permute(0,2,1)).permute(0,2,1)
 
 		emb = torch.cat((emb,conv_result),dim=2)
 
