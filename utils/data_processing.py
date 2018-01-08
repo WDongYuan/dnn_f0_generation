@@ -83,7 +83,7 @@ def concat_seq_feature(in_file,map_file,out_file):
 def word2index(txt_file,voc_size):
 	##return a dictionary for word-count
 	dic = {}
-	with open(txt_file) as f:
+	with open(txt_file,encoding='utf-8') if cuda_flag else open(txt_file) as f:
 		for line in f:
 			line = line.split(" ")[2].decode("utf-8")[1:-1]
 			for word in line:
