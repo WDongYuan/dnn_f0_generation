@@ -373,9 +373,9 @@ if __name__=="__main__":
 
 		os.system("mkdir lstm_data")
 		print("--->collect data according to the data name")
-		word_index = word2index(txt_file,config.voc_size)
-		collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
-		collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
+		# word_index = word2index(txt_file,config.voc_size)
+		# collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
+		# collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
