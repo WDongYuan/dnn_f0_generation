@@ -287,11 +287,11 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		conv_result = self.conv(emb.permute(0,2,1)).permute(0,2,1)
 
 		# emb = torch.cat((emb,conv_result),dim=2)
-		emb = torch.mul(emb,conv_result)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 		emb_h, (_,_) = self.emb_lstm(emb,(h_0,c_0))
+		emb_h = torch.mul(emb_h,conv_result)
 
 		emb_h = self.emb_l1(emb_h)
 		emb_h = self.non_linear(emb_h)
