@@ -1,5 +1,6 @@
 cuda_flag = None
 ##concat? element-wise product? add?
+##try the last hidden layer
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -216,7 +217,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.emb_concat_size = self.emb_size+self.pos_emb_size+self.feat_size
 
 		##CONV
-		self.kernel_size = 3
+		self.kernel_size = 5
 		self.padding_size = int((self.kernel_size-1)/2)
 		self.out_channel = 20
 		self.conv1 = nn.Sequential(
@@ -236,10 +237,16 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 
 
 		self.non_linear = nn.ReLU()
-		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction+self.out_channel,self.linear_h1)
+		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.emb_l1)
 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.emb_l2)
+
+		self.non_linear = nn.ReLU()
+		self.conv_l1 = nn.Linear(self.out_channel,self.linear_h1)
+		self.linear_init(self.conv_l1)
+		self.conv_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.conv_l2)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -264,18 +271,21 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		emb = torch.cat((emb,pos,feat),dim=2)
 
 		conv_result = self.conv1(emb.view(self.batch_size,1,self.max_length*self.emb_concat_size)).permute(0,2,1)
-		# conv_result = self.conv2(conv_result.contiguous().view(self.batch_size,1,self.max_length*self.out_channel)).permute(0,2,1)
+		conv_result = self.conv2(conv_result.contiguous().view(self.batch_size,1,self.max_length*self.out_channel)).permute(0,2,1)
+		conv_h = self.emb_l1(conv_result)
+		conv_h = self.non_linear(conv_h)
+		conv_h = self.emb_l2(conv_h)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 
-		emb_h = torch.cat((emb_h_n,conv_result),dim=2)
-		emb_h = self.emb_l1(emb_h)
+		# emb_h = torch.cat((emb_h_n,conv_result),dim=2)
+		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.non_linear(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
-		h = emb_h
+		h = emb_h+conv_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
