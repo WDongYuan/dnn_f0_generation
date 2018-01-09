@@ -312,9 +312,9 @@ class Attention(nn.Module):
 		self.feat_d1 = feat_d1
 		self.feat_d2 = feat_d2
 		self.aff = nn.Linear(self.feat_d1,self.feat_d2)
-		
+
 		self.non_linear = nn.Tanh()
-		self.linear = nn.Linear(self.max_length,1)
+		self.linear = nn.Linear(max_length,1)
 
 		self.softmax = nn.Softmax()
 		self.batch_size = -1
