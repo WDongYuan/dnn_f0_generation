@@ -279,6 +279,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 
 	def forward(self,sents,pos,feat,sent_length):
 		self.batch_size,self.max_length = sents.size()
+		print(self.max_length)
 		emb = self.embed(sents)
 		pos = self.pos_embed(pos)
 		emb = torch.cat((emb,pos,feat),dim=2)
@@ -308,30 +309,24 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 class Attention(nn.Module):
 	def __init__(self,max_length,feat_d1,feat_d2):
 		super(Attention,self).__init__()
-		self.max_length = max_length
-		print(self.max_length)
+		self.max_length = 40
 		self.feat_d1 = feat_d1
 		self.feat_d2 = feat_d2
 		self.aff = nn.Linear(self.feat_d1,self.feat_d2)
 
 		self.non_linear = nn.Tanh()
-		self.ly = nn.Linear(self.max_length,1)
-		linear_init(self.ly)
+		self.linear = nn.Linear(self.max_length,1)
 
 		self.softmax = nn.Softmax()
 		self.batch_size = -1
 
-
-	def linear_init(self,layer,lower=-1,upper=1):
-		layer.weight.data.uniform_(lower, upper)
-		layer.bias.data.uniform_(lower, upper)
 
 	def forward(self,in_1,in_2):
 		self.batch_size,_,_ = in_1.size()
 		in_1 = self.aff(in_1)
 		att = torch.bmm(in_1,in_2.permute(0,2,1))
 		att = self.non_linear(att)
-		att = self.ly(att).view(self.batch_size,self.max_length)
+		att = self.linear(att).view(self.batch_size,self.max_length)
 		att = self.softmax(att)
 		return att
 
