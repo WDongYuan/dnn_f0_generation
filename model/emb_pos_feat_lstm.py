@@ -315,10 +315,15 @@ class Attention(nn.Module):
 
 		self.non_linear = nn.Tanh()
 		self.ly = nn.Linear(self.max_length,1)
+		linear_init(self.ly)
 
 		self.softmax = nn.Softmax()
 		self.batch_size = -1
 
+
+	def linear_init(self,layer,lower=-1,upper=1):
+		layer.weight.data.uniform_(lower, upper)
+		layer.bias.data.uniform_(lower, upper)
 
 	def forward(self,in_1,in_2):
 		self.batch_size,_,_ = in_1.size()
