@@ -217,9 +217,9 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.emb_concat_size = self.emb_size+self.pos_emb_size+self.feat_size
 
 		##CNN CONFIG
-		self.kernel_size = 5
+		self.kernel_size = 3
 		self.padding_size = int((self.kernel_size-1)/2)
-		self.out_channel = 50
+		self.out_channel = 20
 
 		##LSTM
 		self.lstm_layer = 1
@@ -292,15 +292,15 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		att = self.att(emb_h_n,conv_result).unsqueeze(2)
 		res_h = torch.mul(att,emb_h_n)
 
-		# emb_h = self.emb_l1(emb_h_n)
-		# emb_h = self.non_linear(emb_h)
-		# emb_h = self.emb_l2(emb_h)
+		emb_h = self.emb_l1(emb_h_n)
+		emb_h = self.non_linear(emb_h)
+		emb_h = self.emb_l2(emb_h)
 
 		res_h = self.res_l1(res_h)
 		res_h = self.non_linear(res_h)
 		res_h = self.res_l2(res_h)
 
-		# h = emb_h+res_h
+		h = emb_h+res_h
 		h = res_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
