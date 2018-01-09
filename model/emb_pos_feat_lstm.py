@@ -292,15 +292,16 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		att = self.att(emb_h_n,conv_result).unsqueeze(2)
 		res_h = torch.mul(att,emb_h_n)
 
-		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.non_linear(emb_h)
-		emb_h = self.emb_l2(emb_h)
+		# emb_h = self.emb_l1(emb_h_n)
+		# emb_h = self.non_linear(emb_h)
+		# emb_h = self.emb_l2(emb_h)
 
 		res_h = self.res_l1(res_h)
 		res_h = self.non_linear(res_h)
 		res_h = self.res_l2(res_h)
 
-		h = emb_h+res_h
+		# h = emb_h+res_h
+		h = res_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
