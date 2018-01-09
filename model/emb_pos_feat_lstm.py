@@ -217,9 +217,9 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.emb_concat_size = self.emb_size+self.pos_emb_size+self.feat_size
 
 		##CNN CONFIG
-		self.kernel_size = 7
+		self.kernel_size = 3
 		self.padding_size = int((self.kernel_size-1)/2)
-		self.out_channel = 50
+		self.out_channel = 20
 
 		##LSTM
 		self.lstm_layer = 1
