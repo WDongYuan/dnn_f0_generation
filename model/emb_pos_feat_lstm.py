@@ -309,6 +309,7 @@ class Attention(nn.Module):
 	def __init__(self,max_length,feat_d1,feat_d2):
 		super(Attention,self).__init__()
 		self.max_length = max_length
+		print(self.max_length)
 		self.feat_d1 = feat_d1
 		self.feat_d2 = feat_d2
 		self.aff = nn.Linear(self.feat_d1,self.feat_d2)
