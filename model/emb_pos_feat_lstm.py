@@ -246,7 +246,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 			nn.ReLU(),
 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
 
-		self.att = Attention(self.max_length,self.lstm_hidden_size*self.direction,self.out_channel)
+		self.att = Attention(self.lstm_hidden_size*self.direction,self.out_channel)
 
 
 
@@ -279,7 +279,6 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 
 	def forward(self,sents,pos,feat,sent_length):
 		self.batch_size,self.max_length = sents.size()
-		print(self.max_length)
 		emb = self.embed(sents)
 		pos = self.pos_embed(pos)
 		emb = torch.cat((emb,pos,feat),dim=2)
@@ -307,25 +306,27 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		return h
 
 class Attention(nn.Module):
-	def __init__(self,max_length,feat_d1,feat_d2):
+	def __init__(self,feat_d1,feat_d2):
 		super(Attention,self).__init__()
-		self.max_length = 40
+		self.max_length = -1
 		self.feat_d1 = feat_d1
 		self.feat_d2 = feat_d2
 		self.aff = nn.Linear(self.feat_d1,self.feat_d2)
 
 		self.non_linear = nn.Tanh()
-		self.linear = nn.Linear(self.max_length,1)
+		self.linear = None
 
 		self.softmax = nn.Softmax()
 		self.batch_size = -1
 
 
 	def forward(self,in_1,in_2):
-		self.batch_size,_,_ = in_1.size()
+		self.batch_size,self.max_length,_ = in_1.size()
 		in_1 = self.aff(in_1)
 		att = torch.bmm(in_1,in_2.permute(0,2,1))
 		att = self.non_linear(att)
+		if self.linear is None:
+			self.linear = nn.Linear(self.max_length,1)
 		att = self.linear(att).view(self.batch_size,self.max_length)
 		att = self.softmax(att)
 		return att
