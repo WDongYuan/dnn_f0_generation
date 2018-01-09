@@ -301,7 +301,6 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		res_h = self.res_l2(res_h)
 
 		h = emb_h+res_h
-		h = res_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
