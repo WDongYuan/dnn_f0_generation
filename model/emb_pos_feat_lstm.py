@@ -314,7 +314,6 @@ class Attention(nn.Module):
 		self.aff = nn.Linear(self.feat_d1,self.feat_d2)
 
 		self.non_linear = nn.Tanh()
-		self.linear = None
 
 		self.softmax = nn.Softmax()
 		self.batch_size = -1
@@ -325,9 +324,8 @@ class Attention(nn.Module):
 		in_1 = self.aff(in_1)
 		att = torch.bmm(in_1,in_2.permute(0,2,1))
 		att = self.non_linear(att)
-		if self.linear is None:
-			self.linear = nn.Linear(self.max_length,1)
-		att = self.linear(att).view(self.batch_size,self.max_length)
+		att = torch.sum(att,dim=2)
+		att = att.view(self.batch_size,self.max_length)
 		att = self.softmax(att)
 		return att
 
