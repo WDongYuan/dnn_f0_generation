@@ -246,6 +246,8 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 			nn.ReLU(),
 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
 
+		self.att = Attention(self.max_length,self.lstm_hidden_size*self.direction,self.out_channel)
+
 
 
 		self.non_linear = nn.ReLU()
@@ -255,10 +257,10 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.linear_init(self.emb_l2)
 
 		self.non_linear = nn.ReLU()
-		self.conv_l1 = nn.Linear(self.out_channel,self.linear_h1)
-		self.linear_init(self.conv_l1)
-		self.conv_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.conv_l2)
+		self.res_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.res_l1)
+		self.res_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.res_l2)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -279,32 +281,52 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
 		pos = self.pos_embed(pos)
-
 		emb = torch.cat((emb,pos,feat),dim=2)
 
-		# conv_result = self.conv1(emb.view(self.batch_size,1,self.max_length*self.emb_concat_size)).permute(0,2,1)
-		# conv_result = self.conv2(conv_result.contiguous().view(self.batch_size,1,self.max_length*self.out_channel)).permute(0,2,1)
 		conv_result = self.conv(emb.permute(0,2,1)).permute(0,2,1)
-
-		# emb = torch.cat((emb,conv_result),dim=2)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
-		emb_h, (_,_) = self.emb_lstm(emb,(h_0,c_0))
-		emb_h = torch.mul(emb_h,conv_result)
+		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 
-		emb_h = self.emb_l1(emb_h)
+		att = self.att(emb_h_n,conv_result).unsqueeze(2)
+		res_h = torch.mul(att,emb_h_n)
+
+		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.non_linear(emb_h)
 		emb_h = self.emb_l2(emb_h)
-		h = emb_h
 
-		# h = emb_h+conv_h
+		res_h = self.res_l1(res_h)
+		res_h = self.non_linear(res_h)
+		res_h = self.res_l2(res_h)
+
+		h = emb_h+res_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
 
+class Attention(nn.Module):
+    def __init__(self,max_length,feat_d1,feat_d2):
+        super(Attention,self).__init__()
+        self.max_length = max_length
+        self.feat_d1 = feat_d1
+        self.feat_d2 = feat_d2
+        self.aff = nn.Linear(self.feat_d1,self.feat_d2)
+        self.linear = nn.Linear(self.max_length,1)
+        self.non_linear = nn.Tanh()
+
+        self.softmax = nn.Softmax()
+        self.batch_size = -1
 
 
+    def forward(self,in_1,in_2):
+    	self.batch_size,_,_ = in_1.size()
+    	in_1 = self.aff(in_1)
+    	att = torch.bmm(in_1,in_2.permute(0,2,1))
+    	att = self.non_linear(att)
+    	att = self.linear(att).view(self.batch_size,self.max_length)
+    	att = self.softmax(att)
+        return att
 
 
 def Train(train_emb,train_pos,train_feat,train_f0,train_len,val_emb,val_pos,val_feat,val_f0,val_len,\
