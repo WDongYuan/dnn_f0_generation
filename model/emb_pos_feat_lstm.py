@@ -242,7 +242,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 			#nn.BatchNorm2d(self.out_channel),
 			nn.ReLU(),
 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size),
-			nn.Conv1d(self.out_channel,self.lstm_hidden_size*self.direction,self.kernel_size,stride=1,padding=self.padding_size),
+			nn.Conv1d(self.out_channel,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
 			nn.ReLU(),
 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
 
