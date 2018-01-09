@@ -306,27 +306,27 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		return h
 
 class Attention(nn.Module):
-    def __init__(self,max_length,feat_d1,feat_d2):
-        super(Attention,self).__init__()
-        self.max_length = max_length
-        self.feat_d1 = feat_d1
-        self.feat_d2 = feat_d2
-        self.aff = nn.Linear(self.feat_d1,self.feat_d2)
-        self.linear = nn.Linear(self.max_length,1)
-        self.non_linear = nn.Tanh()
+	def __init__(self,max_length,feat_d1,feat_d2):
+		super(Attention,self).__init__()
+		self.max_length = max_length
+		self.feat_d1 = feat_d1
+		self.feat_d2 = feat_d2
+		self.aff = nn.Linear(self.feat_d1,self.feat_d2)
+		self.linear = nn.Linear(self.max_length,1)
+		self.non_linear = nn.Tanh()
 
-        self.softmax = nn.Softmax()
-        self.batch_size = -1
+		self.softmax = nn.Softmax()
+		self.batch_size = -1
 
 
-    def forward(self,in_1,in_2):
-    	self.batch_size,_,_ = in_1.size()
-    	in_1 = self.aff(in_1)
-    	att = torch.bmm(in_1,in_2.permute(0,2,1))
-    	att = self.non_linear(att)
-    	att = self.linear(att).view(self.batch_size,self.max_length)
-    	att = self.softmax(att)
-        return att
+	def forward(self,in_1,in_2):
+		self.batch_size,_,_ = in_1.size()
+		in_1 = self.aff(in_1)
+		att = torch.bmm(in_1,in_2.permute(0,2,1))
+		att = self.non_linear(att)
+		att = self.linear(att).view(self.batch_size,self.max_length)
+		att = self.softmax(att)
+		return att
 
 
 def Train(train_emb,train_pos,train_feat,train_f0,train_len,val_emb,val_pos,val_feat,val_f0,val_len,\
