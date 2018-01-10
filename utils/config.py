@@ -5,9 +5,9 @@ decay_rate = 0.95
 epoch_num = 100
 voc_size = 2500
 batch_size = 20
-emb_size = 20
+emb_size = 10
 pos_emb_size = 10
-tone_emb_size = 20
+tone_emb_size = 10
 lstm_hidden_size = 100
 f0_dim = 10
 linear_h1 = 200
@@ -83,3 +83,20 @@ linear_h1 = 200
 # f0_dim = 10
 # linear_h1 = 200
 ##27.7
+
+
+##Tone LSTM
+# cuda_flag = True
+# learning_rate = 0.001
+# decay_step = 1
+# decay_rate = 0.95
+# epoch_num = 100
+# voc_size = 2500
+# batch_size = 20
+# emb_size = 20
+# pos_emb_size = 10
+# tone_emb_size = 10
+# lstm_hidden_size = 100
+# f0_dim = 10
+# linear_h1 = 200
+#27.4
