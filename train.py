@@ -1,4 +1,3 @@
-cuda_flag = False
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -36,6 +35,7 @@ from model import emb_pos_feat_lstm
 from model import tone_lstm
 from utils import config
 from utils import predict_mean_tool
+cuda_flag = config.cuda_flag
 # from model import expand_emb
 ###########################################################
 #GPU OPTION
