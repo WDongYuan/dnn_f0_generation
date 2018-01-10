@@ -18,73 +18,73 @@ import time
 # 	import torch.backends.cudnn as cudnn
 ###########################################################
 
-# class EMB_POS_FEAT_LSTM(nn.Module):
-# 	def __init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1):
-# 		super(EMB_POS_FEAT_LSTM, self).__init__()
-# 		self.emb_size = emb_size
-# 		self.feat_size = feat_size
-# 		self.pos_emb_size = pos_emb_size
-# 		self.lstm_hidden_size = lstm_hidden_size
-# 		self.f0_dim = f0_dim
-# 		self.linear_h1 = linear_h1
-# 		self.voc_size = voc_size
-# 		self.pos_num = pos_num
-# 		self.batch_size = -1
-# 		self.max_length = -1
+class EMB_POS_FEAT_LSTM(nn.Module):
+	def __init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1):
+		super(EMB_POS_FEAT_LSTM, self).__init__()
+		self.emb_size = emb_size
+		self.feat_size = feat_size
+		self.pos_emb_size = pos_emb_size
+		self.lstm_hidden_size = lstm_hidden_size
+		self.f0_dim = f0_dim
+		self.linear_h1 = linear_h1
+		self.voc_size = voc_size
+		self.pos_num = pos_num
+		self.batch_size = -1
+		self.max_length = -1
 
-# 		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
-# 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
-# 		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
-# 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
+		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
+		init.uniform(self.embed.weight,a=-0.01,b=0.01)
 
-# 		##LSTM
-# 		self.lstm_layer = 1
-# 		self.bidirectional_flag = True
-# 		self.direction = 2 if self.bidirectional_flag else 1
-# 		self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size+self.feat_size, self.lstm_hidden_size,
-# 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-
-
-# 		self.non_linear = nn.ReLU()
-# 		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-# 		self.linear_init(self.emb_l1)
-# 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-# 		self.linear_init(self.emb_l2)
+		##LSTM
+		self.lstm_layer = 1
+		self.bidirectional_flag = True
+		self.direction = 2 if self.bidirectional_flag else 1
+		self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size+self.feat_size, self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
-# 	def linear_init(self,layer,lower=-1,upper=1):
-# 		layer.weight.data.uniform_(lower, upper)
-# 		layer.bias.data.uniform_(lower, upper)
-# 	def init_hidden(self):
-# 		direction = 2 if self.bidirectional_flag else 1
-# 		###########################################################
-# 		#GPU OPTION
-# 		###########################################################
-# 		if cuda_flag:
-# 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
-# 		else:
-# 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
-# 		###########################################################
+		self.non_linear = nn.ReLU()
+		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.emb_l1)
+		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.emb_l2)
 
-# 	def forward(self,sents,pos,feat,sent_length):
-# 		self.batch_size,self.max_length = sents.size()
-# 		emb = self.embed(sents)
-# 		pos = self.pos_embed(pos)
 
-# 		emb = torch.cat((emb,pos,feat),dim=2)
+	def linear_init(self,layer,lower=-1,upper=1):
+		layer.weight.data.uniform_(lower, upper)
+		layer.bias.data.uniform_(lower, upper)
+	def init_hidden(self):
+		direction = 2 if self.bidirectional_flag else 1
+		###########################################################
+		#GPU OPTION
+		###########################################################
+		if cuda_flag:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+		else:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		###########################################################
 
-# 		c_0 = self.init_hidden()
-# 		h_0 = self.init_hidden()
-# 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
+	def forward(self,sents,pos,feat,sent_length):
+		self.batch_size,self.max_length = sents.size()
+		emb = self.embed(sents)
+		pos = self.pos_embed(pos)
 
-# 		emb_h = self.emb_l1(emb_h_n)
-# 		emb_h = self.non_linear(emb_h)
-# 		emb_h = self.emb_l2(emb_h)
+		emb = torch.cat((emb,pos,feat),dim=2)
 
-# 		h = emb_h
+		c_0 = self.init_hidden()
+		h_0 = self.init_hidden()
+		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 
-# 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
-# 		return h
+		emb_h = self.emb_l1(emb_h_n)
+		emb_h = self.non_linear(emb_h)
+		emb_h = self.emb_l2(emb_h)
+
+		h = emb_h
+
+		h = h.view(self.batch_size,self.max_length*self.f0_dim)
+		return h
 
 
 
@@ -195,139 +195,150 @@ import time
 
 
 
-class EMB_POS_FEAT_LSTM(nn.Module):
-	def __init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1):
-		super(EMB_POS_FEAT_LSTM, self).__init__()
-		self.emb_size = emb_size
-		self.feat_size = feat_size
-		self.pos_emb_size = pos_emb_size
-		self.lstm_hidden_size = lstm_hidden_size
-		self.f0_dim = f0_dim
-		self.linear_h1 = linear_h1
-		self.voc_size = voc_size
-		self.pos_num = pos_num
-		self.batch_size = -1
-		self.max_length = -1
+# class EMB_POS_FEAT_LSTM(nn.Module):
+# 	def __init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1):
+# 		super(EMB_POS_FEAT_LSTM, self).__init__()
+# 		self.emb_size = emb_size
+# 		self.feat_size = feat_size
+# 		self.pos_emb_size = pos_emb_size
+# 		self.lstm_hidden_size = lstm_hidden_size
+# 		self.f0_dim = f0_dim
+# 		self.linear_h1 = linear_h1
+# 		self.voc_size = voc_size
+# 		self.pos_num = pos_num
+# 		self.batch_size = -1
+# 		self.max_length = -1
 
-		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
-		init.uniform(self.embed.weight,a=-0.01,b=0.01)
-		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
-		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+# 		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
+# 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+# 		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
+# 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
 
-		self.emb_concat_size = self.emb_size+self.pos_emb_size+self.feat_size
+# 		self.emb_concat_size = self.emb_size+self.pos_emb_size+self.feat_size
 
-		##CNN CONFIG
-		self.kernel_size = 7
-		self.padding_size = int((self.kernel_size-1)/2)
-		self.out_channel = 50
+# 		##CNN CONFIG
+# 		self.kernel_size = 3
+# 		self.padding_size = int((self.kernel_size-1)/2)
+# 		self.out_channel = 50
 
-		##LSTM
-		self.lstm_layer = 1
-		self.bidirectional_flag = True
-		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_concat_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+# 		##LSTM
+# 		self.lstm_layer = 1
+# 		self.bidirectional_flag = True
+# 		self.direction = 2 if self.bidirectional_flag else 1
+# 		self.emb_lstm = nn.LSTM(self.emb_concat_size, self.lstm_hidden_size,
+# 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+# 		self.conv_lstm = nn.LSTM(self.emb_concat_size, self.lstm_hidden_size,
+# 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
-		##CONV
-		# self.conv1 = nn.Sequential(
-		# 	nn.Conv1d(1,self.out_channel,self.kernel_size*self.emb_concat_size,stride=self.emb_concat_size,padding=self.padding_size*self.emb_concat_size),
-		# 	#nn.BatchNorm2d(self.out_channel),
-		# 	nn.Tanh())
-		# self.conv2 = nn.Sequential(
-		# 	nn.Conv1d(1,self.out_channel,self.kernel_size*self.out_channel,stride=self.out_channel,padding=self.padding_size*self.out_channel),
-		# 	nn.Tanh())
+# 		##CONV
+# 		# self.conv1 = nn.Sequential(
+# 		# 	nn.Conv1d(1,self.out_channel,self.kernel_size*self.emb_concat_size,stride=self.emb_concat_size,padding=self.padding_size*self.emb_concat_size),
+# 		# 	#nn.BatchNorm2d(self.out_channel),
+# 		# 	nn.Tanh())
+# 		# self.conv2 = nn.Sequential(
+# 		# 	nn.Conv1d(1,self.out_channel,self.kernel_size*self.out_channel,stride=self.out_channel,padding=self.padding_size*self.out_channel),
+# 		# 	nn.Tanh())
 
-		self.conv = nn.Sequential(
-			nn.Conv1d(self.emb_concat_size,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
-			#nn.BatchNorm2d(self.out_channel),
-			nn.ReLU(),
-			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size),
-			nn.Conv1d(self.out_channel,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
-			nn.ReLU(),
-			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
+# 		self.conv = nn.Sequential(
+# 			nn.Conv1d(self.lstm_hidden_size*self.direction,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
+# 			#nn.BatchNorm2d(self.out_channel),
+# 			nn.ReLU(),
+# 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size),
+# 			nn.Conv1d(self.out_channel,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
+# 			nn.ReLU(),
+# 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size),
+# 			nn.Conv1d(self.out_channel,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
+# 			nn.ReLU(),
+# 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size),
+# 			nn.Conv1d(self.out_channel,self.out_channel,self.kernel_size,stride=1,padding=self.padding_size),
+# 			nn.ReLU(),
+# 			nn.MaxPool1d(self.kernel_size,stride=1,padding=self.padding_size))
 
-		self.att = Attention(self.lstm_hidden_size*self.direction,self.out_channel)
-
-
-
-		self.non_linear = nn.ReLU()
-		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.emb_l1)
-		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.emb_l2)
-
-		self.non_linear = nn.ReLU()
-		self.res_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.res_l1)
-		self.res_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.res_l2)
+# 		self.att = Attention(self.lstm_hidden_size*self.direction,self.out_channel)
 
 
-	def linear_init(self,layer,lower=-1,upper=1):
-		layer.weight.data.uniform_(lower, upper)
-		layer.bias.data.uniform_(lower, upper)
-	def init_hidden(self):
-		direction = 2 if self.bidirectional_flag else 1
-		###########################################################
-		#GPU OPTION
-		###########################################################
-		if cuda_flag:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
-		else:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
-		###########################################################
 
-	def forward(self,sents,pos,feat,sent_length):
-		self.batch_size,self.max_length = sents.size()
-		emb = self.embed(sents)
-		pos = self.pos_embed(pos)
-		emb = torch.cat((emb,pos,feat),dim=2)
+# 		self.non_linear = nn.ReLU()
+# 		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+# 		self.linear_init(self.emb_l1)
+# 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+# 		self.linear_init(self.emb_l2)
 
-		conv_result = self.conv(emb.permute(0,2,1)).permute(0,2,1)
-
-		c_0 = self.init_hidden()
-		h_0 = self.init_hidden()
-		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
-
-		att = self.att(emb_h_n,conv_result).unsqueeze(2)
-		res_h = torch.mul(att,emb_h_n)
-
-		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.non_linear(emb_h)
-		emb_h = self.emb_l2(emb_h)
-
-		res_h = self.res_l1(res_h)
-		res_h = self.non_linear(res_h)
-		res_h = self.res_l2(res_h)
-
-		h = emb_h+res_h
-
-		h = h.view(self.batch_size,self.max_length*self.f0_dim)
-		return h
-
-class Attention(nn.Module):
-	def __init__(self,feat_d1,feat_d2):
-		super(Attention,self).__init__()
-		self.max_length = -1
-		self.feat_d1 = feat_d1
-		self.feat_d2 = feat_d2
-		self.aff = nn.Linear(self.feat_d1,self.feat_d2)
-
-		self.non_linear = nn.Tanh()
-
-		self.softmax = nn.Softmax()
-		self.batch_size = -1
+# 		# self.non_linear = nn.ReLU()
+# 		self.res_l1 = nn.Linear(self.out_channel,self.linear_h1)
+# 		self.linear_init(self.res_l1)
+# 		self.res_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+# 		self.linear_init(self.res_l2)
 
 
-	def forward(self,in_1,in_2):
-		self.batch_size,self.max_length,_ = in_1.size()
-		in_1 = self.aff(in_1)
-		att = torch.bmm(in_1,in_2.permute(0,2,1))
-		att = self.non_linear(att)
-		att = torch.sum(att,dim=2)
-		att = att.view(self.batch_size,self.max_length)
-		att = self.softmax(att)
-		return att
+# 	def linear_init(self,layer,lower=-1,upper=1):
+# 		layer.weight.data.uniform_(lower, upper)
+# 		layer.bias.data.uniform_(lower, upper)
+# 	def init_hidden(self):
+# 		direction = 2 if self.bidirectional_flag else 1
+# 		###########################################################
+# 		#GPU OPTION
+# 		###########################################################
+# 		if cuda_flag:
+# 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+# 		else:
+# 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+# 		###########################################################
+
+# 	def forward(self,sents,pos,feat,sent_length):
+# 		self.batch_size,self.max_length = sents.size()
+# 		emb = self.embed(sents)
+# 		pos = self.pos_embed(pos)
+# 		emb = torch.cat((emb,pos,feat),dim=2)
+
+
+# 		c_0 = self.init_hidden()
+# 		h_0 = self.init_hidden()
+# 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
+# 		conv_h_n, (_,_) = self.conv_lstm(emb,(h_0,c_0))
+
+# 		res_h = self.conv(conv_h_n.permute(0,2,1)).permute(0,2,1)
+
+# 		# att = self.att(emb_h_n,conv_result).unsqueeze(2)
+# 		# res_h = torch.mul(att,conv_h_n)
+# 		# print(res_h.size())
+
+# 		emb_h = self.emb_l1(emb_h_n)
+# 		emb_h = self.non_linear(emb_h)
+# 		emb_h = self.emb_l2(emb_h)
+
+# 		res_h = self.res_l1(res_h)
+# 		res_h = self.non_linear(res_h)
+# 		res_h = self.res_l2(res_h)
+
+# 		h = emb_h+res_h
+
+# 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
+# 		return h
+
+# class Attention(nn.Module):
+# 	def __init__(self,feat_d1,feat_d2):
+# 		super(Attention,self).__init__()
+# 		self.max_length = -1
+# 		self.feat_d1 = feat_d1
+# 		self.feat_d2 = feat_d2
+# 		self.aff = nn.Linear(self.feat_d1,self.feat_d2)
+
+# 		self.non_linear = nn.Tanh()
+
+# 		self.softmax = nn.Softmax()
+# 		self.batch_size = -1
+
+
+# 	def forward(self,in_1,in_2):
+# 		self.batch_size,self.max_length,_ = in_1.size()
+# 		in_1 = self.aff(in_1)
+# 		att = torch.bmm(in_1,in_2.permute(0,2,1))
+# 		att = self.non_linear(att)
+# 		att = torch.sum(att,dim=2)
+# 		att = att.view(self.batch_size,self.max_length)
+# 		att = self.softmax(att)
+# 		return att
 
 
 def Train(train_emb,train_pos,train_feat,train_f0,train_len,val_emb,val_pos,val_feat,val_f0,val_len,\

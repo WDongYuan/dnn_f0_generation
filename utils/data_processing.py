@@ -6,23 +6,66 @@ import os
 import numpy as np
 # from stanfordcorenlp import StanfordCoreNLP
 class EncodeFeature():
+	# syl_numphones 0 0
+	# p.syl_numphones 1 1
+	# n.syl_numphones 2 2
+	# stress 3 7
+	# p.stress 8 13
+	# n.stress 14 19
+	# pos_in_word 20 20
+	# ssyl_in 21 21
+	# ssyl_out 22 22
+	# syl_out 23 23
+	# syl_in 24 24
+	# asyl_in 25 25
+	# asyl_out 26 26
+	# next_accent 27 27
+	# last_accent 28 28
+	# accented 29 30
+	# p.accented 31 32
+	# n.accented 33 34
+	# syl_endpitch 35 35
+	# syl_startpitch 36 36
+	# p.syl_endpitch 37 37
+	# n.syl_startpitch 38 38
+	# syl_break 39 43
+	# p.syl_break 44 48
+	# n.syl_break 49 53
+	# syl_accent 54 56
+	# p.syl_accent 57 59
+	# n.syl_accent 60 62
+	# R:SylStructure.parent.R:Word.content_words_in 63 63
+	# R:SylStructure.parent.R:Word.content_words_out 64 64
+	# R:SylStructure.parent.R:Word.pos_in_phrase 65 65
+	# R:SylStructure.parent.R:Word.words_out 66 66
+	# in_pos 67 67
+	# out_pos 68 68
+	# in_percent 69 69
+	# tone 70 74
 	def __init__(self,desc):
 		self.encode_dic = []
+		self.feature_pos = []
 		with open(desc) as f:
 			cont = f.readlines()
 			cont = [line.strip()[1:-1] for line in cont]
 			cont.pop(0)
 			cont.pop(0)
 			cont.pop(-1)
+		feat_pos = 0
 		for feat in cont:
 			feat = feat.split(" ")
 			if feat[-1]=="float":
 				self.encode_dic.append({})
+				self.feature_pos.append([feat[0],[feat_pos,feat_pos]])
+				feat_pos += 1
 			else:
 				tmp_dic = {}
 				for i in range(1,len(feat)):
 					tmp_dic[feat[i]] = i-1
 				self.encode_dic.append(tmp_dic)
+				self.feature_pos.append([feat[0],[feat_pos,feat_pos+len(tmp_dic)-1]])
+				feat_pos += len(tmp_dic)
+
 		self.not_one_hot_flag = []
 		count = 0
 		for i in range(len(self.encode_dic)):
@@ -334,6 +377,17 @@ def append_pos_to_feature(feat_dir,pos_file):
 			f.writelines(file_sents)
 	return pos_num
 
+def one_hot_to_index(arr,zero_padding=True):
+	new_arr = np.zeros((arr.shape[0],))
+	for i in range(len(arr)):
+		assert arr[i].sum()==1 or arr[i].sum()==0
+		for j in range(len(arr[i])):
+			if arr[i][j]==1:
+				if zero_padding:
+					new_arr[i] = j+1
+				else:
+					new_arr[i] = j
+	return new_arr.astype(np.int32)
 
 
 

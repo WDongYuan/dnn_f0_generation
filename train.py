@@ -1,4 +1,4 @@
-cuda_flag = True
+cuda_flag = False
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -24,6 +24,7 @@ from utils.data_processing import get_f0_feature_list
 from utils.data_processing import get_shape_mean_std
 from utils.data_processing import parse_txt_file
 from utils.data_processing import append_pos_to_feature
+from utils.data_processing import one_hot_to_index
 from model.mlp import MLP
 from model import embedding_lstm
 from model import feature_lstm
@@ -32,6 +33,7 @@ from model import emb_att
 from model import classify_mean
 from model import emb_feat_lstm
 from model import emb_pos_feat_lstm
+from model import tone_lstm
 from utils import config
 from utils import predict_mean_tool
 # from model import expand_emb
@@ -107,6 +109,7 @@ if __name__=="__main__":
 	parser.add_argument('--test_data', dest='test_data')
 	parser.add_argument('--test_label', dest='test_label')
 	parser.add_argument('--test_map', dest='test_map')
+	parser.add_argument('--predict_file', dest='predict_file')
 	args = parser.parse_args()
 	mode = args.mode
 	if mode=="how_to_run":
@@ -186,7 +189,7 @@ if __name__=="__main__":
 		print("test loss: "+str(test_loss))
 		np.savetxt("prediction",result,fmt="%.3f")
 		################################################################################
-	elif "train_emb" in mode or ("emb" in mode and "predict" in mode):
+	elif "train_emb" in mode or ("emb" in mode and "feat" not in mode and "predict" in mode):
 		desc_file = args.desc_file
 		train_data = args.train_data
 		train_label = args.train_label
@@ -464,6 +467,12 @@ if __name__=="__main__":
 
 		############################################
 		# encode_feature = EncodeFeature(desc_file)
+
+		# for tup in encode_feature.feature_pos:
+		# 	print(tup[0] ),
+		# 	print(str(tup[1][0])+" "+str(tup[1][1]))
+		# exit()
+
 		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
 		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
 		############################################
@@ -503,6 +512,12 @@ if __name__=="__main__":
 		max_length = train_feat.shape[1]
 		feat_num = train_feat.shape[2]
 
+		ori_train_f0 = train_f0
+		ori_train_emb = train_emb
+		ori_train_pos = train_pos
+		ori_train_feat = train_feat
+		ori_train_len = train_len
+
 		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_pos = train_pos[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
@@ -527,6 +542,20 @@ if __name__=="__main__":
 		test_f0 = torch.FloatTensor(test_f0.tolist())
 		test_len = torch.LongTensor(test_len.tolist())
 
+		if "predict" in mode:
+			print("predicting...")
+			model = torch.load("./my_saved_model")
+
+			#############################################################
+			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
+			# test_pos = torch.LongTensor(ori_train_pos.reshape((len(ori_train_pos),-1)).tolist())
+			# test_feat = torch.FloatTensor(ori_train_feat.reshape((len(ori_train_feat),max_length,feat_num)).tolist())
+			# test_len = torch.LongTensor(ori_train_len.tolist())
+			# test_f0 = torch.FloatTensor(ori_train_f0.reshape((len(ori_train_f0),-1)).tolist())
+			#############################################################
+
+			emb_pos_feat_lstm.Validate(model,test_emb,test_pos,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
+			exit()
 		model = emb_pos_feat_lstm.EMB_POS_FEAT_LSTM(config.emb_size,config.pos_emb_size,feat_num,config.voc_size,pos_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		##__init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1)
@@ -552,5 +581,161 @@ if __name__=="__main__":
 			decay_step,
 			decay_rate,
 			epoch_num)
+
+	elif mode=="train_tone_lstm" or mode=="tone_lstm_predict":
+		desc_file = args.desc_file
+		train_data = args.train_data
+		train_label = args.train_label
+		train_map = args.train_map
+		test_data = args.test_data
+		test_label = args.test_label
+		test_map = args.test_map
+		txt_file = args.txt_file
+		pos_num = -1
+
+		############################################
+		# encode_feature = EncodeFeature(desc_file)
+		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
+		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
+		############################################
+
+		############################################
+		# print("--->collect data according to the data name")
+		# os.system("mkdir lstm_data")
+		# word_index = word2index(txt_file,config.voc_size)
+		# collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
+		# collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
+		############################################
+
+		# parse_txt_file(txt_file,"./lstm_data/txt_token_pos")
+
+		
+		############################################
+		# pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
+		# print("pos_num: "+str(pos_num))
+		# append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")
+		############################################
+		pos_num = 32
+		############################################
+
+		print("--->get the numpy data for training")
+		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
+		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+
+		train_emb = train_feat[:,:,-2].astype(np.int32)
+		train_pos = train_feat[:,:,-1].astype(np.int32)
+		train_feat = train_feat[:,:,0:-2]
+		tmp_shape = train_feat.shape
+		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
+		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
+		train_postone = one_hot_to_index(train_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
+		train_feat = np.delete(train_feat,range(3,20),2)
+
+		test_emb = test_feat[:,:,-2].astype(np.int32)
+		test_pos = test_feat[:,:,-1].astype(np.int32)
+		test_feat = test_feat[:,:,0:-2]
+		tmp_shape = test_feat.shape
+		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
+		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
+		test_postone = one_hot_to_index(test_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
+		test_feat = np.delete(test_feat,range(3,20),2)
+
+		batch_num = int(train_f0.shape[0]/config.batch_size)
+		max_length = train_emb.shape[1]
+		feat_num = train_feat.shape[2]
+		tone_num = 6
+		pretone_num = 7
+		postone_num = 7
+
+		ori_train_f0 = train_f0
+		ori_train_emb = train_emb
+		ori_train_pos = train_pos
+		ori_train_feat = train_feat
+		ori_train_len = train_len
+
+		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_pos = train_pos[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_tone = train_tone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_pretone = train_pretone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_postone = train_postone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_feat = train_feat[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,feat_num))
+		train_len = train_len[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size))
+		
+
+		train_emb = torch.LongTensor(train_emb.tolist())
+		train_pos = torch.LongTensor(train_pos.tolist())
+		train_tone = torch.LongTensor(train_tone.tolist())
+		train_pretone = torch.LongTensor(train_pretone.tolist())
+		train_postone = torch.LongTensor(train_postone.tolist())
+		train_feat = torch.FloatTensor(train_feat.tolist())
+		train_f0 = torch.FloatTensor(train_f0.tolist())
+		train_len = torch.LongTensor(train_len.tolist())
+
+		test_emb = test_emb.reshape((len(test_emb),-1))
+		test_pos = test_pos.reshape((len(test_pos),-1))
+		test_tone = test_tone.reshape((len(test_tone),-1))
+		test_pretone = test_pretone.reshape((len(test_pretone),-1))
+		test_postone = test_postone.reshape((len(test_postone),-1))
+		test_feat = test_feat.reshape((len(test_feat),-1,feat_num))
+		test_f0 = test_f0.reshape((len(test_f0),-1))
+		test_len = test_len
+		# print(np.sum(test_len))
+		test_emb = torch.LongTensor(test_emb.tolist())
+		test_pos = torch.LongTensor(test_pos.tolist())
+		test_tone = torch.LongTensor(test_tone.tolist())
+		test_pretone = torch.LongTensor(test_pretone.tolist())
+		test_postone = torch.LongTensor(test_postone.tolist())
+		test_feat = torch.FloatTensor(test_feat.tolist())
+		test_f0 = torch.FloatTensor(test_f0.tolist())
+		test_len = torch.LongTensor(test_len.tolist())
+
+		if "predict" in mode:
+			print("predicting...")
+			model = torch.load("./my_saved_model")
+
+			#############################################################
+			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
+			# test_pos = torch.LongTensor(ori_train_pos.reshape((len(ori_train_pos),-1)).tolist())
+			# test_feat = torch.FloatTensor(ori_train_feat.reshape((len(ori_train_feat),max_length,feat_num)).tolist())
+			# test_len = torch.LongTensor(ori_train_len.tolist())
+			# test_f0 = torch.FloatTensor(ori_train_f0.reshape((len(ori_train_f0),-1)).tolist())
+			#############################################################
+
+			tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
+			exit()
+		model = tone_lstm.TONE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+			pretone_num,tone_num,postone_num,feat_num,config.voc_size,pos_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		##__init__(self,emb_size,pos_emb_size,tone_emb_size,pretone_num,tone_num,postone_num,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1)
+		learning_rate = config.learning_rate
+		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+		decay_step = config.decay_step
+		decay_rate = config.decay_rate
+		epoch_num = config.epoch_num
+		tone_lstm.Train(
+			train_emb,
+			train_pos,
+			train_pretone,
+			train_tone,
+			train_postone,
+			train_feat,
+			train_f0,
+			train_len,
+			test_emb,
+			test_pos,
+			test_pretone,
+			test_tone,
+			test_postone,
+			test_feat,
+			test_f0,
+			test_len,
+			model,
+			optimizer,
+			learning_rate,
+			decay_step,
+			decay_rate,
+			epoch_num)
+		
 
 
