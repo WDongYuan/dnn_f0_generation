@@ -328,7 +328,20 @@ def parse_txt_file(txt_file,out_file):
 			outf.write("\n")
 	return
 
-def append_pos_to_feature(feat_dir,pos_file):
+def get_pos_dic(pos_file):
+	pos_dic = {}
+	with open(pos_file) as f:
+		cont = f.readlines()
+		for i in range(len(cont)):
+			if i%4!=2:
+				continue
+			pos_l = cont[i].strip().split(" ")
+			pos_l.pop(-1)
+			for pos in pos_l:
+				if pos not in pos_dic:
+					pos_dic[pos] = len(pos_dic)+1
+	return pos_dic
+def append_pos_to_feature(feat_dir,pos_file,pos_dic):
 	##read pos tag
 	data_dic = {}
 
@@ -356,12 +369,12 @@ def append_pos_to_feature(feat_dir,pos_file):
 			# 	for tk in token:
 			# 		print(tk.encode("utf-8")),
 			# 	print("")
-	pos_dic = {}
-	for key,val in data_dic.items():
-		for pos in val:
-			if pos not in pos_dic:
-				pos_dic[pos] = len(pos_dic)+1
-	pos_num = len(pos_dic)+1
+	# pos_dic = {}
+	# for key,val in data_dic.items():
+	# 	for pos in val:
+	# 		if pos not in pos_dic:
+	# 			pos_dic[pos] = len(pos_dic)+1
+	# pos_num = len(pos_dic)+1
 	# print(pos_dic)
 
 	file_list = os.listdir(feat_dir)
@@ -375,7 +388,7 @@ def append_pos_to_feature(feat_dir,pos_file):
 		file_sents = [file_sents[i].strip()+" "+str(pos_dic[pos[i]])+"\n" for i in range(len(file_sents))]
 		with open(feat_dir+"/"+file_name,"w+") as f:
 			f.writelines(file_sents)
-	return pos_num
+	return
 
 def one_hot_to_index(arr,zero_padding=True):
 	new_arr = np.zeros((arr.shape[0],))
@@ -388,6 +401,57 @@ def one_hot_to_index(arr,zero_padding=True):
 				else:
 					new_arr[i] = j
 	return new_arr.astype(np.int32)
+
+def get_syl_dic():
+	cons_l = ["b","d","t","g","j","k","p","q","f","h","sh","s","ch","c","x","zh","z","m","n","l","r","w","y"]
+	vowel_l = ["a","ai","ao","an","ang","o","ou","e","ei","en","eng","er","i","ia","iao","ian","iang","ie",
+	"iu","in","ing","iong","iou","u","ua","uo","uai","uei","ui","uan","uen","uang","ueng","un","ong","v","ue"]
+	c_dic = {}
+	v_dic = {}
+	for cons in cons_l:
+		c_dic[cons] = len(c_dic)+1
+	for vowel in vowel_l:
+		v_dic[vowel] = len(v_dic)+1
+	return c_dic,v_dic
+def decompose_zh_syl(syl_l,c_dic,v_dic):
+	result = []
+	for syl in syl_l:
+		if syl in v_dic:
+			result.append([0,v_dic[syl]])
+		else:
+			p = 0
+			while syl[0:p+1] in c_dic:
+				p += 1
+			# print(syl[0:p]+" "+syl[p:])
+			result.append([c_dic[syl[0:p]],v_dic[syl[p:]]])
+	result = np.array(result).astype(np.int32)
+	return result
+def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic):
+	data = {}
+	with open(map_file) as f:
+		for line in f:
+			data_name,syl = line.strip().split(" ")
+			if data_name not in data:
+				data[data_name] = []
+			data[data_name].append(syl[0:-1])
+	file_list = os.listdir(feat_dir)
+	for data_name in file_list:
+		if "data" not in data_name:
+			continue
+		syl_l = data[data_name]
+		cvl = decompose_zh_syl(syl_l,c_dic,v_dic)
+		feat_cont = None
+		with open(feat_dir+"/"+data_name) as f:
+			feat_cont = f.readlines()
+		feat_cont = [line.strip() for line in feat_cont]
+		assert len(feat_cont)==len(cvl)
+		with open(feat_dir+"/"+data_name,"w+") as f:
+			for i in range(len(feat_cont)):
+				feat_cont[i] = feat_cont[i]+" "+str(cvl[i][0])+" "+str(cvl[i][1])+"\n"
+			f.writelines(feat_cont)
+
+
+
 
 
 

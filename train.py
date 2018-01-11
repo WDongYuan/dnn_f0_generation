@@ -24,6 +24,9 @@ from utils.data_processing import get_shape_mean_std
 from utils.data_processing import parse_txt_file
 from utils.data_processing import append_pos_to_feature
 from utils.data_processing import one_hot_to_index
+from utils.data_processing import get_syl_dic
+from utils.data_processing import append_syl_to_feature
+from utils.data_processing import get_pos_dic
 from model.mlp import MLP
 from model import embedding_lstm
 from model import feature_lstm
@@ -612,34 +615,51 @@ if __name__=="__main__":
 
 		
 		############################################
-		# pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
-		# print("pos_num: "+str(pos_num))
-		# append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")
+		# pos_dic = get_pos_dic("./lstm_data/txt_token_pos")
+		# pos_num = len(pos_dic)+1
+		# append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos",pos_dic)
+		# append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos",pos_dic)
 		############################################
 		pos_num = 32
+		############################################
+
+
+		############################################
+		# consonant_dic,vowel_dic = get_syl_dic()
+		# append_syl_to_feature("./lstm_data/train",train_map,consonant_dic,vowel_dic)
+		# append_syl_to_feature("./lstm_data/test",test_map,consonant_dic,vowel_dic)
+		# cons_num = len(consonant_dic)+1
+		# vowel_num = len(vowel_dic)+1
+		############################################
+		cons_num = 24
+		vowel_num = 38
 		############################################
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
 
-		train_emb = train_feat[:,:,-2].astype(np.int32)
-		train_pos = train_feat[:,:,-1].astype(np.int32)
-		train_feat = train_feat[:,:,0:-2]
+		train_emb = train_feat[:,:,-4].astype(np.int32)
+		train_pos = train_feat[:,:,-3].astype(np.int32)
+		train_cons = train_feat[:,:,-2].astype(np.int32)
+		train_vowel = train_feat[:,:,-1].astype(np.int32)
+		train_feat = train_feat[:,:,0:-4]
 		tmp_shape = train_feat.shape
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_postone = one_hot_to_index(train_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
-		train_feat = np.delete(train_feat,range(3,20),2)
+		# train_feat = np.delete(train_feat,range(3,20),2)
 
-		test_emb = test_feat[:,:,-2].astype(np.int32)
-		test_pos = test_feat[:,:,-1].astype(np.int32)
-		test_feat = test_feat[:,:,0:-2]
+		test_emb = test_feat[:,:,-4].astype(np.int32)
+		test_pos = test_feat[:,:,-3].astype(np.int32)
+		test_cons = test_feat[:,:,-2].astype(np.int32)
+		test_vowel = test_feat[:,:,-1].astype(np.int32)
+		test_feat = test_feat[:,:,0:-4]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_postone = one_hot_to_index(test_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
-		test_feat = np.delete(test_feat,range(3,20),2)
+		# test_feat = np.delete(test_feat,range(3,20),2)
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
@@ -657,6 +677,8 @@ if __name__=="__main__":
 		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_pos = train_pos[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_cons = train_cons[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_vowel = train_vowel[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_tone = train_tone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_pretone = train_pretone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_postone = train_postone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
@@ -666,6 +688,8 @@ if __name__=="__main__":
 
 		train_emb = torch.LongTensor(train_emb.tolist())
 		train_pos = torch.LongTensor(train_pos.tolist())
+		train_cons = torch.LongTensor(train_cons.tolist())
+		train_vowel = torch.LongTensor(train_vowel.tolist())
 		train_tone = torch.LongTensor(train_tone.tolist())
 		train_pretone = torch.LongTensor(train_pretone.tolist())
 		train_postone = torch.LongTensor(train_postone.tolist())
@@ -675,6 +699,8 @@ if __name__=="__main__":
 
 		test_emb = test_emb.reshape((len(test_emb),-1))
 		test_pos = test_pos.reshape((len(test_pos),-1))
+		test_cons = test_cons.reshape((len(test_cons),-1))
+		test_vowel = test_vowel.reshape((len(test_vowel),-1))
 		test_tone = test_tone.reshape((len(test_tone),-1))
 		test_pretone = test_pretone.reshape((len(test_pretone),-1))
 		test_postone = test_postone.reshape((len(test_postone),-1))
@@ -684,6 +710,8 @@ if __name__=="__main__":
 		# print(np.sum(test_len))
 		test_emb = torch.LongTensor(test_emb.tolist())
 		test_pos = torch.LongTensor(test_pos.tolist())
+		test_cons = torch.LongTensor(test_cons.tolist())
+		test_vowel = torch.LongTensor(test_vowel.tolist())
 		test_tone = torch.LongTensor(test_tone.tolist())
 		test_pretone = torch.LongTensor(test_pretone.tolist())
 		test_postone = torch.LongTensor(test_postone.tolist())
@@ -706,7 +734,7 @@ if __name__=="__main__":
 			tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			exit()
 		model = tone_lstm.TONE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			pretone_num,tone_num,postone_num,feat_num,config.voc_size,pos_num,
+			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,config.voc_size,pos_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		##__init__(self,emb_size,pos_emb_size,tone_emb_size,pretone_num,tone_num,postone_num,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1)
 		learning_rate = config.learning_rate
@@ -717,6 +745,8 @@ if __name__=="__main__":
 		tone_lstm.Train(
 			train_emb,
 			train_pos,
+			train_cons,
+			train_vowel,
 			train_pretone,
 			train_tone,
 			train_postone,
@@ -725,6 +755,8 @@ if __name__=="__main__":
 			train_len,
 			test_emb,
 			test_pos,
+			test_cons,
+			test_vowel,
 			test_pretone,
 			test_tone,
 			test_postone,
