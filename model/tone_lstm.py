@@ -120,7 +120,7 @@ class TONE_LSTM(nn.Module):
 		syl = torch.cat((cons,vowel,tone),dim=2)
 		res_h_n, (_,_) = self.res_lstm(syl,(h_0,c_0))
 		res_h = self.res_l1(res_h_n)
-		res_h = self.sigmoid(res_h)
+		res_h = self.non_linear(res_h)
 		res_h = self.res_l2(res_h)
 
 		h = emb_h+res_h
