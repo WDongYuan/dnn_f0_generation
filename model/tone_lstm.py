@@ -63,7 +63,7 @@ class TONE_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size+3*self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -121,7 +121,7 @@ class TONE_LSTM(nn.Module):
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 
-		emb = torch.cat((emb,pos),dim=2)
+		emb = torch.cat((emb,pos,cons,vowel,tone),dim=2)
 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
@@ -132,13 +132,13 @@ class TONE_LSTM(nn.Module):
 		feat_h = self.non_linear(feat_h)
 		feat_h = self.feat_l2(feat_h)
 
-		syl = torch.cat((cons,vowel,tone),dim=2)
-		syl_h_n, (_,_) = self.syl_lstm(syl,(h_0,c_0))
-		syl_h = self.syl_l1(syl_h_n)
-		syl_h = self.tanh(syl_h)
-		syl_h = self.syl_l2(syl_h)
+		# syl = torch.cat((cons,vowel,tone),dim=2)
+		# syl_h_n, (_,_) = self.syl_lstm(syl,(h_0,c_0))
+		# syl_h = self.syl_l1(syl_h_n)
+		# syl_h = self.tanh(syl_h)
+		# syl_h = self.syl_l2(syl_h)
 
-		h = emb_h+feat_h+syl_h
+		h = emb_h+feat_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
