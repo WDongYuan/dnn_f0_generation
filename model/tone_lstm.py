@@ -63,24 +63,32 @@ class TONE_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.res_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
+		self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
 		self.non_linear = nn.ReLU()
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
+
 		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.emb_l1)
 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.emb_l2)
 
-		self.res_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.res_l1)
-		self.res_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.res_l2)
+		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.feat_l1)
+		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.feat_l2)
+
+		self.syl_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.syl_l1)
+		self.syl_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.syl_l2)
 
 		# self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 
@@ -109,25 +117,28 @@ class TONE_LSTM(nn.Module):
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
 
-		feat = torch.cat((emb,pos,feat),dim=2)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
-		emb_h_n, (_,_) = self.emb_lstm(feat,(h_0,c_0))
 
+		emb = torch.cat((emb,pos),dim=2)
+		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.non_linear(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
-		syl = torch.cat((cons,vowel,tone),dim=2)
-		# res = torch.cat((emb,pos),dim=2)
-		res_h_n, (_,_) = self.res_lstm(syl,(h_0,c_0))
-		res_h = self.res_l1(res_h_n)
-		res_h = self.tanh(res_h)
-		res_h = self.res_l2(res_h)
-		res_h = res_h.expand(self.batch_size,self.max_length,10)
+		feat_h_n, (_,_) = self.feat_lstm(feat,(h_0,c_0))
+		feat_h = self.feat_l1(feat_h_n)
+		feat_h = self.non_linear(feat_h)
+		feat_h = self.feat_l2(feat_h)
 
-		h = emb_h+res_h
+		syl = torch.cat((cons,vowel,tone),dim=2)
+		syl_h_n, (_,_) = self.syl_lstm(syl,(h_0,c_0))
+		syl_h = self.syl_l1(syl_h_n)
+		syl_h = self.tanh(syl_h)
+		syl_h = self.syl_l2(syl_h)
+
+		h = emb_h+feat_h+syl_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
