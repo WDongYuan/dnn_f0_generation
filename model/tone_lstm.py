@@ -127,7 +127,7 @@ class TONE_LSTM(nn.Module):
 		res_h = self.res_l2(res_h)
 		res_h = res_h.expand(self.batch_size,self.max_length,10)
 
-		h = emb_h+res
+		h = emb_h+res_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
