@@ -120,15 +120,14 @@ class TONE_LSTM(nn.Module):
 		emb_h = self.emb_l2(emb_h)
 
 		# syl = torch.cat((cons,vowel,tone),dim=2)
-		res = torch.cat((emb,pos),dim=2)
-		res_h_n, (_,_) = self.res_lstm(res,(h_0,c_0))
-		res_h = self.res_l1(res_h_n)
-		res_h = self.non_linear(res_h)
-		res_h = self.res_l2(res_h)
-		res_h = res_h.expand(self.batch_size,self.max_length,10)
+		# res = torch.cat((emb,pos),dim=2)
+		# res_h_n, (_,_) = self.res_lstm(res,(h_0,c_0))
+		# res_h = self.res_l1(res_h_n)
+		# res_h = self.non_linear(res_h)
+		# res_h = self.res_l2(res_h)
+		# res_h = res_h.expand(self.batch_size,self.max_length,10)
 
-		h = emb_h+res_h
-
+		h = emb_h
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
 		# emb_h = emb_h.view(self.batch_size,self.max_length*self.f0_dim)
