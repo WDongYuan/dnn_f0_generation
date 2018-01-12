@@ -77,9 +77,9 @@ class TONE_LSTM(nn.Module):
 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.emb_l2)
 
-		self.res_l1 = nn.Linear(self.lstm_hidden_size*self.direction,50)
+		self.res_l1 = nn.Linear(self.lstm_hidden_size*self.direction,100)
 		self.linear_init(self.res_l1)
-		self.res_l2 = nn.Linear(50,1)
+		self.res_l2 = nn.Linear(100,1)
 		self.linear_init(self.res_l2)
 
 		# self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
