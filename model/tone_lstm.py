@@ -63,9 +63,9 @@ class TONE_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size+self.feat_size, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.feat_size+3*self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.res_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
+		self.res_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
@@ -81,6 +81,8 @@ class TONE_LSTM(nn.Module):
 		self.linear_init(self.res_l1)
 		self.res_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.res_l2)
+
+		# self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -107,7 +109,7 @@ class TONE_LSTM(nn.Module):
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
 
-		emb = torch.cat((emb,pos,feat),dim=2)
+		emb = torch.cat((cons,vowel,tone,feat),dim=2)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
@@ -117,7 +119,8 @@ class TONE_LSTM(nn.Module):
 		emb_h = self.non_linear(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
-		syl = torch.cat((cons,vowel,tone),dim=2)
+		# syl = torch.cat((cons,vowel,tone),dim=2)
+		res = torch.cat((emb,pos),dim=2)
 		res_h_n, (_,_) = self.res_lstm(syl,(h_0,c_0))
 		res_h = self.res_l1(res_h_n)
 		res_h = self.tanh(res_h)
@@ -126,6 +129,10 @@ class TONE_LSTM(nn.Module):
 		h = emb_h+res_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
+		################################################################################
+		# emb_h = emb_h.view(self.batch_size,self.max_length*self.f0_dim)
+		# res_h = res_h.view(self.batch_size,self.max_length*self.f0_dim)
+		################################################################################
 		return h
 
 def Train(train_emb,train_pos,train_cons,train_vowel,train_pretone,train_tone,train_postone,train_feat,train_f0,train_len,
@@ -214,10 +221,28 @@ def Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_p
 			Variable(val_feat.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 		val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	else:
-		result = model(Variable(val_emb),Variable(val_pos),Variable(val_cons),Variable(val_vowel),
+		result,emb_h,res_h = model(Variable(val_emb),Variable(val_pos),Variable(val_cons),Variable(val_vowel),
 			Variable(val_pretone),Variable(val_tone),Variable(val_postone),
-			Variable(val_feat),Variable(val_len)).data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+			Variable(val_feat),Variable(val_len))
+		result = result.data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
 		val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		################################################################################
+		# val_len = val_len.numpy()
+		# emb_h = emb_h.data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		# res_h = res_h.data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		# tmp_emb_h = np.zeros((np.sum(val_len),model.f0_dim))
+		# tmp_res_h = np.zeros((np.sum(val_len),model.f0_dim))
+		# row_count = 0
+		# for i in range(batch_size):
+		# 	tmp_emb = emb_h[i,0:val_len[i],:]
+		# 	tmp_res = res_h[i,0:val_len[i],:]
+		# 	tmp_emb_h[row_count:row_count+val_len[i]] = tmp_emb
+		# 	tmp_res_h[row_count:row_count+val_len[i]] = tmp_res
+		# 	row_count += val_len[i]
+		# np.savetxt("emb_h",tmp_emb_h,delimiter=" ")
+		# np.savetxt("res_h",tmp_res_h,delimiter=" ")
+		exit()
+		################################################################################
 	###########################################################
 	val_len = val_len.numpy()
 	loss = []

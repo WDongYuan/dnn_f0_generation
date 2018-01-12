@@ -721,7 +721,7 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			model = torch.load("./my_saved_model")
+			model = torch.load("my_best_model_.model")
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -731,7 +731,9 @@ if __name__=="__main__":
 			# test_f0 = torch.FloatTensor(ori_train_f0.reshape((len(ori_train_f0),-1)).tolist())
 			#############################################################
 
-			tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
+			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
+			tone_lstm.Validate(model,test_emb,test_pos,test_cons,test_vowel,test_pretone,test_tone,test_postone,
+				test_feat,test_f0,test_len,"./tone_lstm_prediction")
 			exit()
 		model = tone_lstm.TONE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,config.voc_size,pos_num,
