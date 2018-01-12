@@ -63,7 +63,7 @@ class TONE_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.feat_size+3*self.tone_emb_size, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.feat_size+self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.res_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -109,7 +109,7 @@ class TONE_LSTM(nn.Module):
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
 
-		feat = torch.cat((cons,vowel,tone,feat),dim=2)
+		feat = torch.cat((cons+vowel+tone,feat),dim=2)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
