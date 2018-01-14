@@ -473,33 +473,33 @@ if __name__=="__main__":
 		pos_num = -1
 
 		############################################
-		encode_feature = EncodeFeature(desc_file)
+		# encode_feature = EncodeFeature(desc_file)
 
-		# for tup in encode_feature.feature_pos:
-		# 	print(tup[0] ),
-		# 	print(str(tup[1][0])+" "+str(tup[1][1]))
-		# exit()
+		# # for tup in encode_feature.feature_pos:
+		# # 	print(tup[0] ),
+		# # 	print(str(tup[1][0])+" "+str(tup[1][1]))
+		# # exit()
 
-		convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
-		convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
+		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
+		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
 		############################################
 
 		############################################
-		print("--->collect data according to the data name")
-		os.system("mkdir lstm_data")
-		word_index = word2index(txt_file,config.voc_size)
-		collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
-		collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
+		# print("--->collect data according to the data name")
+		# os.system("mkdir lstm_data")
+		# word_index = word2index(txt_file,config.voc_size)
+		# collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
+		# collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
 		############################################
 
 		# parse_txt_file(txt_file,"./lstm_data/txt_token_pos")
 
 		
 		############################################
-		pos_dic = get_pos_dic("./lstm_data/txt_token_pos")
-		pos_num = len(pos_dic)+1
-		append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos",pos_dic)
-		append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos",pos_dic)
+		# pos_dic = get_pos_dic("./lstm_data/txt_token_pos")
+		# pos_num = len(pos_dic)+1
+		# append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos",pos_dic)
+		# append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos",pos_dic)
 		############################################
 		pos_num = 32
 		############################################
