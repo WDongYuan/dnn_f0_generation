@@ -1,6 +1,6 @@
 cuda_flag = True
 update_data = False
-learning_rate = 0.001
+learning_rate = 0.005
 decay_step = 1
 decay_rate = 0.95
 epoch_num = 100
