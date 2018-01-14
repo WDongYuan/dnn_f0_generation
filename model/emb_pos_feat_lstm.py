@@ -435,6 +435,8 @@ def Validate(model,val_emb,val_pos,val_feat,val_f0,val_len,save_prediction=""):
 	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
 
 	if save_prediction!="":
+		print("saving here")
+		print(save_prediction)
 		np.savetxt(save_prediction,prediction,delimiter=" ",fmt="%.3f")
 
 	return loss,result.reshape((val_f0_shape))

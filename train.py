@@ -569,7 +569,6 @@ if __name__=="__main__":
 			if config.dct_flag:
 				dct_lstm.Validate(model,test_emb,test_pos,test_feat,test_f0,test_len,"./dct_emb_pos_feat_prediction")
 			else:
-				print("here")
 				emb_pos_feat_lstm.Validate(model,test_emb,test_pos,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			exit()
 		if config.dct_flag:
