@@ -420,6 +420,14 @@ def Validate(model,val_emb,val_pos,val_feat,val_f0,val_len,save_prediction=""):
 		val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	###########################################################
 	val_len = val_len.numpy()
+
+	shit_arr = []
+	for i in range(len(val_len)):
+		shit_arr.append(val_f0[i,0:val_len[i],:])
+	shit_arr = np.vstack(shit_arr)
+	true_f0 = np.loadtxt("./dev_data_f0_vector_phrase",delimiter=" ")
+	print(np.sqrt(np.square(shit_arr-true_f0).mean(axis=1)).mean())
+
 	loss = []
 
 	prediction = np.zeros((np.sum(val_len),model.f0_dim))
@@ -432,7 +440,6 @@ def Validate(model,val_emb,val_pos,val_feat,val_f0,val_len,save_prediction=""):
 		true_f0[row_count:row_count+val_len[i]] = tmp_f0
 		row_count += val_len[i]
 
-	true_f0 = np.loadtxt("./dev_data_f0_vector_phrase",delimiter=" ")
 	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
 
 	if save_prediction!="":
