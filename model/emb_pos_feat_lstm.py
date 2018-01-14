@@ -432,6 +432,7 @@ def Validate(model,val_emb,val_pos,val_feat,val_f0,val_len,save_prediction=""):
 		true_f0[row_count:row_count+val_len[i]] = tmp_f0
 		row_count += val_len[i]
 
+	true_f0 = np.loadtxt("./dev_data_f0_vector_phrase",delimiter=" ")
 	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
 
 	if save_prediction!="":
