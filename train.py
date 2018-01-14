@@ -507,6 +507,7 @@ if __name__=="__main__":
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+
 		if config.dct_flag:
 			train_f0,train_mean,train_std = get_f0_dct(train_f0,train_len,config.dct_num,noramlize_flag=True)
 			np.savetxt("tmp_mean_std",np.vstack((train_mean,train_std)))
@@ -568,6 +569,7 @@ if __name__=="__main__":
 			if config.dct_flag:
 				dct_lstm.Validate(model,test_emb,test_pos,test_feat,test_f0,test_len,"./dct_emb_pos_feat_prediction")
 			else:
+				print("here")
 				emb_pos_feat_lstm.Validate(model,test_emb,test_pos,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			exit()
 		if config.dct_flag:
