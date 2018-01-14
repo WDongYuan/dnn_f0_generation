@@ -421,12 +421,12 @@ def Validate(model,val_emb,val_pos,val_feat,val_f0,val_len,save_prediction=""):
 	###########################################################
 	val_len = val_len.numpy()
 
-	shit_arr = []
-	for i in range(len(val_len)):
-		shit_arr.append(val_f0[i,0:val_len[i],:])
-	shit_arr = np.vstack(shit_arr)
-	true_f0 = np.loadtxt("./dev_data_f0_vector_phrase",delimiter=" ")
-	print(np.sqrt(np.square(shit_arr-true_f0).mean(axis=1)).mean())
+	# shit_arr = []
+	# for i in range(len(val_len)):
+	# 	shit_arr.append(val_f0[i,0:val_len[i],:])
+	# shit_arr = np.vstack(shit_arr)
+	# true_f0 = np.loadtxt("./dev_data_f0_vector_phrase",delimiter=" ")
+	# print(np.sqrt(np.square(shit_arr-true_f0).mean(axis=1)).mean())
 
 	loss = []
 

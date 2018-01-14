@@ -507,14 +507,14 @@ if __name__=="__main__":
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
-		shit_arr = []
-		for i in range(len(test_len)):
-			shit_arr.append(test_f0[i,0:test_len[i],:])
-		shit_arr = np.vstack(shit_arr)
-		np.savetxt("shit_arr",shit_arr,delimiter=" ",fmt="%.3f")
-		true_f0 = np.loadtxt("./dev_data_f0_vector_phrase",delimiter=" ")
-		print(np.sqrt(np.square(shit_arr-true_f0).mean(axis=1)).mean())
-		exit()
+		# shit_arr = []
+		# for i in range(len(test_len)):
+		# 	shit_arr.append(test_f0[i,0:test_len[i],:])
+		# shit_arr = np.vstack(shit_arr)
+		# np.savetxt("shit_arr",shit_arr,delimiter=" ",fmt="%.3f")
+		# true_f0 = np.loadtxt("./dev_data_f0_vector_phrase",delimiter=" ")
+		# print(np.sqrt(np.square(shit_arr-true_f0).mean(axis=1)).mean())
+		# exit()
 
 		if config.dct_flag:
 			train_f0,train_mean,train_std = get_f0_dct(train_f0,train_len,config.dct_num,noramlize_flag=True)
