@@ -51,6 +51,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.emb_l2)
 		self.tanh = nn.Tanh()
+		self.sigmoid = nn.Sigmoid()
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -79,7 +80,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 
 		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.non_linear(emb_h)
+		emb_h = self.sigmoid(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
 		h = emb_h
