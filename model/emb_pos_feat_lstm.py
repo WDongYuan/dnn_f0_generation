@@ -50,6 +50,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.linear_init(self.emb_l1)
 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.emb_l2)
+		self.tanh = nn.Tanh()
 
 
 	def linear_init(self,layer,lower=-1,upper=1):

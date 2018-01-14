@@ -27,6 +27,8 @@ from utils.data_processing import one_hot_to_index
 from utils.data_processing import get_syl_dic
 from utils.data_processing import append_syl_to_feature
 from utils.data_processing import get_pos_dic
+from utils.data_processing import get_f0_dct
+from utils.data_processing import normalize
 from model.mlp import MLP
 from model import embedding_lstm
 from model import feature_lstm
@@ -36,6 +38,7 @@ from model import classify_mean
 from model import emb_feat_lstm
 from model import emb_pos_feat_lstm
 from model import tone_lstm
+from model import dct_lstm
 from utils import config
 from utils import predict_mean_tool
 cuda_flag = config.cuda_flag
@@ -125,7 +128,6 @@ if __name__=="__main__":
 			" --test_data ./data/dev/dct_0"+
 			" --test_label ./data/dev_data_f0_vector")
 		print("python train.py"+
-			" --mode train_lstm"+
 			" --desc_file ./feature_desc"+
 			" --txt_file ../../txt.done.data"+
 			" --train_data ./data/train/dct_0"+
@@ -133,9 +135,9 @@ if __name__=="__main__":
 			" --train_map ./data/train_syllable_map"+
 			" --test_data ./data/dev/dct_0"+
 			" --test_label ./data/dev_data_f0_vector"+
-			" --test_map ./data/dev_syllable_map")
+			" --test_map ./data/dev_syllable_map"+
+			" --mode train_lstm")
 		print("python train.py"+
-			" --mode train_emb_lstm/emb_lstm_predict"+
 			" --desc_file ../mandarine/gen_f0/train_dev_data_vector/feature_desc_vector"+
 			" --txt_file ./data/txt.done.data-all"+
 			" --train_data ../mandarine/gen_f0/train_dev_data_vector/train_data/dct_0"+
@@ -143,7 +145,8 @@ if __name__=="__main__":
 			" --train_map ../mandarine/gen_f0/train_dev_data_vector/train_data/syllable_map"+
 			" --test_data ../mandarine/gen_f0/train_dev_data_vector/dev_data/dct_0"+
 			" --test_label ../mandarine/gen_f0/train_dev_data_vector/dev_data_f0_vector"+
-			" --test_map ../mandarine/gen_f0/train_dev_data_vector/dev_data/syllable_map")
+			" --test_map ../mandarine/gen_f0/train_dev_data_vector/dev_data/syllable_map"+
+			" --mode train_emb_lstm/emb_lstm_predict")
 		
 	elif mode=="train_mlp":
 		desc_file = args.desc_file
@@ -472,10 +475,10 @@ if __name__=="__main__":
 		############################################
 		# encode_feature = EncodeFeature(desc_file)
 
-		# for tup in encode_feature.feature_pos:
-		# 	print(tup[0] ),
-		# 	print(str(tup[1][0])+" "+str(tup[1][1]))
-		# exit()
+		# # for tup in encode_feature.feature_pos:
+		# # 	print(tup[0] ),
+		# # 	print(str(tup[1][0])+" "+str(tup[1][1]))
+		# # exit()
 
 		# convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
 		# convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
@@ -493,9 +496,10 @@ if __name__=="__main__":
 
 		
 		############################################
-		# pos_num = append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos")
-		# print("pos_num: "+str(pos_num))
-		# append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos")
+		# pos_dic = get_pos_dic("./lstm_data/txt_token_pos")
+		# pos_num = len(pos_dic)+1
+		# append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos",pos_dic)
+		# append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos",pos_dic)
 		############################################
 		pos_num = 32
 		############################################
@@ -503,6 +507,10 @@ if __name__=="__main__":
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+		if config.dct_flag:
+			train_f0,train_mean,train_std = get_f0_dct(train_f0,train_len,config.dct_num,noramlize_flag=True)
+			np.savetxt("tmp_mean_std",np.vstack((train_mean,train_std)))
+			test_f0,_,_ = get_f0_dct(test_f0,test_len,config.dct_num,noramlize_flag=True)
 
 		train_emb = train_feat[:,:,-2].astype(np.int32)
 		train_pos = train_feat[:,:,-1].astype(np.int32)
@@ -548,7 +556,7 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			model = torch.load("./my_saved_model")
+			model = torch.load("./my_best_model_.model")
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -557,18 +565,25 @@ if __name__=="__main__":
 			# test_len = torch.LongTensor(ori_train_len.tolist())
 			# test_f0 = torch.FloatTensor(ori_train_f0.reshape((len(ori_train_f0),-1)).tolist())
 			#############################################################
-
-			emb_pos_feat_lstm.Validate(model,test_emb,test_pos,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
+			if config.dct_flag:
+				dct_lstm.Validate(model,test_emb,test_pos,test_feat,test_f0,test_len,"./dct_emb_pos_feat_prediction")
+			else:
+				emb_pos_feat_lstm.Validate(model,test_emb,test_pos,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			exit()
-		model = emb_pos_feat_lstm.EMB_POS_FEAT_LSTM(config.emb_size,config.pos_emb_size,feat_num,config.voc_size,pos_num,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		if config.dct_flag:
+			model = dct_lstm.DCT_LSTM(config.emb_size,config.pos_emb_size,feat_num,config.voc_size,pos_num,
+				config.lstm_hidden_size,config.dct_num,config.linear_h1)
+		else:
+			model = emb_pos_feat_lstm.EMB_POS_FEAT_LSTM(config.emb_size,config.pos_emb_size,feat_num,config.voc_size,pos_num,
+				config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		##__init__(self,emb_size,pos_emb_size,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1)
 		learning_rate = config.learning_rate
 		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 		decay_step = config.decay_step
 		decay_rate = config.decay_rate
 		epoch_num = config.epoch_num
-		emb_pos_feat_lstm.Train(
+		if config.dct_flag:
+			dct_lstm.Train(
 			train_emb,
 			train_pos,
 			train_feat,
@@ -585,6 +600,24 @@ if __name__=="__main__":
 			decay_step,
 			decay_rate,
 			epoch_num)
+		else:
+			emb_pos_feat_lstm.Train(
+				train_emb,
+				train_pos,
+				train_feat,
+				train_f0,
+				train_len,
+				test_emb,
+				test_pos,
+				test_feat,
+				test_f0,
+				test_len,
+				model,
+				optimizer,
+				learning_rate,
+				decay_step,
+				decay_rate,
+				epoch_num)
 
 	elif mode=="train_tone_lstm" or mode=="tone_lstm_predict":
 		desc_file = args.desc_file

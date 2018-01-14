@@ -4,6 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
 import numpy as np
+from scipy.fftpack import idct, dct
 # from stanfordcorenlp import StanfordCoreNLP
 class EncodeFeature():
 	# syl_numphones 0 0
@@ -94,13 +95,26 @@ class EncodeFeature():
 		new_feat = " ".join(new_feat)
 		return new_feat
 
-def convert_feature(feat_file,f0_file,encode_feature,out_file):
-	with open(feat_file) as featf, open(f0_file) as f0f, open(out_file,"w+") as outf:
+def convert_feature(feat_file,f0_file,encode_feature,out_file,normalize_flag = False):
+	f0 = np.loadtxt(f0_file,delimiter=" ")
+	f0_mean = None
+	f0_std = None
+	if normalize_flag:
+		f0_mean = f0.mean(axis=0)
+		f0_std = f0.std(axis=0)
+		f0 = (f0-f0_mean)/(f0_std+0.000001)
+	with open(feat_file) as featf, open(out_file,"w+") as outf:
 		feat = featf.readlines()
-		f0 = f0f.readlines()
 		assert len(feat)==len(f0)
 		for i in range(len(f0)):
-			outf.write(f0[i].strip()+" "+encode_feature.encode(feat[i].strip())+"\n")
+			outf.write(" ".join(f0[i].astype(np.str).tolist())+" "+encode_feature.encode(feat[i].strip())+"\n")
+	return f0_mean,f0_std
+	# with open(feat_file) as featf, open(f0_file) as f0f, open(out_file,"w+") as outf:
+	# 	feat = featf.readlines()
+	# 	f0 = f0f.readlines()
+	# 	assert len(feat)==len(f0)
+	# 	for i in range(len(f0)):
+	# 		outf.write(f0[i].strip()+" "+encode_feature.encode(feat[i].strip())+"\n")
 
 	##Normalize not one hot vector
 	# not_one_hot = np.array(encode_feature.not_one_hot_flag)+10
@@ -298,6 +312,25 @@ def get_f0_feature_list(data_dir,feat_list):
 		f0_arr[i,0:len(f0[i]),:] = f0[i]
 	return f0_arr,feature_arr,length_arr.astype(np.int64)
 
+def get_f0_dct(utt_f0,utt_len,dct_num,noramlize_flag=False):
+	utt_dct = np.zeros((utt_f0.shape[0],dct_num))
+	# print(utt_f0.shape)
+	# print(utt_dct.shape)
+	for utt_i in range(len(utt_f0)):
+		tmp_f0 = utt_f0[utt_i,0:utt_len[utt_i],:].flatten()
+		tmp_dct = dct(tmp_f0)
+
+		# print(tmp_dct.shape)
+		# print(utt_dct.shape)
+		utt_dct[utt_i,:] = tmp_dct[0:dct_num]
+	dct_mean = None
+	dct_std = None
+	if noramlize_flag:
+		dct_mean = utt_dct.mean(axis=0)
+		dct_std = utt_dct.std(axis=0)
+		utt_dct = (utt_dct-dct_mean)/(dct_std+0.00000001)
+	return utt_dct,dct_mean,dct_std
+
 
 def get_shape_mean_std(f0_arr,len_arr):
 	shape_arr = np.zeros(f0_arr.shape)
@@ -449,6 +482,10 @@ def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic):
 			for i in range(len(feat_cont)):
 				feat_cont[i] = feat_cont[i]+" "+str(cvl[i][0])+" "+str(cvl[i][1])+"\n"
 			f.writelines(feat_cont)
+def normalize(arr):
+	arr_mean = arr.mean(axis=0)
+	arr_std = arr.std(axis=0)
+	return (arr-arr_mean)/(0.0000001+arr_std),arr_mean,arr_std
 
 
 
