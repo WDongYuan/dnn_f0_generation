@@ -391,7 +391,7 @@ def Train(train_emb,train_pos,train_feat,train_f0,train_len,val_emb,val_pos,val_
 			val_loss,result = Validate(model,val_emb,val_pos,val_feat,val_f0,val_len)
 			print("val loss: "+str(val_loss))
 			if val_loss<min_loss:
-				torch.save(model,"./my_best_model_.model")
+				torch.save(model,"./my_best_model.model")
 				min_loss = val_loss
 		if (epoch+1)%decay_step==0:
 			learning_rate *= decay_rate

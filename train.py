@@ -556,7 +556,7 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			model = torch.load("./my_best_model_.model")
+			model = torch.load("./my_best_model.model")
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
