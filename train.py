@@ -511,7 +511,7 @@ if __name__=="__main__":
 		for i in range(len(test_len)):
 			shit_arr.append(test_f0[i,0:test_len[i],:])
 		shit_arr = np.vstack(shit_arr)
-		np.savetxt("shit_arr",shit_arr,delimiter=" ")
+		np.savetxt("shit_arr",shit_arr,delimiter=" ",fmt="%.3f")
 		true_f0 = np.loadtxt("./dev_data_f0_vector_phrase",delimiter=" ")
 		print(np.sqrt(np.square(shit_arr-true_f0).mean(axis=1)).mean())
 		exit()
