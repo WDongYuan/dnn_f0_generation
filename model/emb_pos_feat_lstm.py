@@ -41,7 +41,7 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size+self.feat_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
@@ -73,14 +73,14 @@ class EMB_POS_FEAT_LSTM(nn.Module):
 		emb = self.embed(sents)
 		pos = self.pos_embed(pos)
 
-		# emb = torch.cat((emb,pos,feat),dim=2)
+		emb = torch.cat((emb,pos,feat),dim=2)
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 
 		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.tanh(emb_h)
+		emb_h = self.non_linear(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
 		h = emb_h
