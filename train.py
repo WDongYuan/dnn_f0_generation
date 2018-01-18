@@ -55,6 +55,7 @@ if cuda_flag:
 utils.data_processing.cuda_flag = cuda_flag
 emb_pos_feat_lstm.cuda_flag = cuda_flag
 tone_lstm.cuda_flag = cuda_flag
+phrase_lstm.cuda_flag = cuda_flag
 
 def Validate(model,val_data,val_label,dct_flag=False):
 	model.eval()
