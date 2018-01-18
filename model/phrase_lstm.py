@@ -43,8 +43,8 @@ class PHRASE_LSTM(nn.Module):
 		self.batch_size = -1
 		self.max_length = -1
 
-		self.phrase_hidden_size = 100
-		self.phrase_linear_size = 50
+		self.phrase_hidden_size = self.lstm_hidden_size
+		self.phrase_linear_size = self.linear_h1
 
 		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
@@ -71,7 +71,7 @@ class PHRASE_LSTM(nn.Module):
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.phrase_lstm = nn.LSTM(self.phrase_num+self.tone_emb_size, self.phrase_hidden_size,
+		self.phrase_lstm = nn.LSTM(self.phrase_num+self.tone_emb_size+2*tone_emb_size, self.phrase_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -147,13 +147,13 @@ class PHRASE_LSTM(nn.Module):
 		feat = torch.cat((emb,pos,feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
-		feat_h = self.sigmoid(feat_h)
+		feat_h = self.tanh(feat_h)
 		feat_h = self.feat_l2(feat_h)
 
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph = torch.cat((phrase,tone),dim=2)
+		ph = torch.cat((phrase,tone,cons,vowel),dim=2)
 		ph_h_n, (_,_) = self.phrase_lstm(ph,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
