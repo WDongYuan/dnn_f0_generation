@@ -58,9 +58,9 @@ class PHRASE_LSTM(nn.Module):
 		self.postone_embed = nn.Embedding(self.postone_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.postone_embed.weight,a=-0.01,b=0.01)
 
-		self.cons_embed = nn.Embedding(self.cons_num, self.tone_emb_size,padding_idx=0)
+		self.cons_embed = nn.Embedding(self.cons_num, self.emb_size,padding_idx=0)
 		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
-		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
+		self.vowel_embed = nn.Embedding(self.vowel_num, self.emb_size,padding_idx=0)
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
@@ -71,7 +71,7 @@ class PHRASE_LSTM(nn.Module):
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.phrase_lstm = nn.LSTM(self.phrase_num+self.tone_emb_size+2*tone_emb_size, self.phrase_hidden_size,
+		self.phrase_lstm = nn.LSTM(self.phrase_num+self.tone_emb_size+2*emb_size, self.phrase_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
