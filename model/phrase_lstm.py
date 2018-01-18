@@ -78,6 +78,7 @@ class PHRASE_LSTM(nn.Module):
 
 
 		self.non_linear = nn.ReLU()
+		self.relu = nn.ReLU()
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
 
@@ -255,7 +256,7 @@ def Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_p
 			Variable(val_feat.cuda(async=True)),Variable(val_phrase.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 		val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	else:
-		result,emb_h,res_h = model(Variable(val_emb),Variable(val_pos),Variable(val_cons),Variable(val_vowel),
+		result = model(Variable(val_emb),Variable(val_pos),Variable(val_cons),Variable(val_vowel),
 			Variable(val_pretone),Variable(val_tone),Variable(val_postone),
 			Variable(val_feat),Variable(val_phrase),Variable(val_len))
 		result = result.data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
