@@ -43,8 +43,8 @@ class PHRASE_LSTM(nn.Module):
 		self.batch_size = -1
 		self.max_length = -1
 
-		self.phrase_hidden_size = 50
-		self.phrase_linear_size = 20
+		self.phrase_hidden_size = 100
+		self.phrase_linear_size = 50
 
 		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
 		init.uniform(self.embed.weight,a=-0.01,b=0.01)
