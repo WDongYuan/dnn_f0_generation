@@ -487,6 +487,50 @@ def normalize(arr):
 	arr_std = arr.std(axis=0)
 	return (arr-arr_mean)/(0.0000001+arr_std),arr_mean,arr_std
 
+def append_phrase_to_feature(feat_dir,phrase_syl_dir):
+	file_list = os.listdir(feat_dir)
+	for file in file_list:
+		if "data" not in file:
+			continue
+		with open(phrase_syl_dir+"/"+file) as f:
+			utt = f.readlines()
+			for i in range(len(utt)):
+				utt[i] = utt[i].strip().split(" ")
+
+			phrase_feat = []
+			for i in range(len(utt)):
+				phrase = utt[i]
+				for j in range(len(phrase)):
+					word_feat = []
+					#phrase position in utt
+					word_feat.append(i)
+
+					#phrase percent in utt
+					word_feat.append(float(i)/len(utt))
+
+					#phrase number in utt
+					word_feat.append(len(utt))
+
+					#syllable position in phrase
+					word_feat.append(j)
+
+					#syllable percent in phrase
+					word_feat.append(float(j)/len(phrase))
+
+					#syllable number in phrase
+					word_feat.append(len(phrase))
+
+					phrase_feat.append(word_feat)
+			phrase_feat = np.array(phrase_feat)
+
+			ori_feat = None
+			with open(feat_dir+"/"+file) as featf:
+				ori_feat = featf.readlines()
+				assert len(phrase_feat)==len(ori_feat)
+			with open(feat_dir+"/"+file,"w+") as outf:
+				for i in range(len(ori_feat)):
+					outf.write(ori_feat[i].strip()+" "+" ".join(phrase_feat[i].astype(np.str).tolist())+"\n")
+
 
 
 
