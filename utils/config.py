@@ -5,7 +5,7 @@ dct_flag = False
 
 learning_rate = 0.001
 decay_step = 1
-decay_rate = 0.97
+decay_rate = 0.96
 epoch_num = 100
 voc_size = 2500
 batch_size = 20
