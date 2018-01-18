@@ -14,8 +14,8 @@ import time
 ###########################################################
 #GPU OPTION
 ###########################################################
-# if cuda_flag:
-# 	import torch.backends.cudnn as cudnn
+if cuda_flag:
+	import torch.backends.cudnn as cudnn
 ###########################################################
 
 class PHRASE_LSTM(nn.Module):
