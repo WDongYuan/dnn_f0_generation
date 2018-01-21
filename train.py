@@ -912,7 +912,7 @@ if __name__=="__main__":
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_postone = one_hot_to_index(train_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
-		# train_feat = np.delete(train_feat,range(3,20),2)
+		train_feat = np.delete(train_feat,range(35,39),2)
 
 		test_emb = test_feat[:,:,-10].astype(np.int32)
 		test_pos = test_feat[:,:,-9].astype(np.int32)
@@ -924,7 +924,7 @@ if __name__=="__main__":
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_postone = one_hot_to_index(test_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
-		# test_feat = np.delete(test_feat,range(3,20),2)
+		test_feat = np.delete(test_feat,range(35,39),2)
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
