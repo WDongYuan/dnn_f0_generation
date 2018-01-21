@@ -14,7 +14,7 @@ pos_emb_size = 10
 tone_emb_size = 10
 lstm_hidden_size = 100
 f0_dim = 10
-linear_h1 = 50
+linear_h1 = 100
 
 
 #################
