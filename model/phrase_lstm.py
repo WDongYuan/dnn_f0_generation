@@ -271,7 +271,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		h_0 = self.init_hidden()
 
 		emb = torch.cat((tone,cons,vowel),dim=2)
-		emb_h_n, (_,_) = self.emb_lstm(feat,(h_0,c_0))
+		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.relu(emb_h)
 		emb_h = self.emb_l2(emb_h)
