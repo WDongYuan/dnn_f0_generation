@@ -245,8 +245,10 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		self.mlp_l1 = nn.Linear(self.concat_length,self.linear_h1)
 		self.linear_init(self.mlp_l1)
-		self.mlp_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.mlp_l2 = nn.Linear(self.linear_h1,100)
 		self.linear_init(self.mlp_l2)
+		self.mlp_l3 = nn.Linear(100,self.f0_dim)
+		self.linear_init(self.mlp_l3)
 
 
 
@@ -324,6 +326,8 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		mlp_h = self.mlp_l1(emb)
 		mlp_h = self.relu(mlp_h)
 		mlp_h = self.mlp_l2(mlp_h)
+		mlp_h = self.relu(mlp_h)
+		mlp_h = self.mlp_l3(mlp_h)
 		h = mlp_h
 
 
