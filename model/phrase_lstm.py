@@ -229,7 +229,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# CONV
 		self.dropout = nn.Dropout(0.5)
 		self.concat_length = self.emb_size+self.feat_size+self.pos_emb_size
-		self.out_channel = 100
+		self.out_channel = 50
 		# self.conv1 = nn.Sequential(
 		# 	nn.Conv1d(self.concat_length,self.out_channel,3,stride=1,padding=1),
 		# 	self.dropout,
@@ -239,6 +239,12 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# 	nn.Tanh())
 		self.conv1 = nn.Sequential(
 			nn.Conv1d(self.concat_length,self.out_channel,3,stride=1,padding=1),
+			self.dropout,
+			nn.Tanh(),
+			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
+			self.dropout,
+			nn.Tanh(),
+			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
 			self.dropout,
 			nn.Tanh())
 

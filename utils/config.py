@@ -152,3 +152,17 @@ linear_h1 = 100
 # f0_dim = 10
 # linear_h1 = 200
 #26.7
+
+##cnn mean
+# learning_rate = 0.0005
+# decay_step = 1
+# decay_rate = 0.95
+# epoch_num = 100
+# voc_size = 2500
+# batch_size = 20
+# emb_size = 10
+# pos_emb_size = 10
+# tone_emb_size = 10
+# lstm_hidden_size = 100
+# f0_dim = 10
+# linear_h1 = 100
