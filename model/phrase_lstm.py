@@ -268,7 +268,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 	def forward(self,sents,pos,cons,vowel,pretone,tone,postone,feat,phrase,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
-		# pos = self.pos_embed(pos)
+		pos = self.pos_embed(pos)
 		tone = self.tone_embed(tone)
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
