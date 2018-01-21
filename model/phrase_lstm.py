@@ -232,11 +232,9 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.out_channel = 50
 		self.conv1 = nn.Sequential(
 			nn.Conv1d(self.concat_length,self.out_channel,3,stride=1,padding=1),
-			nn.MaxPool1d(3, stride=1, padding=1),
 			self.dropout,
 			nn.Tanh(),
 			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
-			nn.MaxPool1d(3, stride=1, padding=1),
 			self.dropout,
 			nn.Tanh())
 
