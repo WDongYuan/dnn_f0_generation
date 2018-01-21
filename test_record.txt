@@ -1,0 +1,7 @@
+mean:
+emb: 23.27
+feat: 20.7
+syllable: 21.6
+all: 19.42
+
+best mean: 18.3535347053
