@@ -218,7 +218,9 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size+self.feat_size, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
@@ -231,6 +233,11 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.linear_init(self.emb_l1)
 		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.emb_l2)
+
+		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.feat_l1)
+		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.feat_l2)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -270,12 +277,18 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 
-		emb = torch.cat((emb,feat),dim=2)
+		# emb = torch.cat((emb,feat),dim=2)
 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.relu(emb_h)
+		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
-		h = emb_h
+
+		feat_h_n, (_,_) = self.feat_lstm(feat,(h_0,c_0))
+		feat_h = self.feat_l1(feat_h_n)
+		feat_h = self.relu(feat_h)
+		feat_h = self.feat_l2(feat_h)
+
+		h = emb_h+feat_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
