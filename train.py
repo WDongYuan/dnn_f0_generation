@@ -895,6 +895,10 @@ if __name__=="__main__":
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
 
+		#if predict mean
+		train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+
 
 		train_emb = train_feat[:,:,-10].astype(np.int32)
 		train_pos = train_feat[:,:,-9].astype(np.int32)
@@ -987,7 +991,8 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			model = torch.load("my_best_model_.model")
+			# model = torch.load("gpu_my_best_model_.model")
+			model = torch.load('./gpu_my_best_model.model', map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -998,13 +1003,19 @@ if __name__=="__main__":
 			#############################################################
 
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
-			tone_lstm.Validate(model,test_emb,test_pos,test_cons,test_vowel,test_pretone,test_tone,test_postone,
-				test_feat,test_f0,test_len,"./tone_lstm_prediction")
+			phrase_lstm.Validate(model,test_emb,test_pos,test_cons,test_vowel,test_pretone,test_tone,test_postone,
+				test_feat,test_phrase,test_f0,test_len,"./phrase_lstm_prediction")
 			exit()
-		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		#############################################################
+		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		#############################################################
+		##if predict mean
+		model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
-		##__init__(self,emb_size,pos_emb_size,tone_emb_size,pretone_num,tone_num,postone_num,feat_size,voc_size,pos_num,lstm_hidden_size,f0_dim,linear_h1)
+		#############################################################
 		learning_rate = config.learning_rate
 		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 		decay_step = config.decay_step
