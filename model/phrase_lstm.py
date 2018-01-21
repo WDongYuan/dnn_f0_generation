@@ -209,9 +209,9 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.postone_embed = nn.Embedding(self.postone_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.postone_embed.weight,a=-0.01,b=0.01)
 
-		self.cons_embed = nn.Embedding(self.cons_num, self.emb_size,padding_idx=0)
+		self.cons_embed = nn.Embedding(self.cons_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
-		self.vowel_embed = nn.Embedding(self.vowel_num, self.emb_size,padding_idx=0)
+		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
