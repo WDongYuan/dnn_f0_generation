@@ -227,21 +227,26 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 
 		# CONV
-		self.dropout = nn.Dropout(0.5)
+		# self.dropout = nn.Dropout(0.5)
 		self.concat_length = self.emb_size+self.feat_size+self.pos_emb_size
-		self.out_channel = 50
-		self.conv1 = nn.Sequential(
-			nn.Conv1d(self.concat_length,self.out_channel,3,stride=1,padding=1),
-			self.dropout,
-			nn.Tanh(),
-			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
-			self.dropout,
-			nn.Tanh())
+		# self.out_channel = 50
+		# self.conv1 = nn.Sequential(
+		# 	nn.Conv1d(self.concat_length,self.out_channel,3,stride=1,padding=1),
+		# 	self.dropout,
+		# 	nn.Tanh(),
+		# 	nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
+		# 	self.dropout,
+		# 	nn.Tanh())
 
 		self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
 		self.linear_init(self.cnn_l1)
 		self.cnn_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.cnn_l2)
+
+		self.mlp_l1 = nn.Linear(self.concat_length,self.linear_h1)
+		self.linear_init(self.mlp_l1)
+		self.mlp_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.mlp_l2)
 
 
 
@@ -310,11 +315,16 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# ph_h = self.relu(ph_h)
 		# ph_h = self.phrase_l2(ph_h)
 
-		cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
-		cnn_h = self.cnn_l1(cnn_h)
-		cnn_h = self.relu(cnn_h)
-		cnn_h = self.cnn_l2(cnn_h)
-		h = cnn_h
+		# cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
+		# cnn_h = self.cnn_l1(cnn_h)
+		# cnn_h = self.relu(cnn_h)
+		# cnn_h = self.cnn_l2(cnn_h)
+
+
+		mlp_h = self.mlp_l1(emb)
+		mlp_h = self.relu(mlp_h)
+		mlp_h = self.mlp_l2(mlp_h)
+		h = mlp_h
 
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
