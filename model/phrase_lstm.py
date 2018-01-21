@@ -238,10 +238,10 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# 	self.dropout,
 		# 	nn.Tanh())
 
-		self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
-		self.linear_init(self.cnn_l1)
-		self.cnn_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.cnn_l2)
+		# self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
+		# self.linear_init(self.cnn_l1)
+		# self.cnn_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		# self.linear_init(self.cnn_l2)
 
 		self.mlp_l1 = nn.Linear(self.concat_length,self.linear_h1)
 		self.linear_init(self.mlp_l1)
