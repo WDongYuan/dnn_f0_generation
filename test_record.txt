@@ -4,5 +4,7 @@ feat: 20.7
 syllable: 21.6
 all: 19.42
 pos+emb+feat: 19.1
+pos+emb+feat cnn: 19.0
+phrase level 2lstm: 18.4
 
 best mean: 18.3535347053
