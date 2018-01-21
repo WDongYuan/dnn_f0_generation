@@ -222,8 +222,24 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.direction = 2 if self.bidirectional_flag else 1
 		self.emb_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.phrase_lstm = nn.LSTM(self.phrase_num+self.tone_emb_size, self.lstm_hidden_size,
+		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+
+		# CONV
+		self.concat_length = self.emb_size+self.feat_size+self.pos_emb_size
+		self.out_channel = 20
+		self.conv1 = nn.Sequential(
+			nn.Conv1d(self.concat_length,self.out_channel,3,stride=1,padding=1),
+			nn.Tanh(),
+			nn.Conv1d(self.concat_length,self.out_channel,3,stride=1,padding=1),
+			nn.Tanh())
+
+		self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
+		self.linear_init(self.cnn_l1)
+		self.cnn_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.cnn_l2)
+
 
 
 		self.non_linear = nn.ReLU()
@@ -280,18 +296,22 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		h_0 = self.init_hidden()
 
 		emb = torch.cat((emb,feat,pos),dim=2)
-		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
-		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.tanh(emb_h)
-		emb_h = self.emb_l2(emb_h)
+		# emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
+		# emb_h = self.emb_l1(emb_h_n)
+		# emb_h = self.tanh(emb_h)
+		# emb_h = self.emb_l2(emb_h)
 
-		ph = torch.cat((phrase,tone+cons+vowel),dim=2)
-		ph_h_n, (_,_) = self.phrase_lstm(ph,(h_0,c_0))
-		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.relu(ph_h)
-		ph_h = self.phrase_l2(ph_h)
+		# ph = torch.cat((phrase,tone,cons,vowel),dim=2)
+		# ph_h_n, (_,_) = self.phrase_lstm(ph,(h_0,c_0))
+		# ph_h = self.phrase_l1(ph_h_n)
+		# ph_h = self.relu(ph_h)
+		# ph_h = self.phrase_l2(ph_h)
 
-		h = emb_h+ph_h
+		cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
+		cnn_h = self.cnn_l1(cnn_h)
+		cnn_h = self.tanh(cnn_h)
+		cnn_h = self.cnn_l2(cnn_h)
+		h = cnn_h
 
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
