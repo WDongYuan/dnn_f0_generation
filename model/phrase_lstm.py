@@ -309,7 +309,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
 		cnn_h = self.cnn_l1(cnn_h)
-		cnn_h = self.tanh(cnn_h)
+		cnn_h = self.relu(cnn_h)
 		cnn_h = self.cnn_l2(cnn_h)
 		h = cnn_h
 
