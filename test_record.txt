@@ -25,4 +25,31 @@ ABS ERROR:
 [ 26.49437348  24.69308126  23.49535384  23.20234792  23.56589608
   24.12977007  24.50950642  25.11539279  26.37580649  27.7337459 ]
 
-first value:  24.1692460403
+one direction first value:  24.1692460403
+learning_rate = 0.001
+decay_step = 1
+decay_rate = 0.97
+epoch_num = 100
+voc_size = 2500
+batch_size = 20
+emb_size = 10
+pos_emb_size = 10
+tone_emb_size = 10
+lstm_hidden_size = 100
+f0_dim = 10
+linear_h1 = 100
+
+
+last value 26.0
+learning_rate = 0.005
+decay_step = 1
+decay_rate = 0.9
+epoch_num = 100
+voc_size = 2500
+batch_size = 20
+emb_size = 10
+pos_emb_size = 10
+tone_emb_size = 10
+lstm_hidden_size = 100
+f0_dim = 10
+linear_h1 = 100
