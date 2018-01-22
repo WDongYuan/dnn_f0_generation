@@ -50,6 +50,7 @@ class EncodeFeature():
 			cont = f.readlines()
 			cont = [line.strip()[1:-1] for line in cont]
 			cont.pop(0)
+			#delete the word.name feature
 			cont.pop(0)
 			cont.pop(-1)
 		feat_pos = 0
@@ -66,6 +67,12 @@ class EncodeFeature():
 				self.encode_dic.append(tmp_dic)
 				self.feature_pos.append([feat[0],[feat_pos,feat_pos+len(tmp_dic)-1]])
 				feat_pos += len(tmp_dic)
+				
+		print("feature position:")
+		for tup in self.feature_pos:
+			print(tup[0]+":"),
+			print(tup[1][0]),
+			print(tup[1][1])
 
 		self.not_one_hot_flag = []
 		count = 0

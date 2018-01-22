@@ -896,6 +896,23 @@ if __name__=="__main__":
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
 
 		############################################
+		train_pre_f0 = train_f0[:,:,-1].reshape((train_f0.shape[0],train_f0.shape[1],1))
+		train_pre_f0[:,1:,:] = train_pre_f0[:,0:-1,:]
+		train_pre_f0[:,0,0] = 0
+		train_post_f0 = train_f0[:,:,0].reshape((train_f0.shape[0],train_f0.shape[1],1))
+		train_post_f0[:,0:-1,:] = train_post_f0[:,1:,:]
+		train_post_f0[:,-1,0] = 0
+		train_f0 = np.concatenate((train_pre_f0,train_f0,train_post_f0),axis=2)
+
+		test_pre_f0 = test_f0[:,:,-1].reshape((test_f0.shape[0],test_f0.shape[1],1))
+		test_pre_f0[:,1:,:] = test_pre_f0[:,0:-1,:]
+		test_pre_f0[:,0,0] = 0
+		test_post_f0 = test_f0[:,:,0].reshape((test_f0.shape[0],test_f0.shape[1],1))
+		test_post_f0[:,0:-1,:] = test_post_f0[:,1:,:]
+		test_post_f0[:,-1,0] = 0
+		test_f0 = np.concatenate((test_pre_f0,test_f0,test_post_f0),axis=2)
+		# print(train_f0[0,0,:])
+		############################################
 		#if predict mean
 		# train_f0 = train_f0[:,:,0].reshape((train_f0.shape[0],train_f0.shape[1],1))
 		# test_f0 = test_f0[:,:,0].reshape((test_f0.shape[0],test_f0.shape[1],1))
@@ -914,7 +931,8 @@ if __name__=="__main__":
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_postone = one_hot_to_index(train_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
-		train_feat = np.delete(train_feat,range(35,39),2)
+		##delete pitch feature
+		# train_feat = np.delete(train_feat,range(35,39),2)
 
 		test_emb = test_feat[:,:,-10].astype(np.int32)
 		test_pos = test_feat[:,:,-9].astype(np.int32)
@@ -926,7 +944,8 @@ if __name__=="__main__":
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_postone = one_hot_to_index(test_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
-		test_feat = np.delete(test_feat,range(35,39),2)
+		##delete pitch feature
+		# test_feat = np.delete(test_feat,range(35,39),2)
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
@@ -995,8 +1014,8 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			# model = torch.load("gpu_my_best_model_.model")
-			model = torch.load('./gpu_my_best_model.model', map_location=lambda storage, loc: storage)
+			model = torch.load("my_best_model.model")
+			# model = torch.load('./gpu_my_best_model.model', map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
