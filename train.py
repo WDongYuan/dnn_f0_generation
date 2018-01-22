@@ -897,8 +897,8 @@ if __name__=="__main__":
 
 		############################################
 		#if predict mean
-		train_f0 = train_f0[:,:,-1].reshape((train_f0.shape[0],train_f0.shape[1],1)).flip(axis=1)
-		test_f0 = test_f0[:,:,-1].reshape((test_f0.shape[0],test_f0.shape[1],1)).flip(axis=1)
+		train_f0 = np.flip(train_f0[:,:,-1].reshape((train_f0.shape[0],train_f0.shape[1],1)),axis=1)
+		test_f0 = np.flip(test_f0[:,:,-1].reshape((test_f0.shape[0],test_f0.shape[1],1)),axis=1)
 		# train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
 		# test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
