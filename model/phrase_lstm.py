@@ -323,17 +323,18 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
-		mean_h = self.mean_l1(emb_h_n)
-		mean_h = self.relu(mean_h)
-		mean_h = self.mean_l2(mean_h)
-		mean_h = mean_h.view(mean_h.size()[0],mean_h.size()[1],1).expand(mean_h.size()[0],mean_h.size()[1],self.f0_dim)
+		# mean_h = self.mean_l1(emb_h_n)
+		# mean_h = self.relu(mean_h)
+		# mean_h = self.mean_l2(mean_h)
+		# mean_h = mean_h.view(mean_h.size()[0],mean_h.size()[1],1).expand(mean_h.size()[0],mean_h.size()[1],self.f0_dim)
 
-		std_h = self.std_l1(emb_h_n)
-		std_h = self.relu(std_h)
-		std_h = self.std_l2(std_h)
-		std_h = std_h.view(std_h.size()[0],std_h.size()[1],1).expand(std_h.size()[0],std_h.size()[1],self.f0_dim)
+		# std_h = self.std_l1(emb_h_n)
+		# std_h = self.relu(std_h)
+		# std_h = self.std_l2(std_h)
+		# std_h = std_h.view(std_h.size()[0],std_h.size()[1],1).expand(std_h.size()[0],std_h.size()[1],self.f0_dim)
 
-		h = emb_h*std_h+mean_h
+		# h = emb_h*std_h+mean_h
+		h = emb_h
 
 
 
