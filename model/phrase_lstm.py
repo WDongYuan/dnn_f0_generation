@@ -268,6 +268,16 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
 		self.linear_init(self.phrase_l2)
 
+		self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,100)
+		self.linear_init(self.mean_l1)
+		self.mean_l2 = nn.Linear(100,1)
+		self.linear_init(self.mean_l2)
+
+		self.std_l1 = nn.Linear(self.lstm_hidden_size*self.direction,100)
+		self.linear_init(self.std_l1)
+		self.std_l2 = nn.Linear(100,1)
+		self.linear_init(self.std_l2)
+
 
 	def linear_init(self,layer,lower=-1,upper=1):
 		layer.weight.data.uniform_(lower, upper)
@@ -308,10 +318,26 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		emb = torch.cat((emb,feat,pos),dim=2)
 		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
+
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
-		h = emb_h
+
+		mean_h = self.mean_l1(emb_h_n)
+		mean_h = self.relu(mean_h)
+		mean_h = self.mean_l2(mean_h)
+		mean_h = mean_h.viwe(mean_h.size[0],mean_h.size[1],1).expand(mean_h.size[0],mean_h.size[1],self.f0_dim)
+
+		std_h = self.std_l1(emb_h_n)
+		std_h = self.relu(std_h)
+		std_h = self.std_l2(std_h)
+		std_h = std_h.viwe(std_h.size[0],std_h.size[1],1).expand(std_h.size[0],std_h.size[1],self.f0_dim)
+
+		h = emb_h*std_h+mean_h
+
+
+
+
 
 		# ph = torch.cat((phrase,tone,cons,vowel),dim=2)
 		# ph_h_n, (_,_) = self.phrase_lstm(ph,(h_0,c_0))
