@@ -896,21 +896,21 @@ if __name__=="__main__":
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
 
 		############################################
-		train_pre_f0 = train_f0[:,:,-1].reshape((train_f0.shape[0],train_f0.shape[1],1))
-		train_pre_f0[:,1:,:] = train_pre_f0[:,0:-1,:]
-		train_pre_f0[:,0,0] = 0
-		train_post_f0 = train_f0[:,:,0].reshape((train_f0.shape[0],train_f0.shape[1],1))
-		train_post_f0[:,0:-1,:] = train_post_f0[:,1:,:]
-		train_post_f0[:,-1,0] = 0
-		train_f0 = np.concatenate((train_pre_f0,train_f0,train_post_f0),axis=2)
+		# train_pre_f0 = train_f0[:,:,-1].reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# train_pre_f0[:,1:,:] = train_pre_f0[:,0:-1,:]
+		# train_pre_f0[:,0,0] = 0
+		# train_post_f0 = train_f0[:,:,0].reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# train_post_f0[:,0:-1,:] = train_post_f0[:,1:,:]
+		# train_post_f0[:,-1,0] = 0
+		# train_f0 = np.concatenate((train_pre_f0,train_f0,train_post_f0),axis=2)
 
-		test_pre_f0 = test_f0[:,:,-1].reshape((test_f0.shape[0],test_f0.shape[1],1))
-		test_pre_f0[:,1:,:] = test_pre_f0[:,0:-1,:]
-		test_pre_f0[:,0,0] = 0
-		test_post_f0 = test_f0[:,:,0].reshape((test_f0.shape[0],test_f0.shape[1],1))
-		test_post_f0[:,0:-1,:] = test_post_f0[:,1:,:]
-		test_post_f0[:,-1,0] = 0
-		test_f0 = np.concatenate((test_pre_f0,test_f0,test_post_f0),axis=2)
+		# test_pre_f0 = test_f0[:,:,-1].reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# test_pre_f0[:,1:,:] = test_pre_f0[:,0:-1,:]
+		# test_pre_f0[:,0,0] = 0
+		# test_post_f0 = test_f0[:,:,0].reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# test_post_f0[:,0:-1,:] = test_post_f0[:,1:,:]
+		# test_post_f0[:,-1,0] = 0
+		# test_f0 = np.concatenate((test_pre_f0,test_f0,test_post_f0),axis=2)
 		# print(train_f0[0,0,:])
 		############################################
 		#if predict mean
