@@ -506,8 +506,8 @@ def Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_p
 		row_count += val_len[i]
 
 	###########################################################
-	# prediction = prediction[:,1:-1]
-	# true_f0 = true_f0[:,1:-1]
+	prediction = prediction[:,0:-1]
+	true_f0 = true_f0[:,0:-1]
 	###########################################################
 
 	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
