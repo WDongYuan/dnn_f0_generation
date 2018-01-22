@@ -190,7 +190,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.vowel_num = vowel_num
 
 		self.lstm_hidden_size = lstm_hidden_size
-		self.f0_dim = 1
+		self.f0_dim = 10
 		self.linear_h1 = linear_h1
 		self.voc_size = voc_size
 		self.pos_num = pos_num
