@@ -189,7 +189,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.vowel_num = vowel_num
 
 		self.lstm_hidden_size = lstm_hidden_size
-		self.f0_dim = 10
+		self.f0_dim = 1
 		self.linear_h1 = linear_h1
 		self.voc_size = voc_size
 		self.pos_num = pos_num
@@ -306,10 +306,11 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		h_0 = self.init_hidden()
 
 		emb = torch.cat((emb,feat,pos),dim=2)
-		# emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
-		# emb_h = self.emb_l1(emb_h_n)
-		# emb_h = self.tanh(emb_h)
-		# emb_h = self.emb_l2(emb_h)
+		emb_h_n, (_,_) = self.emb_lstm(emb,(h_0,c_0))
+		emb_h = self.emb_l1(emb_h_n)
+		emb_h = self.tanh(emb_h)
+		emb_h = self.emb_l2(emb_h)
+		h = emb_h
 
 		# ph = torch.cat((phrase,tone,cons,vowel),dim=2)
 		# ph_h_n, (_,_) = self.phrase_lstm(ph,(h_0,c_0))
@@ -317,11 +318,11 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# ph_h = self.relu(ph_h)
 		# ph_h = self.phrase_l2(ph_h)
 
-		cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
-		cnn_h = self.cnn_l1(cnn_h)
-		cnn_h = self.relu(cnn_h)
-		cnn_h = self.cnn_l2(cnn_h)
-		h = cnn_h
+		# cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
+		# cnn_h = self.cnn_l1(cnn_h)
+		# cnn_h = self.relu(cnn_h)
+		# cnn_h = self.cnn_l2(cnn_h)
+		# h = cnn_h
 
 
 		# mlp_h = self.mlp_l1(emb)
@@ -467,6 +468,8 @@ def Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_p
 		row_count += val_len[i]
 
 	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
+	print("abs:")
+	print(np.abs(prediction-true_f0).mean(axis=0))
 
 	if save_prediction!="":
 		np.savetxt(save_prediction,prediction,delimiter=" ",fmt="%.3f")
