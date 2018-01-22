@@ -1030,14 +1030,14 @@ if __name__=="__main__":
 				test_feat,test_phrase,test_f0,test_len,"./phrase_lstm_prediction")
 			exit()
 		#############################################################
-		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,
-		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
-		#############################################################
-		##if predict mean
-		model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		#############################################################
+		##if predict mean
+		# model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
 		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
