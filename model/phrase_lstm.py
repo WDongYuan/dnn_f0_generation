@@ -37,7 +37,8 @@ class PHRASE_LSTM(nn.Module):
 		self.vowel_num = vowel_num
 
 		self.lstm_hidden_size = lstm_hidden_size
-		self.f0_dim = f0_dim
+		# self.f0_dim = f0_dim
+		self.f0_dim = 1
 		self.linear_h1 = linear_h1
 		self.voc_size = voc_size
 		self.pos_num = pos_num
@@ -426,7 +427,6 @@ def Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_p
 		result = model(Variable(val_emb.cuda(async=True)),Variable(val_pos.cuda(async=True)),Variable(val_cons.cuda(async=True)),Variable(val_vowel.cuda(async=True)),
 			Variable(val_pretone.cuda(async=True)),Variable(val_tone.cuda(async=True)),Variable(val_postone.cuda(async=True)),
 			Variable(val_feat.cuda(async=True)),Variable(val_phrase.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
-		result = np.flip(result,axis=1)
 		val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	else:
 		# result,res_h,emb_h = model(Variable(val_emb),Variable(val_pos),Variable(val_cons),Variable(val_vowel),
