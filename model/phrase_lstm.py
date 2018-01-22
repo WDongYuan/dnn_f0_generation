@@ -37,8 +37,8 @@ class PHRASE_LSTM(nn.Module):
 		self.vowel_num = vowel_num
 
 		self.lstm_hidden_size = lstm_hidden_size
-		# self.f0_dim = f0_dim
-		self.f0_dim = 1
+		self.f0_dim = f0_dim
+		# self.f0_dim = 1
 		self.linear_h1 = linear_h1
 		self.voc_size = voc_size
 		self.pos_num = pos_num
@@ -71,7 +71,7 @@ class PHRASE_LSTM(nn.Module):
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
+		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size+self.phrase_num, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.phrase_lstm = nn.LSTM(self.phrase_num+self.tone_emb_size+2*emb_size, self.phrase_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -146,7 +146,7 @@ class PHRASE_LSTM(nn.Module):
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 
-		feat = torch.cat((emb,pos,feat),dim=2)
+		feat = torch.cat((emb,pos,feat,phrase),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
