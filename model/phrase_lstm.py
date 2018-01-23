@@ -353,7 +353,7 @@ class MEAN_LSTM(nn.Module):
 		self.sigmoid = nn.Sigmoid()
 
 	def forward(self,in_emb):
-    	self.batch_size = in_emb.size()[0]
+		self.batch_size = in_emb.size()[0]
 		emb_h_n, (_,_) = self.emb_lstm(in_emb,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
