@@ -330,20 +330,20 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		return h
 
 class MEAN_LSTM(nn.Module):
-    def __init__(self,input_length):
-        super(MEAN_LSTM,self).__init__()
-        self.linear_size = 100
-        self.input_length = input_length
-        self.lstm_hidden_size = 100
-        self.bidirectional_flag = True
-        self.direction = 2 if self.bidirectional_flag else 1
-        self.lstm_layer = 1
-        self.batch_size = -1
+	def __init__(self,input_length):
+		super(MEAN_LSTM,self).__init__()
+		self.linear_size = 100
+		self.input_length = input_length
+		self.lstm_hidden_size = 100
+		self.bidirectional_flag = True
+		self.direction = 2 if self.bidirectional_flag else 1
+		self.lstm_layer = 1
+		self.batch_size = -1
 
-        self.emb_lstm = nn.LSTM(self.input_length, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.input_length, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
-        self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_size)
+		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_size)
 		# self.linear_init(self.mean_l1)
 		self.emb_l2 = nn.Linear(self.linear_size,1)
 		# self.linear_init(self.mean_l2)
@@ -352,15 +352,15 @@ class MEAN_LSTM(nn.Module):
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
 
-    def forward(self,in_emb):
+	def forward(self,in_emb):
     	self.batch_size = in_emb.size()[0]
 		emb_h_n, (_,_) = self.emb_lstm(in_emb,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
-    	return emb_h
+		return emb_h
 
-    def init_hidden(self):
+	def init_hidden(self):
 		direction = 2 if self.bidirectional_flag else 1
 		###########################################################
 		#GPU OPTION
@@ -501,8 +501,8 @@ def Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_p
 		row_count += val_len[i]
 
 	###########################################################
-	prediction = prediction[:,0:-1]
-	true_f0 = true_f0[:,0:-1]
+	# prediction = prediction[:,0:-1]
+	# true_f0 = true_f0[:,0:-1]
 	###########################################################
 
 	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
