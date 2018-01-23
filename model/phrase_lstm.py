@@ -313,7 +313,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
-		acc_emb = torch.cat((emb,pos))
+		acc_emb = torch.cat((emb,pos),dim=2)
 		acc_h = self.acc_lstm(acc_emb)
 		acc_h = acc_h.view(acc_h.size()[0],acc_h.size()[1],1).expand(acc_h.size()[0],acc_h.size()[1],self.f0_dim)
 
