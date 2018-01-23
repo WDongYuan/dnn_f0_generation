@@ -362,7 +362,7 @@ class MEAN_LSTM(nn.Module):
 		h_t = h_t.permute(1,0,2).contiguous().view(self.batch_size,1,-1).expand(self.batch_size,self.max_length,self.lstm_hidden_size*self.lstm_layer*self.direction)
 		
 		emb_h_n = torch.cat((in_emb,h_t),dim=2)
-		emb_h_n, (_,_) = self.emb_lstm(emb_h_n,(h_0,c_0))
+		emb_h_n, (_,_) = self.att_lstm(emb_h_n,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
