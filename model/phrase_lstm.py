@@ -332,7 +332,7 @@ class MEAN_LSTM(nn.Module):
 		super(MEAN_LSTM,self).__init__()
 		self.linear_size = 50
 		self.input_length = input_length
-		self.lstm_hidden_size = 50
+		self.lstm_hidden_size = 100
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		self.lstm_layer = 1
