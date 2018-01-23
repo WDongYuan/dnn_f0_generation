@@ -330,6 +330,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 class MEAN_LSTM(nn.Module):
 	def __init__(self,input_length):
 		super(MEAN_LSTM,self).__init__()
+		self.max_length = -1
 		self.linear_size = 50
 		self.input_length = input_length
 		self.lstm_hidden_size = 50
@@ -339,6 +340,9 @@ class MEAN_LSTM(nn.Module):
 		self.batch_size = -1
 
 		self.emb_lstm = nn.LSTM(self.input_length, self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+		self.att_lstm = nn.LSTM(self.input_length+self.lstm_hidden_size*self.lstm_layer*self.direction, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_size)
@@ -351,10 +355,13 @@ class MEAN_LSTM(nn.Module):
 		self.sigmoid = nn.Sigmoid()
 
 	def forward(self,in_emb):
-		self.batch_size = in_emb.size()[0]
+		self.batch_size,self.max_length,_ = in_emb.size()
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
-		emb_h_n, (_,_) = self.emb_lstm(in_emb,(h_0,c_0))
+		emb_h_n, (h_t,c_t) = self.emb_lstm(in_emb,(h_0,c_0))
+		h_t = h_t.permute(1,0,2).view(self.batch_size,1,-1).expand(self.batch_size,self.max_length,self.lstm_hidden_size*self.lstm_layer*self.direction)
+		emb_h_n = torch.cat((emb,h_t),axis=2)
+		emb_h_n, (_,_) = self.emb_lstm(emb_h,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
