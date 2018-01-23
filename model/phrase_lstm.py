@@ -295,14 +295,14 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		vowel = self.vowel_embed(vowel)
 
 
-		c_0 = self.init_hidden()
-		h_0 = self.init_hidden()
+		# c_0 = self.init_hidden()
+		# h_0 = self.init_hidden()
 
-		emb_h = torch.cat((emb,feat,pos),dim=2)
-		emb_h_n, (_,_) = self.emb_lstm(emb_h,(h_0,c_0))
-		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.tanh(emb_h)
-		emb_h = self.emb_l2(emb_h)
+		# emb_h = torch.cat((emb,feat,pos),dim=2)
+		# emb_h_n, (_,_) = self.emb_lstm(emb_h,(h_0,c_0))
+		# emb_h = self.emb_l1(emb_h_n)
+		# emb_h = self.tanh(emb_h)
+		# emb_h = self.emb_l2(emb_h)
 
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
@@ -317,7 +317,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		acc_h = self.acc_lstm(acc_emb)
 		acc_h = acc_h.view(acc_h.size()[0],acc_h.size()[1],1).expand(acc_h.size()[0],acc_h.size()[1],self.f0_dim)
 
-		h = ph_h+emb_h+acc_h
+		h = ph_h+acc_h
 
 		# cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
 		# cnn_h = self.cnn_l1(cnn_h)
