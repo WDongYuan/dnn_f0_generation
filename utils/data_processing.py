@@ -67,7 +67,7 @@ class EncodeFeature():
 				self.encode_dic.append(tmp_dic)
 				self.feature_pos.append([feat[0],[feat_pos,feat_pos+len(tmp_dic)-1]])
 				feat_pos += len(tmp_dic)
-				
+
 		print("feature position:")
 		for tup in self.feature_pos:
 			print(tup[0]+":"),
@@ -537,6 +537,28 @@ def append_phrase_to_feature(feat_dir,phrase_syl_dir):
 			with open(feat_dir+"/"+file,"w+") as outf:
 				for i in range(len(ori_feat)):
 					outf.write(ori_feat[i].strip()+" "+" ".join(phrase_feat[i].astype(np.str).tolist())+"\n")
+
+def get_word_mean(emb,f0,voc_size,f0_mean=None):
+	#get the mean f0 of the specific word for every f0 sample
+
+	#emb 1 dimension
+	#f0 2 dimension
+	if f0_mean is None:
+		print("is none")
+		f0_dim = f0.shape[1]
+		f0_sum = np.zeros((voc_size,f0_dim))
+		f0_count = np.zeros((voc_size,1))
+		for i in range(len(emb)):
+			f0_sum[emb[i]] += f0[i]
+			f0_count[emb[i]] += 1
+		f0_mean = f0_sum/(f0_count+0.000001)
+
+	new_f0 = np.zeros(f0.shape)
+	for i in range(len(emb)):
+		new_f0[i] = f0_mean[emb[i]]
+	return new_f0,f0_mean
+
+
 
 
 

@@ -32,6 +32,7 @@ from utils.data_processing import get_pos_dic
 from utils.data_processing import get_f0_dct
 from utils.data_processing import normalize
 from utils.data_processing import append_phrase_to_feature
+from utils.data_processing import get_word_mean
 from model.mlp import MLP
 from model import embedding_lstm
 from model import feature_lstm
@@ -896,6 +897,7 @@ if __name__=="__main__":
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
 
 		############################################
+		#append the previous f0 and next f0 value
 		# train_pre_f0 = train_f0[:,:,-1].reshape((train_f0.shape[0],train_f0.shape[1],1))
 		# train_pre_f0[:,1:,:] = train_pre_f0[:,0:-1,:]
 		# train_pre_f0[:,0,0] = 0
@@ -914,9 +916,20 @@ if __name__=="__main__":
 		# print(train_f0[0,0,:])
 		############################################
 		#if predict mean
-		train_f0 = train_f0.std(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
-		test_f0 = test_f0.std(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# train_f0 = train_f0.std(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# test_f0 = test_f0.std(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
+		train_emb = train_feat[:,:,-10].astype(np.int32)
+		train_word_mean,word_mean_dic = get_word_mean(train_emb.flatten(),train_f0.reshape((-1,10)),config.voc_size)
+		train_word_mean = train_word_mean.reshape(train_f0.shape)
+		train_f0 = (train_f0.mean(axis=2)-train_word_mean.mean(axis=2)).reshape((train_f0.shape[0],train_f0.shape[1],1))
+
+		test_emb = test_feat[:,:,-10].astype(np.int32)
+		test_word_mean = get_word_mean(test_emb.flatten(),test_f0.reshape((-1,10)),config.voc_size,word_mean_dic)
+		test_word_mean = test_word_mean.reshape(test_f0.shape)
+		test_f0 = (test_f0.mean(axis=2)-test_word_mean.mean(axis=2)).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		############################################
+
 
 
 		train_emb = train_feat[:,:,-10].astype(np.int32)
