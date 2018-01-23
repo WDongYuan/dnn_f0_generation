@@ -190,7 +190,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.vowel_num = vowel_num
 
 		self.lstm_hidden_size = lstm_hidden_size
-		self.f0_dim = 10
+		self.f0_dim = 1
 		self.linear_h1 = linear_h1
 		self.voc_size = voc_size
 		self.pos_num = pos_num
@@ -297,27 +297,25 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		# c_0 = self.init_hidden()
 		# h_0 = self.init_hidden()
-
 		# emb_h = torch.cat((emb,feat,pos),dim=2)
 		# emb_h_n, (_,_) = self.emb_lstm(emb_h,(h_0,c_0))
 		# emb_h = self.emb_l1(emb_h_n)
 		# emb_h = self.tanh(emb_h)
 		# emb_h = self.emb_l2(emb_h)
 
-		c_0 = self.init_phrase_hidden()
-		h_0 = self.init_phrase_hidden()
-
-		ph_h = torch.cat((phrase,tone,cons,vowel),dim=2)
-		ph_h_n, (_,_) = self.phrase_lstm(ph_h,(h_0,c_0))
-		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.relu(ph_h)
-		ph_h = self.phrase_l2(ph_h)
+		# c_0 = self.init_phrase_hidden()
+		# h_0 = self.init_phrase_hidden()
+		# ph_h = torch.cat((phrase,tone,cons,vowel),dim=2)
+		# ph_h_n, (_,_) = self.phrase_lstm(ph_h,(h_0,c_0))
+		# ph_h = self.phrase_l1(ph_h_n)
+		# ph_h = self.relu(ph_h)
+		# ph_h = self.phrase_l2(ph_h)
 
 		acc_emb = torch.cat((emb,pos),dim=2)
 		acc_h = self.acc_lstm(acc_emb)
-		acc_h = acc_h.view(acc_h.size()[0],acc_h.size()[1],1).expand(acc_h.size()[0],acc_h.size()[1],self.f0_dim)
+		acc_h = acc_h.view(acc_h.size()[0],acc_h.size()[1],1)
 
-		h = ph_h+acc_h
+		h = acc_h
 
 		# cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
 		# cnn_h = self.cnn_l1(cnn_h)

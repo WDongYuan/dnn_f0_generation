@@ -914,10 +914,8 @@ if __name__=="__main__":
 		# print(train_f0[0,0,:])
 		############################################
 		#if predict mean
-		# train_f0 = train_f0[:,:,0].reshape((train_f0.shape[0],train_f0.shape[1],1))
-		# test_f0 = test_f0[:,:,0].reshape((test_f0.shape[0],test_f0.shape[1],1))
-		# train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
-		# test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		train_f0 = train_f0.std(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		test_f0 = test_f0.std(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
 
 
