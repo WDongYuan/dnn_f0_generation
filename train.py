@@ -925,7 +925,7 @@ if __name__=="__main__":
 		train_f0 = (train_f0.mean(axis=2)-train_word_mean.mean(axis=2)).reshape((train_f0.shape[0],train_f0.shape[1],1))
 
 		test_emb = test_feat[:,:,-10].astype(np.int32)
-		test_word_mean = get_word_mean(test_emb.flatten(),test_f0.reshape((-1,10)),config.voc_size,word_mean_dic)
+		test_word_mean,_ = get_word_mean(test_emb.flatten(),test_f0.reshape((-1,10)),config.voc_size,word_mean_dic)
 		test_word_mean = test_word_mean.reshape(test_f0.shape)
 		test_f0 = (test_f0.mean(axis=2)-test_word_mean.mean(axis=2)).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
