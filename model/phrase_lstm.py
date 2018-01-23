@@ -225,7 +225,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.acc_lstm = MEAN_LSTM(self.emb_size+3*self.tone_emb_size)
+		self.acc_lstm = MEAN_LSTM(self.emb_size+3*self.tone_emb_size+self.phrase_num)
 
 
 		# CONV
@@ -311,7 +311,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# ph_h = self.relu(ph_h)
 		# ph_h = self.phrase_l2(ph_h)
 
-		acc_emb = torch.cat((emb,cons,tone,vowel),dim=2)
+		acc_emb = torch.cat((emb,cons,tone,vowel,phrase),dim=2)
 		acc_h = self.acc_lstm(acc_emb)
 		acc_h = acc_h.view(acc_h.size()[0],acc_h.size()[1],1)
 
