@@ -342,7 +342,7 @@ class MEAN_LSTM(nn.Module):
 		self.emb_lstm = nn.LSTM(self.input_length, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
-		self.att_lstm = nn.LSTM(self.input_length+self.lstm_hidden_size*self.lstm_layer*self.direction, self.lstm_hidden_size,
+		self.att_lstm = nn.LSTM(self.input_length, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_size)
@@ -359,10 +359,9 @@ class MEAN_LSTM(nn.Module):
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 		emb_h_n, (h_t,c_t) = self.emb_lstm(in_emb,(h_0,c_0))
-		h_t = h_t.permute(1,0,2).contiguous().view(self.batch_size,1,-1).expand(self.batch_size,self.max_length,self.lstm_hidden_size*self.lstm_layer*self.direction)
-		
-		emb_h_n = torch.cat((in_emb,h_t),dim=2)
-		emb_h_n, (_,_) = self.att_lstm(emb_h_n,(h_0,c_0))
+		# h_t = h_t.permute(1,0,2).contiguous().view(self.batch_size,1,-1).expand(self.batch_size,self.max_length,self.lstm_hidden_size*self.lstm_layer*self.direction)
+		# emb_h_n = torch.cat((in_emb,h_t),dim=2)
+		emb_h_n, (_,_) = self.att_lstm(in_emb,(h_t,c_t))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
