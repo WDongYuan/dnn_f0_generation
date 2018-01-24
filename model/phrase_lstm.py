@@ -151,8 +151,8 @@ class PHRASE_LSTM(nn.Module):
 
 		# print(pos.size())
 		# print(pos_feat.size())
-		feat = torch.cat((emb,pos,pos_feat),dim=2)
-		feat_h_n, (_,_) = self.feat_lstm(feat,(h_0,c_0))
+		feat_h_0 = torch.cat((emb,pos,pos_feat),dim=2)
+		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
 		feat_h = self.feat_l2(feat_h)
@@ -160,8 +160,8 @@ class PHRASE_LSTM(nn.Module):
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph = torch.cat((feat,phrase,tone,cons,vowel),dim=2)
-		ph_h_n, (_,_) = self.phrase_lstm(ph,(h_0,c_0))
+		ph_h_0 = torch.cat((feat,phrase,tone,cons,vowel),dim=2)
+		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
