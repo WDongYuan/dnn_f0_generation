@@ -305,7 +305,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
 		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
 		tone = self.tone_embed(tone)
-		tone = self.conv_tone(tone.permute(0,2,1)).permuter(0,2,1)
+		tone = self.conv_tone(tone.permute(0,2,1)).permute(0,2,1)
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
 
