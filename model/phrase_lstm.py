@@ -256,10 +256,10 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
 
-		self.emb_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.emb_l1)
-		self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.emb_l2)
+		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.feat_l1)
+		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.feat_l2)
 
 		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.direction,self.phrase_linear_size)
 		self.linear_init(self.phrase_l1)
