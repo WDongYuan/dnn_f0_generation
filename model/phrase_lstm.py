@@ -264,13 +264,18 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.feat_l1)
-		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.feat_l2)
+		# self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		# self.linear_init(self.feat_l2)
 
 		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.direction,self.phrase_linear_size)
 		self.linear_init(self.phrase_l1)
-		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
-		self.linear_init(self.phrase_l2)
+		# self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
+		# self.linear_init(self.phrase_l2)
+
+		self.concar_l1 = nn.Linear(self.phrase_linear_size+self.linear_h1,self.linear_h1)
+		self.linear_init(self.concar_l1)
+		self.concar_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.concar_l2)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -320,7 +325,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.relu(feat_h)
-		feat_h = self.feat_l2(feat_h)
+		# feat_h = self.feat_l2(feat_h)
 
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
@@ -329,9 +334,13 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
-		ph_h = self.phrase_l2(ph_h)
+		# ph_h = self.phrase_l2(ph_h)
 
-		h = ph_h.mul(feat_h)
+		h = torch.cat((ph_h,feat_h),dim=2)
+		h = self.concat_l1(h)
+		h = self.relu(ph_h)
+		h = self.concat_l2(h)
+
 		# h = feat_h
 
 		################################################################################
