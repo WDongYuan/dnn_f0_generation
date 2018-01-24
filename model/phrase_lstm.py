@@ -237,10 +237,16 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		# CONV
 		self.dropout = nn.Dropout(0.5)
-		self.out_channel = self.emb_size
-		self.conv1 = nn.Sequential(
-			nn.Conv1d(self.emb_size,self.out_channel,3,stride=1,padding=1),
-			self.dropout,
+		# self.out_channel = self.emb_size
+		# self.conv1 = nn.Sequential(
+		# 	nn.Conv1d(self.emb_size,self.out_channel,3,stride=1,padding=1),
+		# 	self.dropout,
+		# 	nn.Tanh())
+
+		self.out_channel = self.tone_emb_size
+		self.conv_tone = nn.Sequential(
+			nn.Conv1d(self.tone_emb_size,self.out_channel,3,stride=1,padding=1),
+			# self.dropout,
 			nn.Tanh())
 			# nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
 			# self.dropout,
@@ -295,10 +301,11 @@ class PHRASE_MEAN_LSTM(nn.Module):
 	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
-		emb = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
+		# emb = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
 		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
 		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
 		tone = self.tone_embed(tone)
+		tone = self.conv_tone(tone.permute(0,2,1)).permuter(0,2,1)
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
 
