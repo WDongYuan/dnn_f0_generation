@@ -14,7 +14,7 @@ pos_emb_size = 10
 tone_emb_size = 10
 lstm_hidden_size = 100
 f0_dim = 10
-linear_h1 = 200
+linear_h1 = 100
 
 
 #################
@@ -167,3 +167,19 @@ linear_h1 = 200
 # f0_dim = 10
 # linear_h1 = 100
 #mean 19.0
+
+
+##pos lstm
+# learning_rate = 0.001
+# decay_step = 1
+# decay_rate = 0.95
+# epoch_num = 100
+# voc_size = 2500
+# batch_size = 20
+# emb_size = 10
+# pos_emb_size = 10
+# tone_emb_size = 10
+# lstm_hidden_size = 100
+# f0_dim = 10
+# linear_h1 = 200
+# 25.9
