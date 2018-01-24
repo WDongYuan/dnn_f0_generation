@@ -319,20 +319,20 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		feat_h_0 = torch.cat((feat,emb,pos,pos_feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
-		feat_h = self.tanh(feat_h)
+		feat_h = self.relu(feat_h)
 		feat_h = self.feat_l2(feat_h)
 
-		c_0 = self.init_phrase_hidden()
-		h_0 = self.init_phrase_hidden()
+		# c_0 = self.init_phrase_hidden()
+		# h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
-		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.relu(ph_h)
-		ph_h = self.phrase_l2(ph_h)
+		# ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
+		# ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		# ph_h = self.phrase_l1(ph_h_n)
+		# ph_h = self.relu(ph_h)
+		# ph_h = self.phrase_l2(ph_h)
 
-		h = feat_h+ph_h
-		# h = feat_h
+		# h = feat_h+ph_h
+		h = feat_h
 
 		################################################################################
 		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
