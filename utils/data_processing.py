@@ -368,6 +368,23 @@ def parse_txt_file(txt_file,out_file):
 			outf.write("\n")
 	return
 
+def pos_refine(convert_map,pos_file,refine_pos_file):
+	pos_map = {}
+	with open(convert_map) as f:
+		for line in f:
+			line = line.strip().split(" ")
+			pos_map[line[0]] = line[1]
+	with open(pos_file) as old_f, open(refine_pos_file,"w+") as new_f:
+		old_lines = old_f.readlines()
+		for i in range(len(old_lines)):
+			if i%4!=2:
+				new_f.write(old_lines[i])
+			else:
+				line = old_lines[i].strip().split(" ")
+				line = [pos_map[pos] for pos in line]
+				new_f.write(" ".join(line)+"\n")
+	return
+
 def get_pos_dic(pos_file):
 	pos_dic = {}
 	with open(pos_file) as f:
@@ -385,7 +402,7 @@ def append_pos_to_feature(feat_dir,pos_file,pos_dic):
 	##read pos tag
 	data_dic = {}
 
-	with open(pos_file,encoding='utf-8') if cuda_flag else open(pos_file) as f:
+	with open(pos_file) as f:
 		sents = f.readlines()
 		row = 0
 		while row < len(sents):
@@ -396,26 +413,38 @@ def append_pos_to_feature(feat_dir,pos_file,pos_dic):
 			pos = sents[row].strip().split(" ")
 			row += 1
 			row += 1
-			token.pop(-1)
-			pos.pop(-1)
+			token.pop(-1)##remove punctuation
+			pos.pop(-1)##remove punctuation
 			pos_list = []
 			assert len(token)==len(pos)
 			for i in range(len(token)):
-				for j in range(len(token[i]) if cuda_flag else len(token[i].decode("utf-8"))):
-					pos_list.append(pos[i])
+				for j in range(len(token[i].decode("utf-8"))):
+					tmp_feat = []
+
+					##current pos
+					tmp_feat.append(str(pos_dic[pos[i]]))
+
+					##previous pos
+					if i==0:
+						tmp_feat.append("0")
+					else:
+						tmp_feat.append(str(pos_dic[pos[i-1]]))
+
+					##next pos
+					if i==len(token)-1:
+						tmp_feat.append("0")
+					else:
+						tmp_feat.append(str(pos_dic[pos[i+1]]))
+
+					##pos tag position in utterance
+					tmp_feat.append(str(i))
+
+					##word position in pos tag
+					tmp_feat.append(str(j))
+
+					pos_list.append(tmp_feat)
+					# pos_list.append([pos[i],i,j])##i=pos tag postion in utterance, j=word postion in its pos tag
 			data_dic[data_name] = pos_list
-			# if data_name=="data_00001":
-			# 	print(pos_list)
-			# 	for tk in token:
-			# 		print(tk.encode("utf-8")),
-			# 	print("")
-	# pos_dic = {}
-	# for key,val in data_dic.items():
-	# 	for pos in val:
-	# 		if pos not in pos_dic:
-	# 			pos_dic[pos] = len(pos_dic)+1
-	# pos_num = len(pos_dic)+1
-	# print(pos_dic)
 
 	file_list = os.listdir(feat_dir)
 	file_list = [tmp_name for tmp_name in file_list if "data" in tmp_name]
@@ -425,9 +454,12 @@ def append_pos_to_feature(feat_dir,pos_file,pos_dic):
 		with open(feat_dir+"/"+file_name) as f:
 			file_sents = f.readlines()
 		assert len(file_sents)==len(pos)
-		file_sents = [file_sents[i].strip()+" "+str(pos_dic[pos[i]])+"\n" for i in range(len(file_sents))]
+		# file_sents = [file_sents[i].strip()+" "+str(pos_dic[pos[i][0]])+" "+str(pos[i][1])+" "+str(pos[i][2])+"\n" for i in range(len(file_sents))]
+		file_sents = [file_sents[i].strip()+" "+" ".join(pos[i])+"\n" for i in range(len(file_sents))]
 		with open(feat_dir+"/"+file_name,"w+") as f:
 			f.writelines(file_sents)
+
+	print("append 5 pos features: pos tag, pre pos tag, next pos tag, pos position in utterance, word position in pos")
 	return
 
 def one_hot_to_index(arr,zero_padding=True):
@@ -489,6 +521,8 @@ def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic):
 			for i in range(len(feat_cont)):
 				feat_cont[i] = feat_cont[i]+" "+str(cvl[i][0])+" "+str(cvl[i][1])+"\n"
 			f.writelines(feat_cont)
+	print("append 2 syllable features")
+
 def normalize(arr):
 	arr_mean = arr.mean(axis=0)
 	arr_std = arr.std(axis=0)
@@ -537,6 +571,7 @@ def append_phrase_to_feature(feat_dir,phrase_syl_dir):
 			with open(feat_dir+"/"+file,"w+") as outf:
 				for i in range(len(ori_feat)):
 					outf.write(ori_feat[i].strip()+" "+" ".join(phrase_feat[i].astype(np.str).tolist())+"\n")
+	print("append 6 phrase features")
 
 def get_word_mean(emb,f0,voc_size,f0_mean=None):
 	#get the mean f0 of the specific word for every f0 sample

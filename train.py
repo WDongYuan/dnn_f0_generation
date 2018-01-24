@@ -33,6 +33,7 @@ from utils.data_processing import get_f0_dct
 from utils.data_processing import normalize
 from utils.data_processing import append_phrase_to_feature
 from utils.data_processing import get_word_mean
+from utils.data_processing import pos_refine
 from model.mlp import MLP
 from model import embedding_lstm
 from model import feature_lstm
@@ -862,10 +863,13 @@ if __name__=="__main__":
 
 			
 			############################################
-			pos_dic = get_pos_dic("./lstm_data/txt_token_pos")
+			pos_refine("./lstm_data/pos_convert_map","./lstm_data/txt_token_pos","./lstm_data/refine_txt_token_pos")
+			pos_file = "./lstm_data/refine_txt_token_pos"
+			pos_dic = get_pos_dic(pos_file)
 			pos_num = len(pos_dic)+1
-			append_pos_to_feature("./lstm_data/train","./lstm_data/txt_token_pos",pos_dic)
-			append_pos_to_feature("./lstm_data/test","./lstm_data/txt_token_pos",pos_dic)
+			print("pos number: "+str(pos_num))
+			append_pos_to_feature("./lstm_data/train",pos_file,pos_dic)
+			append_pos_to_feature("./lstm_data/test",pos_file,pos_dic)
 			############################################
 			# pos_num = 32
 			############################################
@@ -888,7 +892,7 @@ if __name__=="__main__":
 			exit()
 			############################################
 
-		pos_num = 32
+		pos_num = 18
 		cons_num = 24
 		vowel_num = 38
 
@@ -898,46 +902,51 @@ if __name__=="__main__":
 
 		############################################
 		#append the previous f0 and next f0 value
-		# train_pre_f0 = train_f0[:,:,-1].reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# train_pre_f0 = np.copy(train_f0[:,:,-1].reshape((train_f0.shape[0],train_f0.shape[1],1)))
 		# train_pre_f0[:,1:,:] = train_pre_f0[:,0:-1,:]
 		# train_pre_f0[:,0,0] = 0
-		# train_post_f0 = train_f0[:,:,0].reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# train_post_f0 = np.copy(train_f0[:,:,0].reshape((train_f0.shape[0],train_f0.shape[1],1)))
 		# train_post_f0[:,0:-1,:] = train_post_f0[:,1:,:]
 		# train_post_f0[:,-1,0] = 0
-		# train_f0 = np.concatenate((train_f0,train_post_f0),axis=2)
+		# train_f0 = np.concatenate((train_pre_f0,train_f0,train_post_f0),axis=2)
 
-		# test_pre_f0 = test_f0[:,:,-1].reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# test_pre_f0 = np.copy(test_f0[:,:,-1].reshape((test_f0.shape[0],test_f0.shape[1],1)))
 		# test_pre_f0[:,1:,:] = test_pre_f0[:,0:-1,:]
 		# test_pre_f0[:,0,0] = 0
-		# test_post_f0 = test_f0[:,:,0].reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# test_post_f0 = np.copy(test_f0[:,:,0].reshape((test_f0.shape[0],test_f0.shape[1],1)))
 		# test_post_f0[:,0:-1,:] = test_post_f0[:,1:,:]
 		# test_post_f0[:,-1,0] = 0
-		# test_f0 = np.concatenate((test_f0,test_post_f0),axis=2)
+		# test_f0 = np.concatenate((test_pre_f0,test_f0,test_post_f0),axis=2)
+
 		# print(train_f0[0,0,:])
+		# exit()
 		############################################
-		#if predict mean
+		# if predict mean
 		# train_f0 = train_f0.std(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
 		# test_f0 = test_f0.std(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
-		train_emb = train_feat[:,:,-10].astype(np.int32)
-		train_word_mean,word_mean_dic = get_word_mean(train_emb.flatten(),train_f0.reshape((-1,10)),config.voc_size)
-		train_word_mean = train_word_mean.reshape(train_f0.shape)
-		train_f0 = (train_f0.mean(axis=2)-train_word_mean.mean(axis=2)).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# get the mean f0 for word
+		# train_emb = train_feat[:,:,-10].astype(np.int32)
+		# train_word_mean,word_mean_dic = get_word_mean(train_emb.flatten(),train_f0.reshape((-1,10)),config.voc_size)
+		# train_word_mean = train_word_mean.reshape(train_f0.shape)
+		# train_f0 = (train_f0.mean(axis=2)-train_word_mean.mean(axis=2)).reshape((train_f0.shape[0],train_f0.shape[1],1))
 
-		test_emb = test_feat[:,:,-10].astype(np.int32)
-		test_word_mean,_ = get_word_mean(test_emb.flatten(),test_f0.reshape((-1,10)),config.voc_size,word_mean_dic)
-		test_word_mean = test_word_mean.reshape(test_f0.shape)
-		test_f0 = (test_f0.mean(axis=2)-test_word_mean.mean(axis=2)).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# test_emb = test_feat[:,:,-10].astype(np.int32)
+		# test_word_mean,_ = get_word_mean(test_emb.flatten(),test_f0.reshape((-1,10)),config.voc_size,word_mean_dic)
+		# test_word_mean = test_word_mean.reshape(test_f0.shape)
+		# test_f0 = (test_f0.mean(axis=2)-test_word_mean.mean(axis=2)).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
 
 
 
-		train_emb = train_feat[:,:,-10].astype(np.int32)
-		train_pos = train_feat[:,:,-9].astype(np.int32)
+		train_emb = train_feat[:,:,-14].astype(np.int32)
+		train_pos = train_feat[:,:,-13:-8].astype(np.int32)
+		train_pos_feat = train_pos[:,:,3:]
+		train_pos = train_pos[:,:,0:3]
 		train_cons = train_feat[:,:,-8].astype(np.int32)
 		train_vowel = train_feat[:,:,-7].astype(np.int32)
 		train_phrase = train_feat[:,:,-6:]
-		train_feat = train_feat[:,:,0:-10]
+		train_feat = train_feat[:,:,0:-14]
 		tmp_shape = train_feat.shape
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -945,12 +954,17 @@ if __name__=="__main__":
 		##delete pitch feature
 		# train_feat = np.delete(train_feat,range(35,39),2)
 
-		test_emb = test_feat[:,:,-10].astype(np.int32)
-		test_pos = test_feat[:,:,-9].astype(np.int32)
+		# print(train_pos_feat.shape)
+		# exit()
+
+		test_emb = test_feat[:,:,-14].astype(np.int32)
+		test_pos = test_feat[:,:,-13:-8].astype(np.int32)
+		test_pos_feat = test_pos[:,:,3:]
+		test_pos = test_pos[:,:,0:3]
 		test_cons = test_feat[:,:,-8].astype(np.int32)
 		test_vowel = test_feat[:,:,-7].astype(np.int32)
 		test_phrase = test_feat[:,:,-6:]
-		test_feat = test_feat[:,:,0:-10]
+		test_feat = test_feat[:,:,0:-14]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -965,6 +979,7 @@ if __name__=="__main__":
 		tone_num = 6
 		pretone_num = 7
 		postone_num = 7
+		pos_feat_num = 2
 
 		# ori_train_f0 = train_f0
 		# ori_train_emb = train_emb
@@ -974,7 +989,8 @@ if __name__=="__main__":
 
 		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
-		train_pos = train_pos[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_pos = train_pos[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,-1))
+		train_pos_feat = train_pos_feat[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,-1))
 		train_cons = train_cons[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_vowel = train_vowel[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_tone = train_tone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
@@ -984,10 +1000,12 @@ if __name__=="__main__":
 		train_len = train_len[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size))
 		train_phrase = train_phrase[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,phrase_num))
 
-		
+
+		# print(train_pos_feat.shape)
 
 		train_emb = torch.LongTensor(train_emb.tolist())
 		train_pos = torch.LongTensor(train_pos.tolist())
+		train_pos_feat = torch.FloatTensor(train_pos_feat.tolist())
 		train_cons = torch.LongTensor(train_cons.tolist())
 		train_vowel = torch.LongTensor(train_vowel.tolist())
 		train_tone = torch.LongTensor(train_tone.tolist())
@@ -999,7 +1017,8 @@ if __name__=="__main__":
 		train_phrase = torch.FloatTensor(train_phrase.tolist())
 
 		test_emb = test_emb.reshape((len(test_emb),-1))
-		test_pos = test_pos.reshape((len(test_pos),-1))
+		test_pos = test_pos.reshape((test_pos.shape[0],test_pos.shape[2],-1))
+		test_pos_feat = test_pos_feat.reshape((test_pos_feat.shape[0],test_pos_feat.shape[2],-1))
 		test_cons = test_cons.reshape((len(test_cons),-1))
 		test_vowel = test_vowel.reshape((len(test_vowel),-1))
 		test_tone = test_tone.reshape((len(test_tone),-1))
@@ -1013,6 +1032,7 @@ if __name__=="__main__":
 		# print(np.sum(test_len))
 		test_emb = torch.LongTensor(test_emb.tolist())
 		test_pos = torch.LongTensor(test_pos.tolist())
+		test_pos_feat = torch.FloatTensor(test_pos_feat.tolist())
 		test_cons = torch.LongTensor(test_cons.tolist())
 		test_vowel = torch.LongTensor(test_vowel.tolist())
 		test_tone = torch.LongTensor(test_tone.tolist())
@@ -1025,8 +1045,8 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			# model = torch.load("my_best_model.model")
-			model = torch.load('./my_best_model.model', map_location=lambda storage, loc: storage)
+			model = torch.load("my_best_model.model")
+			# model = torch.load('./best_phrase_model', map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -1037,18 +1057,18 @@ if __name__=="__main__":
 			#############################################################
 
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
-			phrase_lstm.Validate(model,test_emb,test_pos,test_cons,test_vowel,test_pretone,test_tone,test_postone,
+			phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
 				test_feat,test_phrase,test_f0,test_len,"./phrase_lstm_prediction")
 			exit()
 		#############################################################
-		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,
-		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,pos_feat_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		##if predict mean
-		model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		# model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
 		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -1058,6 +1078,7 @@ if __name__=="__main__":
 		phrase_lstm.Train(
 			train_emb,
 			train_pos,
+			train_pos_feat,
 			train_cons,
 			train_vowel,
 			train_pretone,
@@ -1069,6 +1090,7 @@ if __name__=="__main__":
 			train_len,
 			test_emb,
 			test_pos,
+			test_pos_feat,
 			test_cons,
 			test_vowel,
 			test_pretone,

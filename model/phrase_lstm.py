@@ -21,12 +21,13 @@ if cuda_flag:
 
 class PHRASE_LSTM(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
-		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,voc_size,pos_num,
+		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,voc_size,pos_num,pos_feat_num,
 		lstm_hidden_size,f0_dim,linear_h1):
 		super(PHRASE_LSTM, self).__init__()
 		self.emb_size = emb_size
 		self.feat_size = feat_size
 		self.pos_emb_size = pos_emb_size
+		self.pos_emb_length = 3##how many pos emb per sample (pre,current,post)
 		self.tone_emb_size = tone_emb_size
 		self.phrase_num = phrase_num
 
@@ -42,6 +43,7 @@ class PHRASE_LSTM(nn.Module):
 		self.linear_h1 = linear_h1
 		self.voc_size = voc_size
 		self.pos_num = pos_num
+		self.pos_feat_num = pos_feat_num
 		self.batch_size = -1
 		self.max_length = -1
 
@@ -71,7 +73,7 @@ class PHRASE_LSTM(nn.Module):
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
+		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.phrase_lstm = nn.LSTM(self.phrase_num+self.tone_emb_size+2*emb_size, self.phrase_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -132,10 +134,11 @@ class PHRASE_LSTM(nn.Module):
 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
 		###########################################################
 
-	def forward(self,sents,pos,cons,vowel,pretone,tone,postone,feat,phrase,sent_length):
+	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
-		pos = self.pos_embed(pos)
+		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
+		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
 		# pretone = self.pretone_embed(pretone)
 		tone = self.tone_embed(tone)
 		# postone = self.postone_embed(postone)
@@ -146,7 +149,9 @@ class PHRASE_LSTM(nn.Module):
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 
-		feat = torch.cat((emb,pos,feat),dim=2)
+		# print(pos.size())
+		# print(pos_feat.size())
+		feat = torch.cat((emb,pos,pos_feat,feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
@@ -174,7 +179,7 @@ class PHRASE_LSTM(nn.Module):
 
 class PHRASE_MEAN_LSTM(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
-		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,voc_size,pos_num,
+		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,voc_size,pos_num,pos_feat_num,
 		lstm_hidden_size,f0_dim,linear_h1):
 		super(PHRASE_MEAN_LSTM, self).__init__()
 		self.emb_size = emb_size
@@ -194,6 +199,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.linear_h1 = linear_h1
 		self.voc_size = voc_size
 		self.pos_num = pos_num
+		self.pos_feat_num = pos_feat_num
 		self.batch_size = -1
 		self.max_length = -1
 
@@ -286,7 +292,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
 		###########################################################
 
-	def forward(self,sents,pos,cons,vowel,pretone,tone,postone,feat,phrase,sent_length):
+	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
 		pos = self.pos_embed(pos)
@@ -379,8 +385,8 @@ class MEAN_LSTM(nn.Module):
 		###########################################################
 
 
-def Train(train_emb,train_pos,train_cons,train_vowel,train_pretone,train_tone,train_postone,train_feat,train_phrase,train_f0,train_len,
-	val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_postone,val_feat,val_phrase,val_f0,val_len,
+def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_pretone,train_tone,train_postone,train_feat,train_phrase,train_f0,train_len,
+	val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,val_tone,val_postone,val_feat,val_phrase,val_f0,val_len,
 	model,optimizer,learning_rate,decay_step,decay_rate,epoch_num):
 	###########################################################
 	#GPU OPTION
@@ -402,6 +408,7 @@ def Train(train_emb,train_pos,train_cons,train_vowel,train_pretone,train_tone,tr
 			if cuda_flag:
 				train_emb_batch = Variable(train_emb[i].cuda(async=True))
 				train_pos_batch = Variable(train_pos[i].cuda(async=True))
+				train_pos_feat_batch = Variable(train_pos_feat[i].cuda(async=True))
 				train_cons_batch = Variable(train_cons[i].cuda(async=True))
 				train_vowel_batch = Variable(train_vowel[i].cuda(async=True))
 				train_tone_batch = Variable(train_tone[i].cuda(async=True))
@@ -414,6 +421,7 @@ def Train(train_emb,train_pos,train_cons,train_vowel,train_pretone,train_tone,tr
 			else:
 				train_emb_batch = Variable(train_emb[i])
 				train_pos_batch = Variable(train_pos[i])
+				train_pos_feat_batch = Variable(train_pos_feat[i])
 				train_cons_batch = Variable(train_cons[i])
 				train_vowel_batch = Variable(train_vowel[i])
 				train_tone_batch = Variable(train_tone[i])
@@ -427,7 +435,7 @@ def Train(train_emb,train_pos,train_cons,train_vowel,train_pretone,train_tone,tr
 
 
 			optimizer.zero_grad()
-			outputs = model(train_emb_batch,train_pos_batch,train_cons_batch,train_vowel_batch,
+			outputs = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_len_batch)
 			# print(outputs.size())
 			# print(train_label_batch.size())
@@ -438,7 +446,7 @@ def Train(train_emb,train_pos,train_cons,train_vowel,train_pretone,train_tone,tr
 		if (epoch+1)%1==0:
 			print("Epoch "+str(epoch))
 			print("train loss: "+str(loss_val/len(train_emb)))
-			val_loss,result = Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_postone,val_feat,val_phrase,val_f0,val_len)
+			val_loss,result = Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,val_tone,val_postone,val_feat,val_phrase,val_f0,val_len)
 			print("val loss: "+str(val_loss))
 			if val_loss<min_loss:
 				torch.save(model,"./my_best_model.model")
@@ -454,7 +462,7 @@ def Train(train_emb,train_pos,train_cons,train_vowel,train_pretone,train_tone,tr
 		print("time: "+str(time.time()-start_time))
 		print("#####################################")
 
-def Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_postone,val_feat,val_phrase,val_f0,val_len,save_prediction=""):
+def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,val_tone,val_postone,val_feat,val_phrase,val_f0,val_len,save_prediction=""):
 	model.eval()
 	val_f0_shape = val_f0.size()
 	batch_size = val_f0_shape[0]
@@ -463,15 +471,15 @@ def Validate(model,val_emb,val_pos,val_cons,val_vowel,val_pretone,val_tone,val_p
 	#GPU OPTION
 	###########################################################
 	if cuda_flag:
-		result = model(Variable(val_emb.cuda(async=True)),Variable(val_pos.cuda(async=True)),Variable(val_cons.cuda(async=True)),Variable(val_vowel.cuda(async=True)),
+		result = model(Variable(val_emb.cuda(async=True)),Variable(val_pos.cuda(async=True)),Variable(val_pos_feat.cuda(async=True)),Variable(val_cons.cuda(async=True)),Variable(val_vowel.cuda(async=True)),
 			Variable(val_pretone.cuda(async=True)),Variable(val_tone.cuda(async=True)),Variable(val_postone.cuda(async=True)),
 			Variable(val_feat.cuda(async=True)),Variable(val_phrase.cuda(async=True)),Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 		val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
 	else:
-		# result,res_h,emb_h = model(Variable(val_emb),Variable(val_pos),Variable(val_cons),Variable(val_vowel),
+		# result,res_h,emb_h = model(Variable(val_emb),Variable(val_pos),Variable(val_pos_feat),Variable(val_cons),Variable(val_vowel),
 		# 	Variable(val_pretone),Variable(val_tone),Variable(val_postone),
 		# 	Variable(val_feat),Variable(val_phrase),Variable(val_len))
-		result = model(Variable(val_emb),Variable(val_pos),Variable(val_cons),Variable(val_vowel),
+		result = model(Variable(val_emb),Variable(val_pos),Variable(val_pos_feat),Variable(val_cons),Variable(val_vowel),
 			Variable(val_pretone),Variable(val_tone),Variable(val_postone),
 			Variable(val_feat),Variable(val_phrase),Variable(val_len))
 		result = result.data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
