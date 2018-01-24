@@ -272,10 +272,10 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
 		# self.linear_init(self.phrase_l2)
 
-		self.concar_l1 = nn.Linear(self.phrase_linear_size+self.linear_h1,self.linear_h1)
-		self.linear_init(self.concar_l1)
-		self.concar_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.concar_l2)
+		self.concat_l1 = nn.Linear(self.phrase_linear_size+self.linear_h1,self.linear_h1)
+		self.linear_init(self.concat_l1)
+		self.concat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.concat_l2)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
