@@ -226,7 +226,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		##LSTM
 		self.lstm_layer = 1
-		self.bidirectional_flag = False
+		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size*self.pos_emb_length+self.pos_feat_num, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
