@@ -305,7 +305,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
 		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
 		tone = self.tone_embed(tone)
-		tone = self.conv_tone(tone.permute(0,2,1)).permute(0,2,1)
+		# tone = self.conv_tone(tone.permute(0,2,1)).permute(0,2,1)
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
 
@@ -532,8 +532,12 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 	###########################################################
 
 	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
-	print("abs:")
-	print(np.abs(prediction-true_f0).mean(axis=0))
+	# print("abs:")
+	# print(np.abs(prediction-true_f0).mean(axis=0))
+	print("mean abs:")
+	print(np.abs(prediction.mean(axis=1)-true_f0.mean(axis=1)).mean())
+	print("std abs:")
+	print(np.abs(prediction.std(axis=1)-true_f0.std(axis=1)).mean())
 
 	if save_prediction!="":
 		np.savetxt(save_prediction,prediction,delimiter=" ",fmt="%.3f")
