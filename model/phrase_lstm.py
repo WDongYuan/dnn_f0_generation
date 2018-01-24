@@ -230,7 +230,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.direction = 2 if self.bidirectional_flag else 1
 		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size*self.pos_emb_length+self.pos_feat_num, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.lstm_hidden_size,
+		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size+self.emb_size+self.pos_emb_size*self.pos_emb_length+self.pos_feat_num, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.acc_lstm = MEAN_LSTM(self.emb_size)
 
@@ -264,13 +264,13 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.feat_l1)
-		# self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		# self.linear_init(self.feat_l2)
+		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.feat_l2)
 
 		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.direction,self.phrase_linear_size)
 		self.linear_init(self.phrase_l1)
-		# self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
-		# self.linear_init(self.phrase_l2)
+		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
+		self.linear_init(self.phrase_l2)
 
 		self.concat_l1 = nn.Linear(self.phrase_linear_size+self.linear_h1,self.linear_h1)
 		self.linear_init(self.concat_l1)
@@ -325,23 +325,23 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.relu(feat_h)
-		# feat_h = self.feat_l2(feat_h)
+		feat_h = self.feat_l2(feat_h)
 
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
+		ph_h_0 = torch.cat((tone,cons,vowel,phrase,emb,pos,pos_feat),dim=2)
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
-		# ph_h = self.phrase_l2(ph_h)
+		ph_h = self.phrase_l2(ph_h)
 
-		h = torch.cat((ph_h,feat_h),dim=2)
-		h = self.concat_l1(h)
-		h = self.relu(ph_h)
-		h = self.concat_l2(h)
+		# h = torch.cat((ph_h,feat_h),dim=2)
+		# h = self.concat_l1(h)
+		# h = self.relu(ph_h)
+		# h = self.concat_l2(h)
 
-		# h = feat_h
+		h = ph_h
 
 		################################################################################
 		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
