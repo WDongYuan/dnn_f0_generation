@@ -1017,9 +1017,9 @@ if __name__=="__main__":
 		train_phrase = torch.FloatTensor(train_phrase.tolist())
 
 		test_emb = test_emb.reshape((len(test_emb),-1))
-		test_pos = test_pos.reshape((test_pos.shape[0],test_pos.shape[2],-1))
-		test_pos_feat = test_pos_feat.reshape((test_pos_feat.shape[0],test_pos_feat.shape[2],-1))
-		print(test_pos_feat.shape)
+		test_pos = test_pos.reshape((test_pos.shape[0],test_pos.shape[1],-1))
+		test_pos_feat = test_pos_feat.reshape((test_pos_feat.shape[0],test_pos_feat.shape[1],-1))
+		# print(test_pos_feat.shape)
 		test_cons = test_cons.reshape((len(test_cons),-1))
 		test_vowel = test_vowel.reshape((len(test_vowel),-1))
 		test_tone = test_tone.reshape((len(test_tone),-1))
