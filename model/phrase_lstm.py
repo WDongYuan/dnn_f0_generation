@@ -327,7 +327,6 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		h = feat_h+ph_h
 		# h = feat_h
 
-		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
 		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
 		# ph_h = ph_h.view(self.batch_size,self.max_length*self.f0_dim)
