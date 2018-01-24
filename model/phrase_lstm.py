@@ -241,10 +241,10 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.conv1 = nn.Sequential(
 			nn.Conv1d(self.emb_size,self.out_channel,3,stride=1,padding=1),
 			self.dropout,
-			nn.Tanh(),
-			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
-			self.dropout,
 			nn.Tanh())
+			# nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
+			# self.dropout,
+			# nn.Tanh())
 
 		# self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
 		# self.linear_init(self.cnn_l1)
