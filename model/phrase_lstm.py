@@ -185,6 +185,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.emb_size = emb_size
 		self.feat_size = feat_size
 		self.pos_emb_size = pos_emb_size
+		self.pos_emb_length = 3##how many pos emb per sample (pre,current,post)
 		self.tone_emb_size = tone_emb_size
 		self.phrase_num = phrase_num
 
@@ -227,7 +228,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = False
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size*self.pos_emb_length+self.pos_feat_num, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -235,16 +236,15 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 
 		# CONV
-		# self.dropout = nn.Dropout(0.5)
-		# self.concat_length = self.emb_size+self.feat_size+self.pos_emb_size
-		# self.out_channel = 50
-		# self.conv1 = nn.Sequential(
-		# 	nn.Conv1d(self.concat_length,self.out_channel,3,stride=1,padding=1),
-		# 	self.dropout,
-		# 	nn.Tanh(),
-		# 	nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
-		# 	self.dropout,
-		# 	nn.Tanh())
+		self.dropout = nn.Dropout(0.5)
+		self.out_channel = self.emb_size
+		self.conv1 = nn.Sequential(
+			nn.Conv1d(self.emb_size,self.out_channel,3,stride=1,padding=1),
+			self.dropout,
+			nn.Tanh(),
+			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
+			self.dropout,
+			nn.Tanh())
 
 		# self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
 		# self.linear_init(self.cnn_l1)
@@ -295,39 +295,44 @@ class PHRASE_MEAN_LSTM(nn.Module):
 	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
-		pos = self.pos_embed(pos)
+		emb = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
+		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
+		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
 		tone = self.tone_embed(tone)
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
 
 
-		# c_0 = self.init_hidden()
-		# h_0 = self.init_hidden()
-		# emb_h = torch.cat((emb,feat,pos),dim=2)
-		# emb_h_n, (_,_) = self.emb_lstm(emb_h,(h_0,c_0))
-		# emb_h = self.emb_l1(emb_h_n)
-		# emb_h = self.tanh(emb_h)
-		# emb_h = self.emb_l2(emb_h)
+		
+		c_0 = self.init_hidden()
+		h_0 = self.init_hidden()
 
-		# c_0 = self.init_phrase_hidden()
-		# h_0 = self.init_phrase_hidden()
-		# ph_h = torch.cat((phrase,tone,cons,vowel),dim=2)
-		# ph_h_n, (_,_) = self.phrase_lstm(ph_h,(h_0,c_0))
-		# ph_h = self.phrase_l1(ph_h_n)
-		# ph_h = self.relu(ph_h)
-		# ph_h = self.phrase_l2(ph_h)
+		# print(pos.size())
+		# print(pos_feat.size())
+		feat_h_0 = torch.cat((feat,emb,pos,pos_feat),dim=2)
+		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
+		feat_h = self.feat_l1(feat_h_n)
+		feat_h = self.tanh(feat_h)
+		feat_h = self.feat_l2(feat_h)
 
-		acc_emb = emb
-		acc_h = self.acc_lstm(acc_emb)
-		acc_h = acc_h.view(acc_h.size()[0],acc_h.size()[1],1)
+		c_0 = self.init_phrase_hidden()
+		h_0 = self.init_phrase_hidden()
 
-		h = acc_h
+		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
+		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		ph_h = self.phrase_l1(ph_h_n)
+		ph_h = self.relu(ph_h)
+		ph_h = self.phrase_l2(ph_h)
 
-		# cnn_h = self.conv1(emb.permute(0,2,1)).permute(0,2,1)
-		# cnn_h = self.cnn_l1(cnn_h)
-		# cnn_h = self.relu(cnn_h)
-		# cnn_h = self.cnn_l2(cnn_h)
-		# h = cnn_h
+		h = feat_h+ph_h
+		# h = feat_h
+
+		h = h.view(self.batch_size,self.max_length*self.f0_dim)
+		################################################################################
+		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
+		# ph_h = ph_h.view(self.batch_size,self.max_length*self.f0_dim)
+		# return h,feat_h,ph_h
+		################################################################################
 
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
