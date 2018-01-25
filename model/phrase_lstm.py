@@ -493,6 +493,8 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				# print(param_group.keys())
 				if param_group["my_name"]!="embed.weight":
 					param_group['lr'] = learning_rate
+				else:
+					print("find embed.weight")
 			print("#####################################")
 			print("learning rate: "+str(learning_rate))
 			print("#####################################")
