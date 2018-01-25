@@ -487,7 +487,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				min_loss = val_loss
 		if (epoch+1)%decay_step==0:
 			learning_rate *= decay_rate
-			print((optimizer.param_groups).encode("utf-8"))
+			print(str(optimizer.param_groups).decode("utf-8"))
 			for param_group in optimizer.param_groups:
 				param_group['lr'] = learning_rate
 			print("#####################################")
