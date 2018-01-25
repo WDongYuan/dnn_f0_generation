@@ -333,13 +333,13 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
-		emb_h_0 = torch.cat((emb,pos,pos_feat),dim=2)
-		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
-		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.tanh(emb_h)
-		emb_h = self.emb_l2(emb_h)
+		# emb_h_0 = torch.cat((emb,pos,pos_feat),dim=2)
+		# emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
+		# emb_h = self.emb_l1(emb_h_n)
+		# emb_h = self.tanh(emb_h)
+		# emb_h = self.emb_l2(emb_h)
 
-		h = ph_h+feat_h+emb_h
+		h = ph_h+feat_h
 
 		################################################################################
 		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
