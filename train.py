@@ -1074,7 +1074,6 @@ if __name__=="__main__":
 		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 		tmp_param = [name for name,param in model.named_parameters()]
 		print(tmp_param)
-		print(model.__dict__.keys())
 		decay_step = config.decay_step
 		decay_rate = config.decay_rate
 		epoch_num = config.epoch_num

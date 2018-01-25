@@ -207,9 +207,9 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.phrase_hidden_size = self.lstm_hidden_size
 		self.phrase_linear_size = self.linear_h1
 
-		# self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
-		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
-		self.embed = EMB(self.voc_size,self.emb_size)
+		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
+		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+		# self.embed = EMB(self.voc_size,self.emb_size)
 		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
 		init.uniform(self.pos_embed.weight,a=-0.01,b=0.01)
 
