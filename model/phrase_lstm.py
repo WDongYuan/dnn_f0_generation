@@ -207,8 +207,9 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.phrase_hidden_size = self.lstm_hidden_size
 		self.phrase_linear_size = self.linear_h1
 
-		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
-		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+		# self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
+		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
+		self.embed = EMB(self.voc_size,self.emb_size)
 		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
 		init.uniform(self.pos_embed.weight,a=-0.01,b=0.01)
 
@@ -356,6 +357,15 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		return h
+class EMB(nn.Module):
+	def __init__(self,voc_size,emb_size):
+		super(EMB,self).__init__():
+		self.voc_size = voc_size
+		self.emb_size = emb_size
+		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
+		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+	def forward(self,sent):
+		return self.embed(sent)
 
 class MEAN_LSTM(nn.Module):
 	def __init__(self,input_length):
@@ -477,7 +487,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				min_loss = val_loss
 		if (epoch+1)%decay_step==0:
 			learning_rate *= decay_rate
-			# print(len(optimizer.param_groups))
+			print(optimizer.param_groups)
 			for param_group in optimizer.param_groups:
 				param_group['lr'] = learning_rate
 			print("#####################################")
