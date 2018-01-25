@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
 cuda_flag = None
 ##concat? element-wise product? add?
 ##try the last hidden layer
