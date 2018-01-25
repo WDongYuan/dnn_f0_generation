@@ -1074,8 +1074,8 @@ if __name__=="__main__":
 		param_list = []
 		for name,param in model.named_parameters():
 			if name=="embed.weight":
-				print("find embed.weight")
-				param_list.append({'params': param, 'lr': 10*learning_rate,"my_name":name})
+				# print("find embed.weight")
+				param_list.append({'params': param, 'lr': 100*learning_rate,"my_name":name})
 			else:
 				param_list.append({'params': param,"my_name":name})
 
