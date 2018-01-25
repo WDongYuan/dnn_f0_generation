@@ -359,7 +359,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		return h
 class EMB(nn.Module):
 	def __init__(self,voc_size,emb_size):
-		super(EMB,self).__init__():
+		super(EMB,self).__init__()
 		self.voc_size = voc_size
 		self.emb_size = emb_size
 		self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
