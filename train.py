@@ -1074,7 +1074,7 @@ if __name__=="__main__":
 		param_list = []
 		for name,param in model.named_parameters():
 			if name in ["embed.weight","pos_embed","cons_embed","vowel_embed"]:
-				# print("find embed.weight")
+				print(name)
 				param_list.append({'params': param, 'lr': 10*learning_rate,"my_name":name})
 			else:
 				param_list.append({'params': param,"my_name":name})

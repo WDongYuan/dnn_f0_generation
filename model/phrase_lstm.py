@@ -498,7 +498,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 						# print("find embed.weight")
 						param_group['lr'] = learning_rate
 					else:
-						param_group['lr'] = 10*learning_rate
+						param_group['lr'] = 5*learning_rate
 			print("#####################################")
 			print("learning rate: "+str(learning_rate))
 			print("#####################################")
