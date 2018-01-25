@@ -230,7 +230,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.direction = 2 if self.bidirectional_flag else 1
 		self.feat_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size*self.pos_emb_length+self.pos_feat_num, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size+self.pos_emb_size*self.pos_emb_length+self.pos_feat_num, self.lstm_hidden_size,
+		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.res_lstm = nn.LSTM(self.feat_size+self.emb_size+self.pos_emb_size*self.pos_emb_length+self.pos_feat_num+self.lstm_hidden_size*self.direction, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -318,8 +318,8 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 
 		
-		c_0 = self.init_hidden()
-		h_0 = self.init_hidden()
+		# c_0 = self.init_hidden()
+		# h_0 = self.init_hidden()
 
 		# print(pos.size())
 		# print(pos_feat.size())
