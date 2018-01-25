@@ -339,7 +339,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# ph_h = self.phrase_l2(ph_h)
 
 		ph_h_n = torch.cat((ph_h_n,feat,emb,pos,pos_feat),dim=2)
-		res_h_n, (res_h_t,res_c_t) = self.phrase_lstm(ph_h_n,(ph_h_t,ph_c_t))
+		res_h_n, (res_h_t,res_c_t) = self.res_lstm(ph_h_n,(ph_h_t,ph_c_t))
 
 		h = self.concat_l1(res_h_n)
 		h = self.relu(h)
