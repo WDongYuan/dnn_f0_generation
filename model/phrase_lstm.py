@@ -494,11 +494,12 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				if param_group["my_name"] not in ["embed.weight","pos_embed.weight","cons_embed.weight","vowel_embed.weight"]:
 					param_group['lr'] = learning_rate
 				else:
-					if epoch>=1:
-						# print("find embed.weight")
-						param_group['lr'] = learning_rate
-					else:
-						param_group['lr'] = 10*learning_rate
+					param_group['lr'] = learning_rate
+					# if epoch>=1:
+					# 	# print("find embed.weight")
+					# 	param_group['lr'] = learning_rate
+					# else:
+					# 	param_group['lr'] = 10*learning_rate
 			print("#####################################")
 			print("learning rate: "+str(learning_rate))
 			print("#####################################")
