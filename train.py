@@ -1071,9 +1071,18 @@ if __name__=="__main__":
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
-		optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-		tmp_param = [name for name,param in model.named_parameters()]
-		print(tmp_param)
+		param_list = []
+		for name,param in model.named_parameters():
+			if name=="embed.weight":
+				print("find embed.weight")
+				param_list.append({'params': param, 'lr': 10*learning_rate,"my_name":name})
+			else:
+				param_list.append({'params': param,"my_name":name})
+
+		# optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+		optimizer = optim.Adam(param_list, lr=learning_rate)
+		# tmp_param = [name for name,param in model.named_parameters()]
+		# print(tmp_param)
 		decay_step = config.decay_step
 		decay_rate = config.decay_rate
 		epoch_num = config.epoch_num
