@@ -491,12 +491,14 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			# print(str(optimizer.param_groups).decode("utf-8"))
 			for param_group in optimizer.param_groups:
 				# print(param_group.keys())
-				if param_group["my_name"]!="embed.weight":
+				if param_group["my_name"] not in ["embed.weight","pos_embed","cons_embed","vowel_embed"]:
 					param_group['lr'] = learning_rate
 				else:
 					if epoch>5:
 						# print("find embed.weight")
 						param_group['lr'] = learning_rate
+					else:
+						param_group['lr'] = 10*learning_rate
 			print("#####################################")
 			print("learning rate: "+str(learning_rate))
 			print("#####################################")
