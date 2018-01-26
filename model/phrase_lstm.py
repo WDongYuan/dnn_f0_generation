@@ -295,7 +295,8 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 	def linear_init(self,layer,lower=-1,upper=1):
 		layer.weight.data.uniform_(lower, upper)
-		layer.bias.data.uniform_(lower, upper)
+		if layer.bias is not None:
+			layer.bias.data.uniform_(lower, upper)
 	def init_hidden(self):
 		direction = 2 if self.bidirectional_flag else 1
 		###########################################################
