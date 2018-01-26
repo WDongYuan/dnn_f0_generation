@@ -551,7 +551,7 @@ def append_dep_to_feature(feat_dir,dep_file,dep_dic):
 			row += 1
 			token.pop(-1)##remove punctuation
 
-			feat_vec = np.zeros((len(token),dep_num*2))
+			feat_vec = np.zeros((len(token),dep_num*4))
 			token_len = np.zeros((len(token),),dtype=np.int32)
 			for i in range(len(token)):
 				token_len[i] = len(token[i].decode("utf-8"))
@@ -563,10 +563,10 @@ def append_dep_to_feature(feat_dir,dep_file,dep_dic):
 				to_idx = int(tup[2])-1
 				if from_idx==len(token) or to_idx==len(token):
 					continue
-				feat_vec[from_idx,dep_idx*2+0] = 1
-				# feat_vec[from_idx,dep_idx*4+3] = to_idx
-				feat_vec[to_idx,dep_idx*2+1] = 1
-				# feat_vec[to_idx,dep_idx*4+2] = from_idx
+				feat_vec[from_idx,dep_idx*4+0] = 1
+				feat_vec[from_idx,dep_idx*4+3] = to_idx
+				feat_vec[to_idx,dep_idx*4+1] = 1
+				feat_vec[to_idx,dep_idx*4+2] = from_idx
 
 			data_dic[data_name] = [feat_vec,token_len]
 
@@ -592,7 +592,7 @@ def append_dep_to_feature(feat_dir,dep_file,dep_dic):
 		with open(feat_dir+"/"+file_name,"w+") as f:
 			f.writelines(file_sents)
 
-	print("dependency features "+str(feature_before)+" "+str(feature_before+dep_num*2-1))
+	print("dependency features "+str(feature_before)+" "+str(feature_before+dep_num*4-1))
 	return
 
 def one_hot_to_index(arr,zero_padding=True):

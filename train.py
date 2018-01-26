@@ -902,7 +902,7 @@ if __name__=="__main__":
 			dep_file = "./lstm_data/refine_txt_token_dep"
 			# parse_txt_file_dep(txt_file,dep_file)
 			dep_dic = get_dep_dic(dep_file,"./lstm_data/dependency_dic")
-			dep_num = len(dep_dic)*2
+			dep_num = len(dep_dic)*4
 			print("dep_num: "+str(dep_num))
 			append_dep_to_feature("./lstm_data/train",dep_file,dep_dic)
 			append_dep_to_feature("./lstm_data/test",dep_file,dep_dic)
@@ -912,7 +912,7 @@ if __name__=="__main__":
 		pos_num = 18
 		cons_num = 24
 		vowel_num = 38
-		dep_num = 30*2
+		dep_num = 30*4
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
@@ -964,7 +964,7 @@ if __name__=="__main__":
 		train_cons = train_feat[:,:,77].astype(np.int32)
 		train_vowel = train_feat[:,:,78].astype(np.int32)
 		train_phrase = train_feat[:,:,79:85]
-		train_dep = train_feat[:,:,85:145]
+		train_dep = train_feat[:,:,85:205]
 		train_feat = train_feat[:,:,0:71]
 		tmp_shape = train_feat.shape
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -983,7 +983,7 @@ if __name__=="__main__":
 		test_cons = test_feat[:,:,77].astype(np.int32)
 		test_vowel = test_feat[:,:,78].astype(np.int32)
 		test_phrase = test_feat[:,:,79:85]
-		test_dep = test_feat[:,:,85:145]
+		test_dep = test_feat[:,:,85:205]
 		test_feat = test_feat[:,:,0:71]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
