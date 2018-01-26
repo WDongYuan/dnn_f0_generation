@@ -238,7 +238,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size+self.dep_num, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_size+self.dep_lemb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -288,6 +288,9 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.linear_init(self.conv_l1)
 		self.conv_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.conv_l2)
+
+		self.dep_lemb = nn.Linear(self.dep_num,self.dep_lemb_size,bias=False)
+		self.linear_init(self.dep_lemb)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -346,6 +349,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# concat_feat = torch.cat((pos,pos_feat,dep),dim=2).view(self.batch_size,1,self.max_length*self.concat_len)
 		# concat_feat = self.conv1(concat_feat).permute(0,2,1)
 		# concat_feat = concat_feat.view(self.batch_size,self.max_length,self.concat_len)
+		dep = self.dep_lemb(dep)
 		emb_h_0 = torch.cat((emb,dep),dim=2)
 		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
