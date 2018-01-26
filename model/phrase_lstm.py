@@ -233,7 +233,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		##LSTM
 		
-		self.out_channel = 100
+		self.out_channel = 200
 
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
@@ -255,6 +255,8 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.concat_len = self.pos_feat_num+self.pos_emb_size*self.pos_emb_length+self.dep_num
 		self.conv1 = nn.Sequential(
 			nn.Conv1d(1,self.out_channel,self.concat_len*3,stride=self.concat_len,padding=self.concat_len),
+			nn.Tanh(),
+			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
 			nn.Tanh())
 
 		# self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
