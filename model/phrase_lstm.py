@@ -194,7 +194,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.tone_emb_size = tone_emb_size
 		self.phrase_num = phrase_num
 		self.dep_num = dep_num
-		self.dep_lemb_size = 20
+		self.dep_lemb_size = 10
 
 		self.pretone_num = pretone_num
 		self.tone_num = tone_num
