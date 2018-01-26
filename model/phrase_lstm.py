@@ -341,7 +341,8 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
-		concat_feat = self.conv1(torch.cat((pos,pos_feat,dep),dim=2))
+		concat_feat = torch.cat((pos,pos_feat,dep),dim=2).view(self.batch_size,1,self.max_length*self.concat_len)
+		concat_feat = self.conv1(concat_feat).view(self.batch_size,self.max_length,self.concat_len)
 		emb_h_0 = torch.cat((emb,feat,concat_feat),dim=2)
 		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
