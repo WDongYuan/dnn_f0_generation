@@ -353,7 +353,7 @@ def get_shape_mean_std(f0_arr,len_arr):
 		std_arr[utt_id,0:utt_len,:] = tmp_std
 	return shape_arr,mean_arr,std_arr
 
-def parse_txt_file(txt_file,out_file):
+def parse_txt_file_pos(txt_file,out_file):
 	parser = StanfordCoreNLP(r'/Users/weidong/Downloads/stanford-corenlp-full-2016-10-31',lang='zh')
 	with open(txt_file) as txtf, open(out_file,"w+") as outf:
 		for line in txtf:
@@ -367,6 +367,26 @@ def parse_txt_file(txt_file,out_file):
 			outf.write(" ".join([tup[1] for tup in pos]).encode("utf-8")+"\n")
 			outf.write("\n")
 	return
+
+def parse_txt_file_dep(txt_file,out_file):
+	parser = StanfordCoreNLP(r'/Users/weidong/Downloads/stanford-corenlp-full-2016-10-31',lang='zh')
+	with open(txt_file) as txtf, open("out_file","w+") as outf:
+		for line in txtf:
+			line = line.strip().split(" ")
+			data_name = line[1]
+			print(data_name)
+			text = line[2].decode("utf-8")[1:-1].encode("utf-8")
+			tokens = parser.word_tokenize(text)
+			# pos = parser.pos_tag(text)
+			dep = parser.dependency_parse(text)
+			outf.write(data_name+"\n")
+			outf.write(" ".join(tokens).encode("utf-8")+"\n")
+			# outf.write(" ".join([tup[1] for tup in pos]).encode("utf-8")+"\n")
+			dep_list = []
+			for tup in dep:
+				dep_list.append(tup[0]+","+str(tup[1])+","+str(tup[2]))
+			outf.write(";".join(dep_list)+"\n")
+			outf.write("\n")
 
 def pos_refine(convert_map,pos_file,refine_pos_file):
 	pos_map = {}
@@ -398,6 +418,27 @@ def get_pos_dic(pos_file):
 				if pos not in pos_dic:
 					pos_dic[pos] = len(pos_dic)+1
 	return pos_dic
+
+def get_dep_dic(in_file,out_dic_file):
+	dep_dic = {}
+	with open(in_file) as f:
+		sent = f.readlines()
+		for i in range(len(sent)):
+			if i%4!=2:
+				continue
+			dep = sent[i].strip().split(";")
+			dep = [tmp.split(",") for tmp in dep]
+			for tup in dep:
+				assert len(tup)==3
+				if tup[0] not in dep_dic:
+					dep_dic[tup[0]] = len(dep_dic)
+	# print(dep_dic)
+	# print(len(dep_dic))
+	with open(out_dic_file,"w+") as f:
+		for rel,idx in dep_dic.items():
+			f.write(rel+" "+str(idx)+"\n")
+	return dep_dic
+
 def append_pos_to_feature(feat_dir,pos_file,pos_dic):
 	##read pos tag
 	data_dic = {}
@@ -448,6 +489,11 @@ def append_pos_to_feature(feat_dir,pos_file,pos_dic):
 
 	file_list = os.listdir(feat_dir)
 	file_list = [tmp_name for tmp_name in file_list if "data" in tmp_name]
+
+	feature_before = 0
+	with open(feat_dir+"/"+file_list[0]) as f:
+		feature_before = len(f.readline().strip().split(" "))-10
+
 	for file_name in file_list:
 		pos = data_dic[file_name]
 		file_sents = None
@@ -459,7 +505,73 @@ def append_pos_to_feature(feat_dir,pos_file,pos_dic):
 		with open(feat_dir+"/"+file_name,"w+") as f:
 			f.writelines(file_sents)
 
-	print("append 5 pos features: pos tag, pre pos tag, next pos tag, pos position in utterance, word position in pos")
+	# print("append 5 pos features: pos tag, pre pos tag, next pos tag, pos position in utterance, word position in pos")
+	print("pos features "+str(feature_before)+" "+str(feature_before+5-1))
+	return
+
+def append_dep_to_feature(feat_dir,dep_file,dep_dic):
+	#4 dimension for every relation: from_relation,to_relation,from_idx,to_idx
+
+	data_dic = {}
+	dep_num = len(dep_dic)
+
+	with open(dep_file) as f:
+		sents = f.readlines()
+		row = 0
+		while row < len(sents):
+			data_name = sents[row].strip()
+			# print(data_name)
+			row += 1
+			token = sents[row].strip().split(" ")
+			row += 1
+			dep = sents[row].strip().split(";")
+			dep = [tmp.split(",") for tmp in dep]
+			row += 1
+			row += 1
+			token.pop(-1)##remove punctuation
+
+			feat_vec = np.zeros((len(token),dep_num*2))
+			token_len = np.zeros((len(token),),dtype=np.int32)
+			for i in range(len(token)):
+				token_len[i] = len(token[i].decode("utf-8"))
+			for tup in dep:
+				if tup[0]=="punct" or tup[0]=="discourse" or tup[0]=="dep":
+					continue
+				dep_idx = dep_dic[tup[0]]
+				from_idx = int(tup[1])-1
+				to_idx = int(tup[2])-1
+				if from_idx==len(token) or to_idx==len(token):
+					continue
+				feat_vec[from_idx,dep_idx*2+0] = 1
+				# feat_vec[from_idx,dep_idx*4+3] = to_idx
+				feat_vec[to_idx,dep_idx*2+1] = 1
+				# feat_vec[to_idx,dep_idx*4+2] = from_idx
+
+			data_dic[data_name] = [feat_vec,token_len]
+
+	file_list = os.listdir(feat_dir)
+	file_list = [tmp_name for tmp_name in file_list if "data" in tmp_name]
+
+	feature_before = 0
+	with open(feat_dir+"/"+file_list[0]) as f:
+		feature_before = len(f.readline().strip().split(" "))-10
+
+	for file_name in file_list:
+		feat_vec,token_len = data_dic[file_name]
+		file_sents = None
+		with open(feat_dir+"/"+file_name) as f:
+			file_sents = f.readlines()
+		assert len(file_sents)==token_len.sum()
+
+		row = 0
+		for i in range(len(feat_vec)):
+			for j in range(token_len[i]):
+				file_sents[row] = file_sents[row].strip()+" "+" ".join(feat_vec[i].astype(np.str).tolist())+"\n"
+				row += 1
+		with open(feat_dir+"/"+file_name,"w+") as f:
+			f.writelines(file_sents)
+
+	print("dependency features "+str(feature_before)+" "+str(feature_before+dep_num*2-1))
 	return
 
 def one_hot_to_index(arr,zero_padding=True):
@@ -507,6 +619,12 @@ def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic):
 				data[data_name] = []
 			data[data_name].append(syl[0:-1])
 	file_list = os.listdir(feat_dir)
+	file_list = [file for file in file_list if "data" in file]
+
+	feature_before = 0
+	with open(feat_dir+"/"+file_list[0]) as f:
+		feature_before = len(f.readline().strip().split(" "))-10
+
 	for data_name in file_list:
 		if "data" not in data_name:
 			continue
@@ -521,7 +639,8 @@ def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic):
 			for i in range(len(feat_cont)):
 				feat_cont[i] = feat_cont[i]+" "+str(cvl[i][0])+" "+str(cvl[i][1])+"\n"
 			f.writelines(feat_cont)
-	print("append 2 syllable features")
+	# print("append 2 syllable features")
+	print("syllable features "+str(feature_before)+" "+str(feature_before+2-1))
 
 def normalize(arr):
 	arr_mean = arr.mean(axis=0)
@@ -530,6 +649,12 @@ def normalize(arr):
 
 def append_phrase_to_feature(feat_dir,phrase_syl_dir):
 	file_list = os.listdir(feat_dir)
+	file_list = [file for file in file_list if "data" in file]
+
+	feature_before = 0
+	with open(feat_dir+"/"+file_list[0]) as f:
+		feature_before = len(f.readline().strip().split(" "))-10
+
 	for file in file_list:
 		if "data" not in file:
 			continue
@@ -571,7 +696,8 @@ def append_phrase_to_feature(feat_dir,phrase_syl_dir):
 			with open(feat_dir+"/"+file,"w+") as outf:
 				for i in range(len(ori_feat)):
 					outf.write(ori_feat[i].strip()+" "+" ".join(phrase_feat[i].astype(np.str).tolist())+"\n")
-	print("append 6 phrase features")
+	# print("append 6 phrase features")
+	print("phrase features "+str(feature_before)+" "+str(feature_before+6-1))
 
 def get_word_mean(emb,f0,voc_size,f0_mean=None):
 	#get the mean f0 of the specific word for every f0 sample

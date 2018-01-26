@@ -23,7 +23,7 @@ from utils.data_processing import get_f0_embedding
 from utils.data_processing import get_f0_feature
 from utils.data_processing import get_f0_feature_list
 from utils.data_processing import get_shape_mean_std
-from utils.data_processing import parse_txt_file
+from utils.data_processing import parse_txt_file_pos
 from utils.data_processing import append_pos_to_feature
 from utils.data_processing import one_hot_to_index
 from utils.data_processing import get_syl_dic
@@ -34,6 +34,9 @@ from utils.data_processing import normalize
 from utils.data_processing import append_phrase_to_feature
 from utils.data_processing import get_word_mean
 from utils.data_processing import pos_refine
+from utils.data_processing import get_dep_dic
+from utils.data_processing import append_dep_to_feature
+
 from model.mlp import MLP
 from model import embedding_lstm
 from model import feature_lstm
@@ -859,7 +862,7 @@ if __name__=="__main__":
 			collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
 			############################################
 
-			# parse_txt_file(txt_file,"./lstm_data/txt_token_pos")
+			# parse_txt_file_pos(txt_file,"./lstm_data/txt_token_pos")
 
 			
 			############################################
@@ -889,12 +892,25 @@ if __name__=="__main__":
 			############################################
 			append_phrase_to_feature("./lstm_data/train",phrase_syl_dir)
 			append_phrase_to_feature("./lstm_data/test",phrase_syl_dir)
+			# exit()
+			############################################
+
+			############################################
+			##dependency feature
+			dep_file = "./lstm_data/txt_token_dep"
+			# parse_txt_file_dep(txt_file,dep_file)
+			dep_dic = get_dep_dic(dep_file,"./lstm_data/dependency_dic")
+			dep_num = len(dep_dic)*2
+			print("dep_num: "+str(dep_num))
+			append_dep_to_feature("./lstm_data/train",dep_file,dep_dic)
+			append_dep_to_feature("./lstm_data/test",dep_file,dep_dic)
 			exit()
 			############################################
 
 		pos_num = 18
 		cons_num = 24
 		vowel_num = 38
+		dep_num = 45*2
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
@@ -922,8 +938,8 @@ if __name__=="__main__":
 		# exit()
 		############################################
 		# if predict mean
-		train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
-		test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
 		# get the mean f0 for word
 		# train_emb = train_feat[:,:,-10].astype(np.int32)
@@ -939,14 +955,15 @@ if __name__=="__main__":
 
 
 
-		train_emb = train_feat[:,:,-14].astype(np.int32)
-		train_pos = train_feat[:,:,-13:-8].astype(np.int32)
+		train_emb = train_feat[:,:,71].astype(np.int32)
+		train_pos = train_feat[:,:,72:77].astype(np.int32)
 		train_pos_feat = train_pos[:,:,3:]
 		train_pos = train_pos[:,:,0:3]
-		train_cons = train_feat[:,:,-8].astype(np.int32)
-		train_vowel = train_feat[:,:,-7].astype(np.int32)
-		train_phrase = train_feat[:,:,-6:]
-		train_feat = train_feat[:,:,0:-14]
+		train_cons = train_feat[:,:,77].astype(np.int32)
+		train_vowel = train_feat[:,:,78].astype(np.int32)
+		train_phrase = train_feat[:,:,79:85]
+		train_dep = train_feat[:,:,85:175]
+		train_feat = train_feat[:,:,0:71]
 		tmp_shape = train_feat.shape
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -957,14 +974,15 @@ if __name__=="__main__":
 		# print(train_pos_feat.shape)
 		# exit()
 
-		test_emb = test_feat[:,:,-14].astype(np.int32)
-		test_pos = test_feat[:,:,-13:-8].astype(np.int32)
+		test_emb = test_feat[:,:,71].astype(np.int32)
+		test_pos = test_feat[:,:,72:77].astype(np.int32)
 		test_pos_feat = test_pos[:,:,3:]
 		test_pos = test_pos[:,:,0:3]
-		test_cons = test_feat[:,:,-8].astype(np.int32)
-		test_vowel = test_feat[:,:,-7].astype(np.int32)
-		test_phrase = test_feat[:,:,-6:]
-		test_feat = test_feat[:,:,0:-14]
+		test_cons = test_feat[:,:,77].astype(np.int32)
+		test_vowel = test_feat[:,:,78].astype(np.int32)
+		test_phrase = test_feat[:,:,79:85]
+		test_dep = test_feat[:,:,85:175]
+		test_feat = test_feat[:,:,0:71]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -981,11 +999,19 @@ if __name__=="__main__":
 		postone_num = 7
 		pos_feat_num = 2
 
-		# ori_train_f0 = train_f0
-		# ori_train_emb = train_emb
-		# ori_train_pos = train_pos
-		# ori_train_feat = train_feat
-		# ori_train_len = train_len
+		ori_train_f0 = train_f0
+		ori_train_emb = train_emb
+		ori_train_pos = train_pos
+		ori_train_pos_feat = train_pos_feat
+		ori_train_cons = train_cons
+		ori_train_vowel = train_vowel
+		ori_train_tone = train_tone
+		ori_train_pretone = train_pretone
+		ori_train_postone = train_postone
+		ori_train_feat = train_feat
+		ori_train_len = train_len
+		ori_train_phrase = train_phrase
+		ori_train_dep = train_dep
 
 		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
@@ -999,6 +1025,7 @@ if __name__=="__main__":
 		train_feat = train_feat[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,feat_num))
 		train_len = train_len[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size))
 		train_phrase = train_phrase[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,phrase_num))
+		train_dep = train_dep[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,dep_num))
 
 
 		# print(train_pos_feat.shape)
@@ -1015,6 +1042,7 @@ if __name__=="__main__":
 		train_f0 = torch.FloatTensor(train_f0.tolist())
 		train_len = torch.LongTensor(train_len.tolist())
 		train_phrase = torch.FloatTensor(train_phrase.tolist())
+		train_dep = torch.FloatTensor(train_dep.tolist())
 
 		test_emb = test_emb.reshape((len(test_emb),-1))
 		test_pos = test_pos.reshape((test_pos.shape[0],test_pos.shape[1],-1))
@@ -1028,6 +1056,7 @@ if __name__=="__main__":
 		test_f0 = test_f0.reshape((len(test_f0),-1))
 		test_len = test_len
 		test_phrase = test_phrase.reshape((len(test_phrase),-1,phrase_num))
+		test_dep = test_dep.reshape((len(test_dep),-1,dep_num))
 
 		# print(np.sum(test_len))
 		test_emb = torch.LongTensor(test_emb.tolist())
@@ -1042,33 +1071,42 @@ if __name__=="__main__":
 		test_f0 = torch.FloatTensor(test_f0.tolist())
 		test_len = torch.LongTensor(test_len.tolist())
 		test_phrase = torch.FloatTensor(test_phrase.tolist())
+		test_dep = torch.FloatTensor(test_dep.tolist())
 
 		if "predict" in mode:
 			print("predicting...")
-			model = torch.load("my_best_model.model")
-			# model = torch.load('./best_phrase_model', map_location=lambda storage, loc: storage)
+			# model = torch.load("my_best_model.model")
+			model = torch.load('./pos_model', map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
 			# test_pos = torch.LongTensor(ori_train_pos.reshape((len(ori_train_pos),-1)).tolist())
+			# test_pos_feat = torch.FloatTensor(ori_train_pos_feat.tolist())
+			# test_cons = torch.LongTensor(ori_train_cons.tolist())
+			# test_vowel = torch.LongTensor(ori_train_vowel.tolist())
+			# test_tone = torch.LongTensor(ori_train_tone.tolist())
+			# test_pretone = torch.LongTensor(ori_train_pretone.tolist())
+			# test_postone = torch.LongTensor(ori_train_postone.tolist())
 			# test_feat = torch.FloatTensor(ori_train_feat.reshape((len(ori_train_feat),max_length,feat_num)).tolist())
 			# test_len = torch.LongTensor(ori_train_len.tolist())
 			# test_f0 = torch.FloatTensor(ori_train_f0.reshape((len(ori_train_f0),-1)).tolist())
+			# test_phrase = torch.FloatTensor(ori_train_phrase.tolist())
+			# test_dep = torch.FloatTensor(ori_train_dep.tolist())
 			#############################################################
 
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
-				test_feat,test_phrase,test_f0,test_len,"./phrase_lstm_prediction")
+				test_feat,test_phrase,test_dep,test_f0,test_len,"./pos_lstm_res")
 			exit()
 		#############################################################
-		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,pos_feat_num,
-		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		##if predict mean
-		model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,config.voc_size,pos_num,pos_feat_num,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		# model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
 		param_list = []
@@ -1097,6 +1135,7 @@ if __name__=="__main__":
 			train_postone,
 			train_feat,
 			train_phrase,
+			train_dep,
 			train_f0,
 			train_len,
 			test_emb,
@@ -1109,6 +1148,7 @@ if __name__=="__main__":
 			test_postone,
 			test_feat,
 			test_phrase,
+			test_dep,
 			test_f0,
 			test_len,
 			model,

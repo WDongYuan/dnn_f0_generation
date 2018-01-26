@@ -8,7 +8,11 @@ pos+emb+feat cnn: 19.0
 phrase level 2lstm: 18.4
 
 best:
-mean abs:
-17.768384143
-std abs:
-9.16281955638
+shape:
+0.490431044698
+
+mean:
+17.7550211955
+
+std:
+9.22433985359
