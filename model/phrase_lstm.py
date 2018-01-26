@@ -238,7 +238,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size+self.feat_size+self.out_channel, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.dep_num, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -337,17 +337,17 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# feat_h = self.tanh(feat_h)
 		# feat_h = self.feat_l2(feat_h)
 
-		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
-		ph_h_n, (ph_h_t,ph_c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.relu(ph_h)
-		ph_h = self.phrase_l2(ph_h)
+		# ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
+		# ph_h_n, (ph_h_t,ph_c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		# ph_h = self.phrase_l1(ph_h_n)
+		# ph_h = self.relu(ph_h)
+		# ph_h = self.phrase_l2(ph_h)
 
-		concat_feat = torch.cat((pos,pos_feat,dep),dim=2).view(self.batch_size,1,self.max_length*self.concat_len)
-		concat_feat = self.conv1(concat_feat).permute(0,2,1)
+		# concat_feat = torch.cat((pos,pos_feat,dep),dim=2).view(self.batch_size,1,self.max_length*self.concat_len)
+		# concat_feat = self.conv1(concat_feat).permute(0,2,1)
 		# concat_feat = concat_feat.view(self.batch_size,self.max_length,self.concat_len)
-		emb_h_0 = torch.cat((emb,feat,concat_feat),dim=2)
-		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
+		# emb_h_0 = torch.cat((emb,feat,concat_feat),dim=2)
+		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(dep,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
@@ -358,7 +358,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# conv_h = self.tanh(conv_h)
 		# conv_h = self.conv_l2(conv_h)
 
-		h = emb_h+ph_h
+		h = emb_h
 
 		################################################################################
 		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
