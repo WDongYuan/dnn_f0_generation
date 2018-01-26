@@ -902,7 +902,7 @@ if __name__=="__main__":
 			dep_file = "./lstm_data/refine_txt_token_dep"
 			# parse_txt_file_dep(txt_file,dep_file)
 			dep_dic = get_dep_dic(dep_file,"./lstm_data/dependency_dic")
-			dep_num = len(dep_dic)*4
+			dep_num = len(dep_dic)*2
 			print("dep_num: "+str(dep_num))
 			append_dep_to_feature("./lstm_data/train",dep_file,dep_dic)
 			append_dep_to_feature("./lstm_data/test",dep_file,dep_dic)
@@ -912,7 +912,7 @@ if __name__=="__main__":
 		pos_num = 18
 		cons_num = 24
 		vowel_num = 38
-		dep_num = 30*4
+		dep_num = 30*2
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
