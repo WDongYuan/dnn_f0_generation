@@ -232,11 +232,13 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
-		self.concat_len = self.pos_feat_num+self.pos_emb_size*self.pos_emb_length+self.dep_num
+		
+		self.out_channel = 100
+
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size+self.feat_size+self.concat_len, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_size+self.feat_size+self.out_channel, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -246,15 +248,15 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		# CONV
 		self.dropout = nn.Dropout(0.5)
-		# self.out_channel = self.emb_size
 		# self.conv1 = nn.Sequential(
 		# 	nn.Conv1d(self.emb_size,self.out_channel,3,stride=1,padding=1),
 		# 	self.dropout,
 		# 	nn.Tanh())
+		self.concat_len = self.pos_feat_num+self.pos_emb_size*self.pos_emb_length+self.dep_num
 		self.conv1 = nn.Sequential(
-			nn.Conv1d(1,1,self.concat_len*3,stride=self.concat_len,padding=self.concat_len),
+			nn.Conv1d(1,self.out_channel,self.concat_len*3,stride=self.concat_len,padding=self.concat_len),
 			nn.Tanh(),
-			nn.Conv1d(1,1,self.concat_len*3,stride=self.concat_len,padding=self.concat_len),
+			nn.Conv1d(1,self.out_channel,self.concat_len*3,stride=self.concat_len,padding=self.concat_len),
 			nn.Tanh())
 
 		# self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
@@ -342,7 +344,8 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		ph_h = self.phrase_l2(ph_h)
 
 		concat_feat = torch.cat((pos,pos_feat,dep),dim=2).view(self.batch_size,1,self.max_length*self.concat_len)
-		concat_feat = self.conv1(concat_feat).view(self.batch_size,self.max_length,self.concat_len)
+		concat_feat = self.conv1(concat_feat).permute(0,2,1)
+		# concat_feat = concat_feat.view(self.batch_size,self.max_length,self.concat_len)
 		emb_h_0 = torch.cat((emb,feat,concat_feat),dim=2)
 		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
