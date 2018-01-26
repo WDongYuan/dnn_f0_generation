@@ -405,6 +405,27 @@ def pos_refine(convert_map,pos_file,refine_pos_file):
 				new_f.write(" ".join(line)+"\n")
 	return
 
+def dep_refine(convert_map,dep_file,refine_dep_file):
+	dep_map = {}
+	with open(convert_map) as f:
+		for line in f:
+			line = line.strip().split(" ")
+			dep_map[line[0]] = line[1]
+
+	with open(dep_file) as old_f, open(refine_dep_file,"w+") as new_f:
+		old_lines = old_f.readlines()
+		for i in range(len(old_lines)):
+			if i%4!=2:
+				new_f.write(old_lines[i])
+			else:
+				line = old_lines[i].strip().split(";")
+				line = [tmp.split(",") for tmp in line]
+				for tup in line:
+					tup[0] = dep_map[tup[0]]
+				line = [",".join(tup) for tup in line]
+				new_f.write(";".join(line)+"\n")
+	return
+
 def get_pos_dic(pos_file):
 	pos_dic = {}
 	with open(pos_file) as f:

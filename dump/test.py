@@ -11,9 +11,9 @@ def normalize(arr):
 
 
 if __name__=="__main__":
-	a = np.loadtxt("../pos_lstm_dev_res",delimiter=" ")
-	b = np.zeros(a.shape)
-	print(rmse(a,b))
+	# a = np.loadtxt("../pos_lstm_dev_res",delimiter=" ")
+	# b = np.zeros(a.shape)
+	# print(rmse(a,b))
 
 	# tagset = Set([])
 	# with open("../lstm_data/txt_token_pos") as f:
@@ -65,5 +65,10 @@ if __name__=="__main__":
 	# for key,value in dic.items():
 	# 	print(key),
 	# 	print(value)
+
+	with open("dependency_dic") as f, open("tmp_dic","w+") as outf:
+		for line in f:
+			tag = line.strip().split(" ")[0]
+			outf.write(tag+" "+tag.split(":")[0]+"\n")
 	
 	
