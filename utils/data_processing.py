@@ -564,9 +564,9 @@ def append_dep_to_feature(feat_dir,dep_file,dep_dic):
 				if from_idx==len(token) or to_idx==len(token):
 					continue
 				feat_vec[from_idx,dep_idx*4+0] = 1
-				feat_vec[from_idx,dep_idx*4+3] = to_idx
+				feat_vec[from_idx,dep_idx*4+3] = to_idx-from_idx
 				feat_vec[to_idx,dep_idx*4+1] = 1
-				feat_vec[to_idx,dep_idx*4+2] = from_idx
+				feat_vec[to_idx,dep_idx*4+2] = from_idx-to_idx
 
 			data_dic[data_name] = [feat_vec,token_len]
 

@@ -193,6 +193,8 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.pos_emb_length = 3##how many pos emb per sample (pre,current,post)
 		self.tone_emb_size = tone_emb_size
 		self.phrase_num = phrase_num
+		self.dep_num = dep_num
+		self.dep_lemb_size = 20
 
 		self.pretone_num = pretone_num
 		self.tone_num = tone_num
@@ -230,13 +232,14 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
+		self.concat_len = self.pos_feat_num+self.pos_emb_size*self.pos_emb_length+self.dep_num
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.pos_emb_size*self.pos_emb_length+self.pos_feat_num, self.lstm_hidden_size,
+		self.emb_lstm = nn.LSTM(self.emb_size+self.feat_size+self.concat_len, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		# self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
+		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
@@ -248,21 +251,11 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# 	nn.Conv1d(self.emb_size,self.out_channel,3,stride=1,padding=1),
 		# 	self.dropout,
 		# 	nn.Tanh())
-
-		self.out_channel = 50
-		self.conv = nn.Sequential(
-			nn.Conv1d(self.phrase_num+self.tone_emb_size+self.emb_size,self.out_channel,3,stride=1,padding=1),
-			self.dropout,
-			nn.Tanh(),
-			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
-			self.dropout,
-			nn.Tanh(),
-			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
-			self.dropout,
-			nn.Tanh(),
-			nn.Conv1d(self.out_channel,self.out_channel,3,stride=1,padding=1),
-			self.dropout,
-			nn.Tanh())
+		self.conv1 = nn.Sequential(
+			nn.Conv1d(1,1,self.concat_len*3,stride=self.concat_len,padding=self.concat_len),
+			self.Tanh(),
+			nn.Conv1d(1,1,self.concat_len*3,stride=self.concat_len,padding=self.concat_len),
+			self.Tanh())
 
 		# self.cnn_l1 = nn.Linear(self.out_channel,self.linear_h1)
 		# self.linear_init(self.cnn_l1)
@@ -342,25 +335,26 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		# feat_h = self.tanh(feat_h)
 		# feat_h = self.feat_l2(feat_h)
 
-		# ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
-		# ph_h_n, (ph_h_t,ph_c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		# ph_h = self.phrase_l1(ph_h_n)
-		# ph_h = self.relu(ph_h)
-		# ph_h = self.phrase_l2(ph_h)
+		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
+		ph_h_n, (ph_h_t,ph_c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		ph_h = self.phrase_l1(ph_h_n)
+		ph_h = self.relu(ph_h)
+		ph_h = self.phrase_l2(ph_h)
 
-		# emb_h_0 = torch.cat((phrase,emb,tone),dim=2)
-		# emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
-		# emb_h = self.emb_l1(emb_h_n)
-		# emb_h = self.tanh(emb_h)
-		# emb_h = self.emb_l2(emb_h)
+		concat_feat = self.conv1(torch.cat((pos,pos_feat,dep),dim=2))
+		emb_h_0 = torch.cat((emb,feat,concat_feat),dim=2)
+		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
+		emb_h = self.emb_l1(emb_h_n)
+		emb_h = self.tanh(emb_h)
+		emb_h = self.emb_l2(emb_h)
 
 
 		# conv_h = self.conv(emb_h_0.permute(0,2,1)).permute(0,2,1)
-		conv_h = self.conv_l1(feat)
-		conv_h = self.tanh(conv_h)
-		conv_h = self.conv_l2(conv_h)
+		# conv_h = self.conv_l1(feat)
+		# conv_h = self.tanh(conv_h)
+		# conv_h = self.conv_l2(conv_h)
 
-		h = conv_h
+		h = emb_h+ph_h
 
 		################################################################################
 		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
