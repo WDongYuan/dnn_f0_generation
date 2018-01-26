@@ -353,6 +353,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		dep = self.dep_lemb(dep)
 		emb_h_0 = torch.cat((emb,dep),dim=2)
 		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
+		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_t,c_t))
 		emb_h = self.emb_l1(emb_h_n)
 		emb_h = self.tanh(emb_h)
 		emb_h = self.emb_l2(emb_h)
