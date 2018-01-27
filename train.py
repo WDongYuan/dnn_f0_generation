@@ -948,8 +948,8 @@ if __name__=="__main__":
 		# exit()
 		############################################
 		# if predict mean
-		train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
-		test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
 		# get the mean f0 for word
 		# train_emb = train_feat[:,:,-10].astype(np.int32)
@@ -1109,14 +1109,14 @@ if __name__=="__main__":
 				test_feat,test_phrase,test_dep,test_f0,test_len,"./pos_lstm_res")
 			exit()
 		#############################################################
-		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
-		#############################################################
-		##if predict mean
-		model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		#############################################################
+		##if predict mean
+		# model = phrase_lstm.PHRASE_MEAN_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
 		param_list = []
