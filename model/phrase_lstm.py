@@ -139,7 +139,7 @@ class PHRASE_LSTM(nn.Module):
 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
 		###########################################################
 
-	def get_embedding(self.emb_file,voc_size,emb_size):
+	def get_embedding(self,emb_file,voc_size,emb_size):
 		arr = np.loadtxt(emb_file)
 		embed = nn.Embedding(voc_size, emb_size)
 		embed.weight.data.copy_(torch.from_numpy(arr))
