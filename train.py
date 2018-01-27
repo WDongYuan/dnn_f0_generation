@@ -948,8 +948,14 @@ if __name__=="__main__":
 		# exit()
 		############################################
 		# if predict mean
-		train_f0 = train_f0.std(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
-		test_f0 = test_f0.std(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		train_std = train_f0.std(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		test_std = test_f0.std(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		train_mean = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		test_mean = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		train_f0 = (train_f0-train_mean)/(train_std+0.0000001)
+		test_f0 = (test_f0-test_mean)/(test_std+0.0000001)
+		# train_f0 = train_mean
+		# test_f0 = test_mean
 		############################################
 		# get the mean f0 for word
 		# train_emb = train_feat[:,:,-10].astype(np.int32)
@@ -1086,7 +1092,7 @@ if __name__=="__main__":
 		if "predict" in mode:
 			print("predicting...")
 			# model = torch.load("my_best_model.model")
-			model = torch.load('./pos_model', map_location=lambda storage, loc: storage)
+			model = torch.load('/Users/weidong/Desktop/model/mean_model', map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -1106,7 +1112,7 @@ if __name__=="__main__":
 
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
-				test_feat,test_phrase,test_dep,test_f0,test_len,"./pos_lstm_res")
+				test_feat,test_phrase,test_dep,test_f0,test_len,"./predict_mean")
 			exit()
 		#############################################################
 		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
