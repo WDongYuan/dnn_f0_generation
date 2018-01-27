@@ -304,7 +304,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.linear_init(self.dep_lemb)
 
 
-	def linear_init(self,layer,lower=-1,upper=1):
+	def linear_init(self,layer,lower=-100,upper=100):
 		layer.weight.data.uniform_(lower, upper)
 		if layer.bias is not None:
 			layer.bias.data.uniform_(lower, upper)
