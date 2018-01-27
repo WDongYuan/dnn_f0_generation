@@ -157,6 +157,7 @@ class PHRASE_LSTM(nn.Module):
 	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,dep,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
+		grad_emb = self.grad_embed(sents)
 		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
 		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
 		# pretone = self.pretone_embed(pretone)
@@ -174,7 +175,7 @@ class PHRASE_LSTM(nn.Module):
 		# dep = self.dep_lemb(dep)
 		# emb = self.emb_l1(emb)
 		# feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
-		feat_h_0 = self.grad_embed
+		feat_h_0 = self.grad_emb
 		# feat_h_0 = feat
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
