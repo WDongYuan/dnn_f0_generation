@@ -249,12 +249,15 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.emb_lstm = nn.LSTM(self.emb_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		# self.feat_lstm = nn.LSTM(self.feat_size, self.lstm_hidden_size,
-		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+		self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size*self.pos_emb_length+self.pos_feat_num,
+			self.lstm_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+		self.feat_lstm = nn.LSTM(self.feat_size+self.lstm_hidden_size*self.direction,
+			self.lstm_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size,
+			self.lstm_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
 		# CONV
@@ -304,7 +307,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		self.linear_init(self.dep_lemb)
 
 
-	def linear_init(self,layer,lower=-10,upper=10):
+	def linear_init(self,layer,lower=-1,upper=1):
 		layer.weight.data.uniform_(lower, upper)
 		if layer.bias is not None:
 			layer.bias.data.uniform_(lower, upper)
@@ -353,28 +356,28 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
 
-		# feat_h_0 = feat
-		# feat_h_n, (feat_h_t,feat_c_t) = self.feat_lstm(feat_h_0,(h_0,c_0))
-		# feat_h = self.feat_l1(feat_h_n)
-		# feat_h = self.tanh(feat_h)
-		# feat_h = self.feat_l2(feat_h)
+		emb_h_0 = torch.cat((emb,pos,pos_feat),dim=2)
+		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
+		emb_h_t = emb_h_t.permute(1,0,2).view(self.batch_size,1,self.lstm_hidden_size*self.direction)
+		emb_h_t = emb_h_t.expand(self.batch_size,self.max_length,self.lstm_hidden_size*self.direction)
 
-		# ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
-		# ph_h_n, (ph_h_t,ph_c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		# ph_h = self.phrase_l1(ph_h_n)
-		# ph_h = self.relu(ph_h)
-		# ph_h = self.phrase_l2(ph_h)
+		feat_h_0 = torch.cat((feat,emb_h_t),dim=2)
+		feat_h_n, (feat_h_t,feat_c_t) = self.feat_lstm(feat_h_0)
+		feat_h = self.feat_l1(feat_h_n)
+		feat_h = self.tanh(feat_h)
+		feat_h = self.feat_l2(feat_h)
+
+		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
+		ph_h_n, (ph_h_t,ph_c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		ph_h = self.phrase_l1(ph_h_n)
+		ph_h = self.relu(ph_h)
+		ph_h = self.phrase_l2(ph_h)
 
 		# concat_feat = torch.cat((pos,pos_feat,dep),dim=2).view(self.batch_size,1,self.max_length*self.concat_len)
 		# concat_feat = self.conv1(concat_feat).permute(0,2,1)
 		# concat_feat = concat_feat.view(self.batch_size,self.max_length,self.concat_len)
 		# dep = self.dep_lemb(dep)
 		# emb_h_0 = torch.cat((emb,pos,pos_feat,dep),dim=2)
-		emb_h_0 = emb
-		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
-		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.relu(emb_h)
-		emb_h = self.emb_l2(emb_h)
 
 
 		# conv_h = self.conv(emb_h_0.permute(0,2,1)).permute(0,2,1)
