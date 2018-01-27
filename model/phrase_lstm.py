@@ -32,7 +32,7 @@ class PHRASE_LSTM(nn.Module):
 		self.phrase_num = phrase_num
 		self.dep_num = dep_num
 		self.dep_lemb_size = 20
-		self.emb_l_size = 50
+		self.emb_l_size = 100
 
 		self.pretone_num = pretone_num
 		self.tone_num = tone_num
