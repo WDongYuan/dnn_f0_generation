@@ -181,6 +181,49 @@ def word2index(txt_file,voc_size):
 	# 	print(str(index)+" "+word)
 	return dic
 
+def new_word2index(txt_file,emb_file):
+	##add all the words in the dictionary except the words not in pretrain embedding file
+	##return a dictionary for word-count
+	dic = {}
+	with open(txt_file) as f:
+		for line in f:
+			line = line.split(" ")[2].decode("utf-8")[1:-1]
+			for word in line:
+				word = word.encode("utf-8")
+				if word not in dic:
+					dic[word] = 0
+				dic[word] += 1
+
+	word_list = []
+	for word,count in dic.items():
+		word_list.append([word,count])
+	word_list = sorted(word_list,key=lambda tup: tup[1],reverse=True)
+	print("word number: "+str(len(word_list)))
+
+	####################################################
+	##the first 1500 words cover 91% of the corpus
+	# all_count = 0
+	# for word,count in word_list:
+	# 	all_count += count
+	# tmp_count = 0
+	# for word,count in word_list:
+	# 	tmp_count += count
+	# 	print(word+" "+str(float(tmp_count)/all_count))
+	####################################################
+
+	pretrain_set = {}
+	with open(emb_file) as f:
+		for line in f:
+			word = line.split(" ")[0]
+			pretrain_set[word] = True
+
+	dic = {}
+	for tup in word_list:
+		if tup[0] in pretrain_set:
+			dic[tup[0]] = len(dic)+1
+	dic["UNK"] = len(dic)+1
+	return dic
+
 def utt_content(txt_file):
 	dic = {}
 	with open(txt_file) as f:

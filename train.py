@@ -38,6 +38,7 @@ from utils.data_processing import get_dep_dic
 from utils.data_processing import append_dep_to_feature
 from utils.data_processing import dep_refine
 from utils.data_processing import generate_word_embedding
+from utils.data_processing import new_word2index
 
 from model.mlp import MLP
 from model import embedding_lstm
@@ -859,7 +860,10 @@ if __name__=="__main__":
 			############################################
 			print("--->collect data according to the data name")
 			os.system("mkdir lstm_data")
-			word_index = word2index(txt_file,config.voc_size)
+			# word_index = word2index(txt_file,config.voc_size)
+			word_index = new_word2index(txt_file,"./lstm_data/emb_dic")
+			config.voc_size = len(word_index)+1
+			print("vocab size: "+str(config.voc_size))
 
 			with open("./lstm_data/word_dic","w+") as f:
 				for word,idx in word_index.items():
@@ -921,6 +925,7 @@ if __name__=="__main__":
 		cons_num = 24
 		vowel_num = 38
 		dep_num = 30*2
+		config.voc_size = 3601
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
@@ -948,12 +953,12 @@ if __name__=="__main__":
 		# exit()
 		############################################
 		# if predict mean
-		train_std = train_f0.std(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
-		test_std = test_f0.std(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
-		train_mean = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
-		test_mean = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
-		train_f0 = (train_f0-train_mean)/(train_std+0.0000001)
-		test_f0 = (test_f0-test_mean)/(test_std+0.0000001)
+		# train_std = train_f0.std(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# test_std = test_f0.std(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# train_mean = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		# test_mean = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		# train_f0 = (train_f0-train_mean)/(train_std+0.0000001)
+		# test_f0 = (test_f0-test_mean)/(test_std+0.0000001)
 		# train_f0 = train_mean
 		# test_f0 = test_mean
 		############################################
@@ -985,7 +990,7 @@ if __name__=="__main__":
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_postone = one_hot_to_index(train_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
-		# train_feat = np.delete(train_feat,range(35,39),2)
+		train_feat = np.delete(train_feat,range(3,31),2)
 
 		# print(train_pos_feat.shape)
 		# exit()
@@ -1004,7 +1009,7 @@ if __name__=="__main__":
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_postone = one_hot_to_index(test_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
-		# test_feat = np.delete(test_feat,range(35,39),2)
+		test_feat = np.delete(test_feat,range(3,21),2)
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
@@ -1092,7 +1097,7 @@ if __name__=="__main__":
 		if "predict" in mode:
 			print("predicting...")
 			# model = torch.load("my_best_model.model")
-			model = torch.load('/Users/weidong/Desktop/model/mean_model', map_location=lambda storage, loc: storage)
+			model = torch.load('/Users/weidong/Desktop/model/shape_model', map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -1112,7 +1117,7 @@ if __name__=="__main__":
 
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
-				test_feat,test_phrase,test_dep,test_f0,test_len,"./predict_mean")
+				test_feat,test_phrase,test_dep,test_f0,test_len,"./predict_shape")
 			exit()
 		#############################################################
 		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,

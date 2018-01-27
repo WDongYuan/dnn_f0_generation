@@ -66,13 +66,23 @@ if __name__=="__main__":
 	# 	print(key),
 	# 	print(value)
 
-	myset = Set([])
-	with open("../lstm_data/emb_dic") as f:
-		for line in f:
-			myset.add(line.split(" ")[0])
-	with open("../lstm_data/word_dic") as f:
-		for line in f:
-			word = line.split(" ")[0]
-			if word not in myset:
-				print(line)
+	# myset = Set([])
+	# with open("../lstm_data/emb_dic") as f:
+	# 	for line in f:
+	# 		myset.add(line.split(" ")[0])
+	# with open("../lstm_data/word_dic") as f:
+	# 	for line in f:
+	# 		word = line.split(" ")[0]
+	# 		if word not in myset:
+	# 			print(line)
+
+	mean = np.loadtxt("../predict_mean",delimiter=" ")
+	std = np.loadtxt("../predict_std",delimiter=" ")
+	shape = np.loadtxt("../predict_shape",delimiter=" ")
+	mean = mean.reshape((-1,1))
+	std = std.reshape((-1,1))
+	predict = shape*std+mean
+	np.savetxt("./final_predict",predict,delimiter=" ")
+	true = np.loadtxt("../../mandarine/gen_f0/train_dev_data_vector/dev_data_f0_vector",delimiter=" ")
+	print(rmse(predict,true))
 	
