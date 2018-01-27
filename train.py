@@ -1121,7 +1121,7 @@ if __name__=="__main__":
 		learning_rate = config.learning_rate
 		param_list = []
 		for name,param in model.named_parameters():
-			if not paramp.requires_grad:
+			if not param.requires_grad:
 				print(name+" no gradient")
 				continue
 			if name in ["embed.weight","pos_embed.weight","cons_embed.weight","vowel_embed.weight"]:
