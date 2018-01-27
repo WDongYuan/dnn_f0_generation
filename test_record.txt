@@ -9,9 +9,9 @@ phrase level 2lstm: 18.4
 
 best model
 
-train loss: 369.75925023595715
+train loss: 359.21969877275006
 mean abs:
-17.5717032485
+17.3175635968
 std abs:
-9.01628580347
-val loss: 25.6087632656
+9.08841173891
+val loss: 25.391615988
