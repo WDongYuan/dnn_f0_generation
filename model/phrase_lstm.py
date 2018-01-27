@@ -364,7 +364,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		feat_h_0 = torch.cat((feat,emb,pos,pos_feat,emb_h_t),dim=2)
 		feat_h_n, (feat_h_t,feat_c_t) = self.feat_lstm(feat_h_0)
 		feat_h = self.feat_l1(feat_h_n)
-		feat_h = self.tanh(feat_h)
+		feat_h = self.relu(feat_h)
 		feat_h = self.feat_l2(feat_h)
 
 		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
