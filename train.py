@@ -984,13 +984,13 @@ if __name__=="__main__":
 		train_vowel = train_feat[:,:,78].astype(np.int32)
 		train_phrase = train_feat[:,:,79:85]
 		train_dep = train_feat[:,:,85:145]
-		train_feat = train_feat[:,:,0:71]
+		train_feat = train_feat[:,:,0:66]
 		tmp_shape = train_feat.shape
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_postone = one_hot_to_index(train_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
-		train_feat = np.delete(train_feat,range(3,21)+range(66,71),2)
+		train_feat = np.delete(train_feat,range(3,21),2)
 
 		# print(train_pos_feat.shape)
 		# exit()
@@ -1003,13 +1003,13 @@ if __name__=="__main__":
 		test_vowel = test_feat[:,:,78].astype(np.int32)
 		test_phrase = test_feat[:,:,79:85]
 		test_dep = test_feat[:,:,85:145]
-		test_feat = test_feat[:,:,0:71]
+		test_feat = test_feat[:,:,0:66]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_postone = one_hot_to_index(test_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
-		test_feat = np.delete(test_feat,range(3,21)+range(66,71),2)
+		test_feat = np.delete(test_feat,range(3,21),2)
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
