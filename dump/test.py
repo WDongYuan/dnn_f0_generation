@@ -66,9 +66,13 @@ if __name__=="__main__":
 	# 	print(key),
 	# 	print(value)
 
-	with open("dependency_dic") as f, open("tmp_dic","w+") as outf:
+	myset = Set([])
+	with open("../lstm_data/emb_dic") as f:
 		for line in f:
-			tag = line.strip().split(" ")[0]
-			outf.write(tag+" "+tag.split(":")[0]+"\n")
-	
+			myset.add(line.split(" ")[0])
+	with open("../lstm_data/word_dic") as f:
+		for line in f:
+			word = line.split(" ")[0]
+			if word not in myset:
+				print(line)
 	

@@ -1,5 +1,5 @@
-cuda_flag = True
-update_data = False
+cuda_flag = False
+update_data = True
 dct_num = 5
 dct_flag = False
 
@@ -9,7 +9,7 @@ decay_rate = 0.95
 epoch_num = 100
 voc_size = 2500
 batch_size = 20
-emb_size = 10
+emb_size = 300
 pos_emb_size = 10
 tone_emb_size = 10
 lstm_hidden_size = 50

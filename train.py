@@ -37,6 +37,7 @@ from utils.data_processing import pos_refine
 from utils.data_processing import get_dep_dic
 from utils.data_processing import append_dep_to_feature
 from utils.data_processing import dep_refine
+from utils.data_processing import generate_word_embedding
 
 from model.mlp import MLP
 from model import embedding_lstm
@@ -859,8 +860,15 @@ if __name__=="__main__":
 			print("--->collect data according to the data name")
 			os.system("mkdir lstm_data")
 			word_index = word2index(txt_file,config.voc_size)
+
+			with open("./lstm_data/word_dic","w+") as f:
+				for word,idx in word_index.items():
+					f.write(word+" "+str(idx)+"\n")
+
 			collect_utt_data("./train_data_f0",train_map,"./lstm_data/train",txt_file,word_index)
 			collect_utt_data("./test_data_f0",test_map,"./lstm_data/test",txt_file,word_index)
+
+			generate_word_embedding("./lstm_data/word_dic","./lstm_data/emb_dic",config.voc_size,300,"./lstm_data/pretrain_emb")
 			############################################
 
 			# parse_txt_file_pos(txt_file,"./lstm_data/txt_token_pos")
@@ -1113,8 +1121,11 @@ if __name__=="__main__":
 		learning_rate = config.learning_rate
 		param_list = []
 		for name,param in model.named_parameters():
+			if not paramp.requires_grad:
+				print(name+" no gradient")
+				continue
 			if name in ["embed.weight","pos_embed.weight","cons_embed.weight","vowel_embed.weight"]:
-				print(name)
+				# print(name)
 				param_list.append({'params': param, 'lr': learning_rate,"my_name":name})
 			else:
 				param_list.append({'params': param,"my_name":name})

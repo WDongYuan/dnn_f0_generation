@@ -159,6 +159,7 @@ def word2index(txt_file,voc_size):
 	for word,count in dic.items():
 		word_list.append([word,count])
 	word_list = sorted(word_list,key=lambda tup: tup[1],reverse=True)
+	print("word number: "+str(len(word_list)))
 
 	####################################################
 	##the first 1500 words cover 91% of the corpus
@@ -739,6 +740,35 @@ def get_word_mean(emb,f0,voc_size,f0_mean=None):
 	for i in range(len(emb)):
 		new_f0[i] = f0_mean[emb[i]]
 	return new_f0,f0_mean
+
+def generate_word_embedding(word_dic,emb_dic,word_num,emb_dim,out_file):
+	wdic = {}
+	with open(word_dic) as f:
+		for line in f:
+			word,idx = line.strip().split(" ")
+			wdic[word] = int(idx)
+
+	edic = {}
+	with open(emb_dic) as f:
+		for line in f:
+			line = line.strip().split(" ")
+			word = line[0]
+			val = np.array([float(tmp) for tmp in line[1:]])
+			assert len(val)==emb_dim
+			edic[word] = val
+
+	arr = np.zeros((word_num,emb_dim))
+	for word,idx in wdic.items():
+		if word=="UNK":
+			print("find UNK")
+			arr[idx] = np.random.uniform(-0.1,0.1,size=(emb_dim,))
+		else:
+			arr[idx] = edic[word]
+
+	np.savetxt(out_file,arr,delimiter=" ",fmt="%.5f")
+	return
+
+
 
 
 
