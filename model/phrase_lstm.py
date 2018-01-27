@@ -358,7 +358,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 
 		emb_h_0 = torch.cat((emb,pos,pos_feat),dim=2)
 		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
-		emb_h_t = emb_h_t.permute(1,0,2).view(self.batch_size,1,self.lstm_hidden_size*self.direction)
+		emb_h_t = emb_h_t.permute(1,0,2).contiguous().view(self.batch_size,1,self.lstm_hidden_size*self.direction)
 		emb_h_t = emb_h_t.expand(self.batch_size,self.max_length,self.lstm_hidden_size*self.direction)
 
 		feat_h_0 = torch.cat((feat,emb_h_t),dim=2)
