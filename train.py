@@ -948,8 +948,8 @@ if __name__=="__main__":
 		# exit()
 		############################################
 		# if predict mean
-		# train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
-		# test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
+		train_f0 = train_f0.mean(axis=2).reshape((train_f0.shape[0],train_f0.shape[1],1))
+		test_f0 = test_f0.mean(axis=2).reshape((test_f0.shape[0],test_f0.shape[1],1))
 		############################################
 		# get the mean f0 for word
 		# train_emb = train_feat[:,:,-10].astype(np.int32)

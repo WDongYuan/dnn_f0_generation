@@ -7,12 +7,11 @@ pos+emb+feat: 19.1
 pos+emb+feat cnn: 19.0
 phrase level 2lstm: 18.4
 
-best:
-shape:
-0.490431044698
+best model
 
-mean:
-17.7550211955
-
-std:
-9.22433985359
+train loss: 369.75925023595715
+mean abs:
+17.5717032485
+std abs:
+9.01628580347
+val loss: 25.6087632656
