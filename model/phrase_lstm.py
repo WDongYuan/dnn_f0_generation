@@ -54,7 +54,7 @@ class PHRASE_LSTM(nn.Module):
 
 		# self.embed = nn.Embedding(self.voc_size, self.emb_size,padding_idx=0)
 		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
-		self.embed = get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
+		self.embed = self.get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
 		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
 		init.uniform(self.pos_embed.weight,a=-0.01,b=0.01)
 
@@ -139,7 +139,7 @@ class PHRASE_LSTM(nn.Module):
 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
 		###########################################################
 
-	def get_embedding(emb_file,voc_size,emb_size):
+	def get_embedding(self.emb_file,voc_size,emb_size):
 		arr = np.loadtxt(emb_file)
 		embed = nn.Embedding(voc_size, emb_size)
 		embed.weight.data.copy_(torch.from_numpy(arr))
