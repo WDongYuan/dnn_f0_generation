@@ -167,7 +167,8 @@ class PHRASE_LSTM(nn.Module):
 		# print(pos.size())
 		# print(pos_feat.size())
 		# dep = self.dep_lemb(dep)
-		feat_h_0 = torch.cat((feat),dim=2)
+		# feat_h_0 = torch.cat((feat),dim=2)
+		feat_h_0 = feat
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
