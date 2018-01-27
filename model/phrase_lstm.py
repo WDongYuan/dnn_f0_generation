@@ -175,7 +175,7 @@ class PHRASE_LSTM(nn.Module):
 		# dep = self.dep_lemb(dep)
 		# emb = self.emb_l1(emb)
 		# feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
-		feat_h_0 = self.grad_emb
+		feat_h_0 = grad_emb
 		# feat_h_0 = feat
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
