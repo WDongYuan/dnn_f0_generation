@@ -365,7 +365,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((grad_emb,cons,vowel,phrase),dim=2)
+		ph_h_0 = torch.cat((grad_emb,cons,vowel,tone,phrase),dim=2)
 		# ph_h_0 = grad_emb
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
