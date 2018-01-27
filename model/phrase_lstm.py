@@ -246,7 +246,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		
 		self.out_channel = 200
 
-		self.lstm_layer = 2
+		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		self.emb_lstm = nn.LSTM(self.emb_size+self.dep_num+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num, self.lstm_hidden_size,
@@ -372,7 +372,7 @@ class PHRASE_MEAN_LSTM(nn.Module):
 		emb_h_0 = torch.cat((emb,pos,pos_feat,dep),dim=2)
 		emb_h_n, (emb_h_t,emb_c_t) = self.emb_lstm(emb_h_0,(h_0,c_0))
 		emb_h = self.emb_l1(emb_h_n)
-		emb_h = self.tanh(emb_h)
+		emb_h = self.relu(emb_h)
 		emb_h = self.emb_l2(emb_h)
 
 
