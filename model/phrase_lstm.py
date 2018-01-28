@@ -372,8 +372,8 @@ class PHRASE_TEST_LSTM(nn.Module):
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
-		h = feat_h+ph_h
-		# h = feat_h
+		# h = feat_h+ph_h
+		h = ph_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
