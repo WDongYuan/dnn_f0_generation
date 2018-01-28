@@ -266,7 +266,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		self.feat_lstm = nn.LSTM(self.emb_l_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num+self.feat_size+self.dep_num,
 			self.lstm_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
-		self.phrase_lstm = nn.LSTM(self.grad_emb_size+3*self.tone_emb_size+self.phrase_num,
+		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.phrase_num+self.feat_size,
 			self.phrase_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
