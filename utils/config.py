@@ -183,3 +183,7 @@ linear_h1 = 200
 # f0_dim = 10
 # linear_h1 = 200
 # 25.9
+
+# 25.3
+# feat_h_0 = torch.cat((emb,feat,pos,pos_feat,dep),dim=2)
+# ph_h_0 = torch.cat((feat,cons,vowel,tone,phrase),dim=2)
