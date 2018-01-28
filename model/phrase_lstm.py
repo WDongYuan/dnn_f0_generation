@@ -263,10 +263,10 @@ class PHRASE_TEST_LSTM(nn.Module):
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.feat_lstm = nn.LSTM(self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.feat_lstm = nn.LSTM(self.emb_l_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num+self.dep_num+self.feat_size,
+		self.feat_lstm = nn.LSTM(self.emb_l_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num+self.feat_size,
 			self.lstm_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
-		self.phrase_lstm = nn.LSTM(self.grad_emb_size+3*self.tone_emb_size+self.phrase_num,
+		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.phrase_num,
 			self.phrase_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -355,7 +355,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		# print(pos_feat.size())
 		# dep = self.dep_lemb(dep)
 		emb = self.emb_l1(emb)
-		feat_h_0 = torch.cat((emb,feat,pos,pos_feat,dep),dim=2)
+		feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
@@ -364,7 +364,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((grad_emb,cons,vowel,tone,phrase),dim=2)
+		ph_h_0 = torch.cat((cons,vowel,tone,phrase),dim=2)
 		# ph_h_0 = grad_emb
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
