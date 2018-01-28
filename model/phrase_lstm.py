@@ -214,7 +214,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		self.dep_num = dep_num
 		self.dep_lemb_size = 20
 		self.emb_l_size = 100
-		self.grad_emb_size = 10
+		self.grad_emb_size = 5
 
 		self.pretone_num = pretone_num
 		self.tone_num = tone_num
