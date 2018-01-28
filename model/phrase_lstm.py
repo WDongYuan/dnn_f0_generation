@@ -355,7 +355,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		# print(pos_feat.size())
 		# dep = self.dep_lemb(dep)
 		emb = self.emb_l1(emb)
-		feat_h_0 = torch.cat((grad_emb,feat,pos,pos_feat),dim=2)
+		feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
