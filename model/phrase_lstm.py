@@ -85,189 +85,8 @@ class PHRASE_LSTM(nn.Module):
 		# self.feat_lstm = nn.LSTM(self.grad_emb_size,self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
-		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size+self.feat_size, self.phrase_hidden_size,
+		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.phrase_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
-		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-
-
-		self.non_linear = nn.ReLU()
-		self.relu = nn.ReLU()
-		self.tanh = nn.Tanh()
-		self.sigmoid = nn.Sigmoid()
-
-		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
-		# self.linear_init(self.emb_l1)
-		# self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		# self.linear_init(self.emb_l2)
-		self.dep_lemb = nn.Linear(self.dep_num,self.dep_lemb_size)
-		self.linear_init(self.dep_lemb)
-
-		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.feat_l1)
-		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.feat_l2)
-
-		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.direction,self.phrase_linear_size)
-		self.linear_init(self.phrase_l1)
-		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
-		self.linear_init(self.phrase_l2)
-
-		# self.concat_l1 = nn.Linear(2*self.lstm_hidden_size*self.direction,self.linear_h1)
-		# self.linear_init(self.concat_l1)
-		# self.concat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		# self.linear_init(self.concat_l2)
-
-		# self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-
-
-	def linear_init(self,layer,lower=-1,upper=1):
-		layer.weight.data.uniform_(lower, upper)
-		layer.bias.data.uniform_(lower, upper)
-	def init_hidden(self):
-		direction = 2 if self.bidirectional_flag else 1
-		###########################################################
-		#GPU OPTION
-		###########################################################
-		if cuda_flag:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
-		else:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
-		###########################################################
-
-	def init_phrase_hidden(self):
-		direction = 2 if self.bidirectional_flag else 1
-		###########################################################
-		#GPU OPTION
-		###########################################################
-		if cuda_flag:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size).cuda(async=True))
-		else:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
-		###########################################################
-
-	def get_embedding(self,emb_file,voc_size,emb_size):
-		arr = np.loadtxt(emb_file)
-		embed = nn.Embedding(voc_size, emb_size)
-		embed.weight.data.copy_(torch.from_numpy(arr))
-		embed.weight.requires_grad = False
-		return embed
-
-
-	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,dep,sent_length):
-		self.batch_size,self.max_length = sents.size()
-		emb = self.embed(sents)
-		grad_emb = self.grad_embed(sents)
-		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
-		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
-		# pretone = self.pretone_embed(pretone)
-		tone = self.tone_embed(tone)
-		# postone = self.postone_embed(postone)
-		cons = self.cons_embed(cons)
-		vowel = self.vowel_embed(vowel)
-
-
-		c_0 = self.init_hidden()
-		h_0 = self.init_hidden()
-
-		# print(pos.size())
-		# print(pos_feat.size())
-		# dep = self.dep_lemb(dep)
-		# emb = self.emb_l1(emb)
-		# feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
-		# feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
-		# feat_h = self.feat_l1(feat_h_n)
-		# feat_h = self.relu(feat_h)
-		# feat_h = self.feat_l2(feat_h)
-
-		c_0 = self.init_phrase_hidden()
-		h_0 = self.init_phrase_hidden()
-
-		ph_h_0 = torch.cat((tone,cons,vowel,phrase,feat),dim=2)
-		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.relu(ph_h)
-		ph_h = self.phrase_l2(ph_h)
-
-		h = ph_h
-		# h = feat_h
-
-		h = h.view(self.batch_size,self.max_length*self.f0_dim)
-		################################################################################
-		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
-		# ph_h = ph_h.view(self.batch_size,self.max_length*self.f0_dim)
-		# return h,feat_h,ph_h
-		################################################################################
-		return h
-
-class PHRASE_TEST_LSTM(nn.Module):
-	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
-		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
-		lstm_hidden_size,f0_dim,linear_h1):
-		super(PHRASE_TEST_LSTM, self).__init__()
-		self.emb_size = emb_size
-		self.feat_size = feat_size
-		self.pos_emb_size = pos_emb_size
-		self.pos_emb_length = 3##how many pos emb per sample (pre,current,post)
-		self.tone_emb_size = tone_emb_size
-		self.phrase_num = phrase_num
-		self.dep_num = dep_num
-		self.dep_lemb_size = 20
-		self.emb_l_size = 100
-		self.grad_emb_size = 10
-
-		self.pretone_num = pretone_num
-		self.tone_num = tone_num
-		self.postone_num = postone_num
-		self.cons_num = cons_num
-		self.vowel_num = vowel_num
-
-		self.lstm_hidden_size = lstm_hidden_size
-		self.f0_dim = f0_dim
-		# self.f0_dim = 1
-		self.linear_h1 = linear_h1
-		self.voc_size = voc_size
-		self.pos_num = pos_num
-		self.pos_feat_num = pos_feat_num
-		self.batch_size = -1
-		self.max_length = -1
-
-		self.phrase_hidden_size = self.lstm_hidden_size
-		self.phrase_linear_size = self.linear_h1
-
-		self.grad_embed = nn.Embedding(self.voc_size, self.grad_emb_size,padding_idx=0)
-		init.uniform(self.grad_embed.weight,a=-0.01,b=0.01)
-
-		self.embed = self.get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
-
-		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
-		init.uniform(self.pos_embed.weight,a=-0.01,b=0.01)
-
-		self.tone_embed = nn.Embedding(self.tone_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.tone_embed.weight,a=-0.01,b=0.01)
-		self.pretone_embed = nn.Embedding(self.pretone_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.pretone_embed.weight,a=-0.01,b=0.01)
-		self.postone_embed = nn.Embedding(self.postone_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.postone_embed.weight,a=-0.01,b=0.01)
-
-		self.cons_embed = nn.Embedding(self.cons_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
-		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
-
-		##LSTM
-		self.lstm_layer = 1
-		self.bidirectional_flag = True
-		self.direction = 2 if self.bidirectional_flag else 1
-		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
-		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		# self.feat_lstm = nn.LSTM(self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
-		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.feat_lstm = nn.LSTM(self.grad_emb_size+self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
-			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-
-		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.phrase_num+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,
-			self.phrase_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
@@ -355,17 +174,198 @@ class PHRASE_TEST_LSTM(nn.Module):
 		# print(pos_feat.size())
 		# dep = self.dep_lemb(dep)
 		emb = self.emb_l1(emb)
-		feat_h_0 = torch.cat((grad_emb,emb,feat,pos,pos_feat),dim=2)
-		# feat_h_0 = feat
+		feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(feat_h_n)
-		feat_h = self.tanh(feat_h)
+		feat_h = self.relu(feat_h)
 		feat_h = self.feat_l2(feat_h)
 
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((cons,vowel,phrase,tone,feat,pos,pos_feat),dim=2)
+		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
+		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		ph_h = self.phrase_l1(ph_h_n)
+		ph_h = self.relu(ph_h)
+		ph_h = self.phrase_l2(ph_h)
+
+		h = feat_h
+		# h = feat_h
+
+		h = h.view(self.batch_size,self.max_length*self.f0_dim)
+		################################################################################
+		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
+		# ph_h = ph_h.view(self.batch_size,self.max_length*self.f0_dim)
+		# return h,feat_h,ph_h
+		################################################################################
+		return h
+
+class PHRASE_TEST_LSTM(nn.Module):
+	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
+		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
+		lstm_hidden_size,f0_dim,linear_h1):
+		super(PHRASE_TEST_LSTM, self).__init__()
+		self.emb_size = emb_size
+		self.feat_size = feat_size
+		self.pos_emb_size = pos_emb_size
+		self.pos_emb_length = 3##how many pos emb per sample (pre,current,post)
+		self.tone_emb_size = tone_emb_size
+		self.phrase_num = phrase_num
+		self.dep_num = dep_num
+		self.dep_lemb_size = 20
+		self.emb_l_size = 100
+		self.grad_emb_size = 10
+
+		self.pretone_num = pretone_num
+		self.tone_num = tone_num
+		self.postone_num = postone_num
+		self.cons_num = cons_num
+		self.vowel_num = vowel_num
+
+		self.lstm_hidden_size = lstm_hidden_size
+		self.f0_dim = f0_dim
+		# self.f0_dim = 1
+		self.linear_h1 = linear_h1
+		self.voc_size = voc_size
+		self.pos_num = pos_num
+		self.pos_feat_num = pos_feat_num
+		self.batch_size = -1
+		self.max_length = -1
+
+		self.phrase_hidden_size = self.lstm_hidden_size
+		self.phrase_linear_size = self.linear_h1
+
+		self.grad_embed = nn.Embedding(self.voc_size, self.grad_emb_size,padding_idx=0)
+		init.uniform(self.grad_embed.weight,a=-0.01,b=0.01)
+
+		self.embed = self.get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
+
+		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
+		init.uniform(self.pos_embed.weight,a=-0.01,b=0.01)
+
+		self.tone_embed = nn.Embedding(self.tone_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.tone_embed.weight,a=-0.01,b=0.01)
+		self.pretone_embed = nn.Embedding(self.pretone_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.pretone_embed.weight,a=-0.01,b=0.01)
+		self.postone_embed = nn.Embedding(self.postone_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.postone_embed.weight,a=-0.01,b=0.01)
+
+		self.cons_embed = nn.Embedding(self.cons_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
+		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
+
+		##LSTM
+		self.lstm_layer = 1
+		self.bidirectional_flag = True
+		self.direction = 2 if self.bidirectional_flag else 1
+		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
+		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		# self.feat_lstm = nn.LSTM(self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
+		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		self.feat_lstm = nn.LSTM(self.grad_emb_size+self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.phrase_num+self.feat_size,
+			self.phrase_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
+		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+
+		self.non_linear = nn.ReLU()
+		self.relu = nn.ReLU()
+		self.tanh = nn.Tanh()
+		self.sigmoid = nn.Sigmoid()
+
+		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
+		# self.linear_init(self.emb_l1)
+		# self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		# self.linear_init(self.emb_l2)
+		self.dep_lemb = nn.Linear(self.dep_num,self.dep_lemb_size)
+		self.linear_init(self.dep_lemb)
+
+		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.feat_l1)
+		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.feat_l2)
+
+		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.direction,self.phrase_linear_size)
+		self.linear_init(self.phrase_l1)
+		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
+		self.linear_init(self.phrase_l2)
+
+		# self.concat_l1 = nn.Linear(2*self.lstm_hidden_size*self.direction,self.linear_h1)
+		# self.linear_init(self.concat_l1)
+		# self.concat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
+		# self.linear_init(self.concat_l2)
+
+		# self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+
+
+	def linear_init(self,layer,lower=-1,upper=1):
+		layer.weight.data.uniform_(lower, upper)
+		layer.bias.data.uniform_(lower, upper)
+	def init_hidden(self):
+		direction = 2 if self.bidirectional_flag else 1
+		###########################################################
+		#GPU OPTION
+		###########################################################
+		if cuda_flag:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+		else:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		###########################################################
+
+	def init_phrase_hidden(self):
+		direction = 2 if self.bidirectional_flag else 1
+		###########################################################
+		#GPU OPTION
+		###########################################################
+		if cuda_flag:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size).cuda(async=True))
+		else:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
+		###########################################################
+
+	def get_embedding(self,emb_file,voc_size,emb_size):
+		arr = np.loadtxt(emb_file)
+		embed = nn.Embedding(voc_size, emb_size)
+		embed.weight.data.copy_(torch.from_numpy(arr))
+		embed.weight.requires_grad = False
+		return embed
+
+
+	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,dep,sent_length):
+		self.batch_size,self.max_length = sents.size()
+		emb = self.embed(sents)
+		grad_emb = self.grad_embed(sents)
+		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
+		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
+		# pretone = self.pretone_embed(pretone)
+		tone = self.tone_embed(tone)
+		# postone = self.postone_embed(postone)
+		cons = self.cons_embed(cons)
+		vowel = self.vowel_embed(vowel)
+
+
+		# c_0 = self.init_hidden()
+		# h_0 = self.init_hidden()
+
+		# print(pos.size())
+		# print(pos_feat.size())
+		# dep = self.dep_lemb(dep)
+		# emb = self.emb_l1(emb)
+		# feat_h_0 = torch.cat((grad_emb,emb,feat,pos,pos_feat),dim=2)
+		# # feat_h_0 = feat
+		# feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
+		# feat_h = self.feat_l1(feat_h_n)
+		# feat_h = self.tanh(feat_h)
+		# feat_h = self.feat_l2(feat_h)
+
+		c_0 = self.init_phrase_hidden()
+		h_0 = self.init_phrase_hidden()
+
+		ph_h_0 = torch.cat((cons,vowel,tone,phrase,feat),dim=2)
 		# ph_h_0 = grad_emb
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
