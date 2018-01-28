@@ -75,14 +75,10 @@ if __name__=="__main__":
 	# 		word = line.split(" ")[0]
 	# 		if word not in myset:
 	# 			print(line)
-
-	mean = np.loadtxt("../predict_mean",delimiter=" ")
-	std = np.loadtxt("../predict_std",delimiter=" ")
-	shape = np.loadtxt("../predict_shape",delimiter=" ")
-	mean = mean.reshape((-1,1))
-	std = std.reshape((-1,1))
-	predict = shape*std+mean
-	np.savetxt("./final_predict",predict,delimiter=" ")
-	true = np.loadtxt("../../mandarine/gen_f0/train_dev_data_vector/dev_data_f0_vector",delimiter=" ")
-	print(rmse(predict,true))
+	true_f0_file = "../../mandarine/gen_f0/train_dev_data_vector/dev_data_f0_vector"
+	base_predict = "../base_dev"
+	true_f0 = np.loadtxt(true_f0_file,delimiter=" ")
+	predict = np.loadtxt(base_predict,delimiter=" ")
+	np.savetxt("../dev_res",true_f0-predict,delimiter=" ",fmt="%.5f")
+	# print(rmse(predict,true_f0))
 	

@@ -128,8 +128,9 @@ if __name__=="__main__":
 	parser.add_argument('--test_data', dest='test_data')
 	parser.add_argument('--test_label', dest='test_label')
 	parser.add_argument('--test_map', dest='test_map')
-	parser.add_argument('--predict_file', dest='predict_file')
 	parser.add_argument('--phrase_syl_dir', dest='phrase_syl_dir')
+	parser.add_argument('--model', dest='model',default="./my_best_model.model")
+	parser.add_argument('--predict_file',dest='predict_file',default="./predict_f0")
 	args = parser.parse_args()
 	mode = args.mode
 	if mode=="how_to_run":
@@ -849,6 +850,8 @@ if __name__=="__main__":
 		test_map = args.test_map
 		txt_file = args.txt_file
 		phrase_syl_dir = args.phrase_syl_dir
+		trained_model = args.model
+		predict_file = args.predict_file
 		pos_num = -1
 		if config.update_data:
 			############################################
@@ -1098,7 +1101,7 @@ if __name__=="__main__":
 		if "predict" in mode:
 			print("predicting...")
 			# model = torch.load("my_best_model.model")
-			model = torch.load('/Users/weidong/Desktop/model/shape_model', map_location=lambda storage, loc: storage)
+			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -1118,7 +1121,7 @@ if __name__=="__main__":
 
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
-				test_feat,test_phrase,test_dep,test_f0,test_len,"./predict_shape")
+				test_feat,test_phrase,test_dep,test_f0,test_len,predict_file)
 			exit()
 		#############################################################
 		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,

@@ -348,32 +348,31 @@ class PHRASE_TEST_LSTM(nn.Module):
 		vowel = self.vowel_embed(vowel)
 
 
-		# c_0 = self.init_hidden()
-		# h_0 = self.init_hidden()
+		c_0 = self.init_hidden()
+		h_0 = self.init_hidden()
 
 		# print(pos.size())
 		# print(pos_feat.size())
 		# dep = self.dep_lemb(dep)
 		# emb = self.emb_l1(emb)
-		# feat_h_0 = torch.cat((grad_emb,emb,feat,pos,pos_feat),dim=2)
-		# # feat_h_0 = feat
-		# feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
-		# feat_h = self.feat_l1(feat_h_n)
-		# feat_h = self.tanh(feat_h)
-		# feat_h = self.feat_l2(feat_h)
+		feat_h_0 = torch.cat((grad_emb,emb,feat,pos,pos_feat),dim=2)
+		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
+		feat_h = self.feat_l1(feat_h_n)
+		feat_h = self.tanh(feat_h)
+		feat_h = self.feat_l2(feat_h)
 
-		c_0 = self.init_phrase_hidden()
-		h_0 = self.init_phrase_hidden()
+		# c_0 = self.init_phrase_hidden()
+		# h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((cons,vowel,tone,phrase,feat),dim=2)
-		# ph_h_0 = grad_emb
-		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.relu(ph_h)
-		ph_h = self.phrase_l2(ph_h)
+		# ph_h_0 = torch.cat((cons,vowel,tone,phrase,feat),dim=2)
+		# # ph_h_0 = grad_emb
+		# ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		# ph_h = self.phrase_l1(ph_h_n)
+		# ph_h = self.relu(ph_h)
+		# ph_h = self.phrase_l2(ph_h)
 
 		# h = feat_h+ph_h
-		h = ph_h
+		h = feat_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
