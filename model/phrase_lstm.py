@@ -95,7 +95,7 @@ class PHRASE_LSTM(nn.Module):
 		self.relu = nn.ReLU()
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
-		self.drop = nn.Dropout(0)
+		self.drop = nn.Dropout(0.5)
 
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
 		# self.linear_init(self.emb_l1)
@@ -178,7 +178,7 @@ class PHRASE_LSTM(nn.Module):
 		feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h = self.feat_l1(self.drop(feat_h_n))
-		feat_h = self.relu(feat_h)
+		feat_h = self.tanh(feat_h)
 		feat_h = self.feat_l2(self.drop(feat_h))
 
 		c_0 = self.init_phrase_hidden()
