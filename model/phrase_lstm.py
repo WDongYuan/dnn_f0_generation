@@ -536,10 +536,10 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
 	# print("abs:")
 	# print(np.abs(prediction-true_f0).mean(axis=0))
-	print("mean abs:")
-	print(np.abs(prediction.mean(axis=1)-true_f0.mean(axis=1)).mean())
-	print("std abs:")
-	print(np.abs(prediction.std(axis=1)-true_f0.std(axis=1)).mean())
+	# print("mean abs:")
+	# print(np.abs(prediction.mean(axis=1)-true_f0.mean(axis=1)).mean())
+	# print("std abs:")
+	# print(np.abs(prediction.std(axis=1)-true_f0.std(axis=1)).mean())
 
 	if save_prediction!="":
 		np.savetxt(save_prediction,prediction,delimiter=" ",fmt="%.3f")
