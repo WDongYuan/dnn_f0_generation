@@ -80,7 +80,7 @@ class PHRASE_LSTM(nn.Module):
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.feat_lstm = nn.LSTM(self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
+		self.feat_lstm = nn.LSTM(self.emb_l_size+self.feat_size+self.pos_feat_num,self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.feat_lstm = nn.LSTM(self.grad_emb_size,self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -95,7 +95,7 @@ class PHRASE_LSTM(nn.Module):
 		self.relu = nn.ReLU()
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
-		self.drop = nn.Dropout(0.5)
+		self.drop = nn.Dropout(0)
 
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
 		# self.linear_init(self.emb_l1)
@@ -175,7 +175,7 @@ class PHRASE_LSTM(nn.Module):
 		# print(pos_feat.size())
 		# dep = self.dep_lemb(dep)
 		emb = self.emb_l1(emb)
-		feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
+		feat_h_0 = torch.cat((emb,feat,pos_feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		feat_h_n = self.drop(feat_h_n)
 		feat_h = self.feat_l1(feat_h_n)
