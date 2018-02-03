@@ -12,7 +12,7 @@ batch_size = 20
 emb_size = 300
 pos_emb_size = 2
 tone_emb_size = 10
-lstm_hidden_size = 200
+lstm_hidden_size = 300
 f0_dim = 10
 linear_h1 = 300
 
