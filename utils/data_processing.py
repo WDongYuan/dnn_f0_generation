@@ -642,7 +642,7 @@ def append_dep_to_feature(feat_dir,dep_file,dep_dic):
 def one_hot_to_index(arr,zero_padding=True):
 	new_arr = np.zeros((arr.shape[0],))
 	for i in range(len(arr)):
-		assert arr[i].sum()==1 or arr[i].sum()==0
+		assert arr[i].sum()==1 or arr[i].sum()==0,arr[i]
 		for j in range(len(arr[i])):
 			if arr[i][j]==1:
 				if zero_padding:
@@ -652,9 +652,10 @@ def one_hot_to_index(arr,zero_padding=True):
 	return new_arr.astype(np.int32)
 
 def get_syl_dic():
-	cons_l = ["b","d","t","g","j","k","p","q","f","h","sh","s","ch","c","x","zh","z","m","n","l","r","w","y"]
-	vowel_l = ["a","ai","ao","an","ang","o","ou","e","ei","en","eng","er","i","ia","iao","ian","iang","ie",
-	"iu","in","ing","iong","iou","u","ua","uo","uai","uei","ui","uan","uen","uang","ueng","un","ong","v","ue"]
+	cons_l = ["gw","c","b","d","g","f","h","k","j","m","l","n","p","s","ng","kw","t","w","z"]
+	vowel_l = ["aa","ang","ei","aak","ek","ai","ip","ak","iu","ong","an","ap","ik","au","at","in","ing",
+	"yut","eng","ng","it","u","on","am","ung","m","yun","oek","aam","e","aang","yu","oeng","ok","oi",
+	"i","ut","eoi","aan","aai","eon","o","aau","aat","un","ui","aap","uk","eot","im","ou","ot","oe"]
 	c_dic = {}
 	v_dic = {}
 	for cons in cons_l:
@@ -723,6 +724,8 @@ def append_phrase_to_feature(feat_dir,phrase_syl_dir):
 	for file in file_list:
 		if "data" not in file:
 			continue
+		# print(file)
+
 		with open(phrase_syl_dir+"/"+file) as f:
 			utt = f.readlines()
 			for i in range(len(utt)):
@@ -757,6 +760,8 @@ def append_phrase_to_feature(feat_dir,phrase_syl_dir):
 			ori_feat = None
 			with open(feat_dir+"/"+file) as featf:
 				ori_feat = featf.readlines()
+				# print(len(phrase_feat))
+				# print(len(ori_feat))
 				assert len(phrase_feat)==len(ori_feat)
 			with open(feat_dir+"/"+file,"w+") as outf:
 				for i in range(len(ori_feat)):

@@ -162,16 +162,16 @@ if __name__=="__main__":
 			" --test_map ../mandarine/gen_f0/train_dev_data_vector/dev_data/syllable_map"+
 			" --mode train_emb_lstm/emb_lstm_predict")
 		print("python train.py"+
-			" --desc_file ../mandarine/gen_f0/train_dev_data_vector/feature_desc_vector"+
-			" --txt_file ./data/txt.done.data-all"+
-			" --train_data ../mandarine/gen_f0/train_dev_data_vector/train_data/dct_0"+
-			" --train_label ../mandarine/gen_f0/train_dev_data_vector/train_data_f0_vector"+
-			" --train_map ../mandarine/gen_f0/train_dev_data_vector/train_data/syllable_map"+
-			" --test_data ../mandarine/gen_f0/train_dev_data_vector/dev_data/dct_0"+
-			" --test_label ../mandarine/gen_f0/train_dev_data_vector/dev_data_f0_vector"+
-			" --test_map ../mandarine/gen_f0/train_dev_data_vector/dev_data/syllable_map"+
-			" --phrase_syl_dir ../mandarine/gen_f0/phrase_dir/phrase_syllable"+
-			" --mode train_phrase_lstm/emb_phrase_predict")
+			" --desc_file ../cantonese/my_can_data/feature_desc_vector"+
+			" --txt_file ../cantonese/txt.done.data.word"+
+			" --train_data ../cantonese/my_can_data/train_test_data/train_data/train_feat"+
+			" --train_label ../cantonese/my_can_data/train_test_data/train_data/train_f0"+
+			" --train_map ../cantonese/my_can_data/train_test_data/train_data/train_syllable_map"+
+			" --test_data ../cantonese/my_can_data/train_test_data/test_data/test_feat"+
+			" --test_label ../cantonese/my_can_data/train_test_data/test_data/test_f0"+
+			" --test_map ../cantonese/my_can_data/train_test_data/test_data/test_syllable_map"+
+			" --phrase_syl_dir ../cantonese/my_can_data/phrase_dir/phrase_syllable"+
+			" --mode train_phrase_lstm")
 		
 	elif mode=="train_mlp":
 		desc_file = args.desc_file
@@ -882,8 +882,8 @@ if __name__=="__main__":
 
 			
 			############################################
-			pos_refine("./lstm_data/pos_convert_map","./lstm_data/txt_token_pos","./lstm_data/refine_txt_token_pos")
-			pos_file = "./lstm_data/refine_txt_token_pos"
+			# pos_refine("./lstm_data/pos_convert_map","./lstm_data/txt_token_pos","./lstm_data/refine_txt_token_pos")
+			pos_file = "./lstm_data/txt_token_pos"
 			pos_dic = get_pos_dic(pos_file)
 			pos_num = len(pos_dic)+1
 			print("pos number: "+str(pos_num))
@@ -913,8 +913,8 @@ if __name__=="__main__":
 
 			############################################
 			##dependency feature
-			dep_refine("./lstm_data/dep_convert_map","./lstm_data/txt_token_dep","./lstm_data/refine_txt_token_dep")
-			dep_file = "./lstm_data/refine_txt_token_dep"
+			# dep_refine("./lstm_data/dep_convert_map","./lstm_data/txt_token_dep","./lstm_data/refine_txt_token_dep")
+			dep_file = "./lstm_data/txt_token_dep"
 			# parse_txt_file_dep(txt_file,dep_file)
 			dep_dic = get_dep_dic(dep_file,"./lstm_data/dependency_dic")
 			dep_num = len(dep_dic)*2
@@ -924,11 +924,11 @@ if __name__=="__main__":
 			exit()
 			############################################
 
-		pos_num = 18
-		cons_num = 24
-		vowel_num = 38
-		dep_num = 30*2
-		config.voc_size = 3601
+		pos_num = 2
+		cons_num = 20
+		vowel_num = 54
+		dep_num = 45*2
+		config.voc_size = 2584
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
@@ -979,38 +979,39 @@ if __name__=="__main__":
 
 
 
-		train_emb = train_feat[:,:,71].astype(np.int32)
-		train_pos = train_feat[:,:,72:77].astype(np.int32)
+		train_emb = train_feat[:,:,74].astype(np.int32)
+		train_pos = train_feat[:,:,75:80].astype(np.int32)
 		train_pos_feat = train_pos[:,:,3:]
 		train_pos = train_pos[:,:,0:3]
-		train_cons = train_feat[:,:,77].astype(np.int32)
-		train_vowel = train_feat[:,:,78].astype(np.int32)
-		train_phrase = train_feat[:,:,79:85]
-		train_dep = train_feat[:,:,85:145]
-		train_feat = train_feat[:,:,0:71]
+		train_cons = train_feat[:,:,80].astype(np.int32)
+		train_vowel = train_feat[:,:,81].astype(np.int32)
+		train_phrase = train_feat[:,:,82:88]
+		train_dep = train_feat[:,:,88:178]
+		train_feat = train_feat[:,:,0:74]
 		tmp_shape = train_feat.shape
-		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
-		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
-		train_postone = one_hot_to_index(train_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
+		# print(train_feat[:,:,3:9][0,0:5,:])
+		train_tone = one_hot_to_index(train_feat[:,:,3:9].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
+		train_pretone = one_hot_to_index(train_feat[:,:,9:16].astype(np.int32).reshape((-1,7))).reshape((tmp_shape[0],tmp_shape[1]))
+		train_postone = one_hot_to_index(train_feat[:,:,16:23].astype(np.int32).reshape((-1,7))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
 		# train_feat = np.delete(train_feat,range(3,21),2)
 
 		# print(train_pos_feat.shape)
 		# exit()
 
-		test_emb = test_feat[:,:,71].astype(np.int32)
-		test_pos = test_feat[:,:,72:77].astype(np.int32)
+		test_emb = test_feat[:,:,74].astype(np.int32)
+		test_pos = test_feat[:,:,75:80].astype(np.int32)
 		test_pos_feat = test_pos[:,:,3:]
 		test_pos = test_pos[:,:,0:3]
-		test_cons = test_feat[:,:,77].astype(np.int32)
-		test_vowel = test_feat[:,:,78].astype(np.int32)
-		test_phrase = test_feat[:,:,79:85]
-		test_dep = test_feat[:,:,85:145]
-		test_feat = test_feat[:,:,0:71]
+		test_cons = test_feat[:,:,80].astype(np.int32)
+		test_vowel = test_feat[:,:,81].astype(np.int32)
+		test_phrase = test_feat[:,:,82:88]
+		test_dep = test_feat[:,:,88:178]
+		test_feat = test_feat[:,:,0:74]
 		tmp_shape = test_feat.shape
-		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
-		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
-		test_postone = one_hot_to_index(test_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
+		test_tone = one_hot_to_index(test_feat[:,:,3:9].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
+		test_pretone = one_hot_to_index(test_feat[:,:,9:16].astype(np.int32).reshape((-1,7))).reshape((tmp_shape[0],tmp_shape[1]))
+		test_postone = one_hot_to_index(test_feat[:,:,16:23].astype(np.int32).reshape((-1,7))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
 		# test_feat = np.delete(test_feat,range(3,21),2)
 
@@ -1018,9 +1019,9 @@ if __name__=="__main__":
 		max_length = train_emb.shape[1]
 		feat_num = train_feat.shape[2]
 		phrase_num = train_phrase.shape[2]
-		tone_num = 6
-		pretone_num = 7
-		postone_num = 7
+		tone_num = 7
+		pretone_num = 8
+		postone_num = 8
 		pos_feat_num = 2
 
 		ori_train_f0 = train_f0
