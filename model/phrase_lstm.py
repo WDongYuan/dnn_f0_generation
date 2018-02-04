@@ -368,7 +368,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		ph_h_0 = emb
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.relu(ph_h)
+		ph_h = self.tanh(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
 		# h = feat_h+ph_h
