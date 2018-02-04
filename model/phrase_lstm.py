@@ -292,7 +292,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.direction,self.phrase_linear_size)
 		self.linear_init(self.phrase_l1)
 		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
-		self.linear_init(self.phrase_l2)
+		self.linear_init(self.phrase_l2,lower=0,upper=10)
 
 		# self.concat_l1 = nn.Linear(2*self.lstm_hidden_size*self.direction,self.linear_h1)
 		# self.linear_init(self.concat_l1)
