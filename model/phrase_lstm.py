@@ -194,7 +194,7 @@ class PHRASE_LSTM(nn.Module):
 		ph_h = self.drop(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
-		h = feat_h+ph_h
+		h = ph_h
 		# h = feat_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
