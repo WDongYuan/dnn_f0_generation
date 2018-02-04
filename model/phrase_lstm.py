@@ -96,6 +96,7 @@ class PHRASE_LSTM(nn.Module):
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
 		self.drop = nn.Dropout(0)
+		self.logsigmoid = nn.LogSigmoid()
 
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
 		# self.linear_init(self.emb_l1)
@@ -190,7 +191,7 @@ class PHRASE_LSTM(nn.Module):
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h_n = self.drop(ph_h_n)
 		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.relu(ph_h)
+		ph_h = self.logsigmoid(ph_h)
 		ph_h = self.drop(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
