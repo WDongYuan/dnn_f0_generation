@@ -3,7 +3,7 @@ update_data = False
 dct_num = 5
 dct_flag = False
 
-learning_rate = 0.001
+learning_rate = 0.005
 decay_step = 1
 decay_rate = 0.95
 epoch_num = 100
@@ -14,7 +14,7 @@ pos_emb_size = 2
 tone_emb_size = 10
 lstm_hidden_size = 100
 f0_dim = 10
-linear_h1 = 200
+linear_h1 = 300
 
 
 #################
