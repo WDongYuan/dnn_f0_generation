@@ -145,7 +145,7 @@ class Seq2Seq(nn.Module):
 		vowel = self.vowel_embed(vowel)
 
 		emb = self.emb_l1(emb)
-		print((emb,feat,pos,pos_feat,pre_f0))
+		# print((emb,feat,pos,pos_feat,pre_f0))
 		feat_h_0 = torch.cat((emb,feat,pos,pos_feat,pre_f0),dim=2)
 		h_0 = self.drop(h_0)
 		c_0 = self.drop(c_0)
@@ -261,7 +261,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 					train_phrase_batch,
 					train_dep_batch,
 					train_len_batch,
-					pre_f0,h_0,c_0)
+					pre_f0_batch,h_0,c_0)
 
 			outputs = outputs.view(batch_size,-1)
 			loss = LF(outputs,train_f0_batch)
