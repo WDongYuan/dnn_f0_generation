@@ -88,6 +88,7 @@ class Seq2Seq(nn.Module):
 		self.relu = nn.ReLU()
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
+		self.drop = nn.Dropout(0.5)
 
 		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.feat_l1)
@@ -145,9 +146,13 @@ class Seq2Seq(nn.Module):
 
 		emb = self.emb_l1(emb)
 		feat_h_0 = torch.cat((emb,feat,pos,pos_feat,pre_f0),dim=2)
+		h_0 = self.drop(h_0)
+		c_0 = self.drop(c_0)
 		feat_h_n, (h_t,c_t) = self.feat_lstm(feat_h_0,(h_0,c_0))
+		feat_h_n = self.drop(feat_h_n)
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.relu(feat_h)
+		feat_h = self.drop(feat_h)
 		feat_h = self.feat_l2(feat_h)
 
 		h = feat_h
