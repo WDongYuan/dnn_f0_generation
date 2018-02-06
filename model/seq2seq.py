@@ -229,7 +229,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim))
 
 			batch_size,max_length = train_emb_batch.size()
-			outputs = Variable(torch.zeros(batch_size,max_length,model.f0_dim))
+			outputs = Variable(torch.zeros(batch_size,max_length,model.f0_dim).cuda(async=True))
 			for l in range(max_length):
 				tmp_result,h_0,c_0 = model(
 					Variable(train_emb[i][:,l:l+1].contiguous().cuda(async=True)),
@@ -246,7 +246,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 					Variable(train_len[i].contiguous().cuda(async=True)),
 					pre_f0,h_0,c_0)
 				pre_f0 = tmp_result
-				outputs[:,l:l+1] = tmp_result.cpu().data
+				outputs[:,l:l+1] = tmp_result
 
 			outputs = outputs.view(batch_size,-1)
 			loss = LF(outputs,train_f0_batch)
