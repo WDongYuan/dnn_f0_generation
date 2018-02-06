@@ -64,10 +64,6 @@ class PHRASE_LSTM(nn.Module):
 
 		self.tone_embed = nn.Embedding(self.tone_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.tone_embed.weight,a=-0.01,b=0.01)
-		self.pretone_embed = nn.Embedding(self.pretone_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.pretone_embed.weight,a=-0.01,b=0.01)
-		self.postone_embed = nn.Embedding(self.postone_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.postone_embed.weight,a=-0.01,b=0.01)
 
 		self.cons_embed = nn.Embedding(self.cons_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
@@ -75,8 +71,8 @@ class PHRASE_LSTM(nn.Module):
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
-		self.lstm_layer = 2
-		self.bidirectional_flag = False
+		self.lstm_layer = 1
+		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -90,8 +86,6 @@ class PHRASE_LSTM(nn.Module):
 		self.phrase_direction = 2 if self.phrase_bidirectional_flag else 1
 		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.phrase_hidden_size,
 			num_layers=self.phrase_lstm_layer,bidirectional=self.phrase_bidirectional_flag,batch_first=True)
-		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
-		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
 		self.non_linear = nn.ReLU()
@@ -115,13 +109,6 @@ class PHRASE_LSTM(nn.Module):
 		self.linear_init(self.phrase_l1)
 		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
 		self.linear_init(self.phrase_l2)
-
-		# self.concat_l1 = nn.Linear(2*self.lstm_hidden_size*self.direction,self.linear_h1)
-		# self.linear_init(self.concat_l1)
-		# self.concat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		# self.linear_init(self.concat_l2)
-
-		# self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -163,9 +150,7 @@ class PHRASE_LSTM(nn.Module):
 		grad_emb = self.grad_embed(sents)
 		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
 		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
-		# pretone = self.pretone_embed(pretone)
 		tone = self.tone_embed(tone)
-		# postone = self.postone_embed(postone)
 		cons = self.cons_embed(cons)
 		vowel = self.vowel_embed(vowel)
 
