@@ -221,7 +221,13 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			batch_size = train_emb_batch.size()[0]
 			h_0 = model.init_hidden(batch_size)
 			c_0 = model.init_hidden(batch_size)
-			pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim))
+			pre_f0 = None
+			
+			if cuda_flag:
+				pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim).cuda(async=True))
+			else:
+				pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim))
+
 			batch_size,max_length = train_emb_batch.size()
 			outputs = Variable(torch.zeros(batch_size,max_length,model.f0_dim))
 			for l in range(max_length):
