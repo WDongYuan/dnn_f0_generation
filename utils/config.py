@@ -5,16 +5,16 @@ dct_flag = False
 
 learning_rate = 0.001
 decay_step = 1
-decay_rate = 0.99
+decay_rate = 0.95
 epoch_num = 300
 voc_size = 2500
 batch_size = 20
 emb_size = 300
 pos_emb_size = 10
 tone_emb_size = 10
-lstm_hidden_size = 50
+lstm_hidden_size = 100
 f0_dim = 10
-linear_h1 = 50
+linear_h1 = 200
 
 
 #################
