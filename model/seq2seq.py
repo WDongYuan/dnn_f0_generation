@@ -246,7 +246,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 					Variable(train_len[i].contiguous().cuda(async=True)),
 					pre_f0,h_0,c_0)
 				pre_f0 = tmp_result
-				outputs[:,l:l+1] = tmp_result.cpu()
+				outputs[:,l:l+1] = tmp_result.cpu().data
 
 			outputs = outputs.view(batch_size,-1)
 			loss = LF(outputs,train_f0_batch)
