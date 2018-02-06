@@ -903,6 +903,7 @@ if __name__=="__main__":
 			print(vowel_char_dic)
 			cons_num = len(consonant_dic)+1
 			vowel_num = len(vowel_dic)+1
+			vowel_ch_num = len(vowel_char_dic)+1
 			############################################
 			# cons_num = 24
 			# vowel_num = 38
@@ -932,6 +933,7 @@ if __name__=="__main__":
 		vowel_num = 38
 		dep_num = 30*2
 		config.voc_size = 3601
+		vowel_ch_num = 10
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
@@ -987,7 +989,7 @@ if __name__=="__main__":
 		train_pos_feat = train_pos[:,:,3:]
 		train_pos = train_pos[:,:,0:3]
 		train_cons = train_feat[:,:,77].astype(np.int32)
-		train_vowel = train_feat[:,:,78].astype(np.int32)
+		train_vowel = train_feat[:,:,78:83].astype(np.int32)
 		train_phrase = train_feat[:,:,83:89]
 		train_dep = train_feat[:,:,89:149]
 		train_feat = train_feat[:,:,0:71]
@@ -1006,7 +1008,7 @@ if __name__=="__main__":
 		test_pos_feat = test_pos[:,:,3:]
 		test_pos = test_pos[:,:,0:3]
 		test_cons = test_feat[:,:,77].astype(np.int32)
-		test_vowel = test_feat[:,:,78].astype(np.int32)
+		test_vowel = test_feat[:,:,78:83].astype(np.int32)
 		test_phrase = test_feat[:,:,83:89]
 		test_dep = test_feat[:,:,89:149]
 		test_feat = test_feat[:,:,0:71]
@@ -1129,7 +1131,7 @@ if __name__=="__main__":
 			exit()
 		#############################################################
 		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+			cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		##if predict mean

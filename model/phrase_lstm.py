@@ -21,7 +21,7 @@ if cuda_flag:
 
 class PHRASE_LSTM(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
-		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
+		cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
 		lstm_hidden_size,f0_dim,linear_h1):
 		super(PHRASE_LSTM, self).__init__()
 		self.emb_size = emb_size
@@ -40,6 +40,7 @@ class PHRASE_LSTM(nn.Module):
 		self.postone_num = postone_num
 		self.cons_num = cons_num
 		self.vowel_num = vowel_num
+		self.vowel_ch_num = vowel_ch_num
 
 		self.lstm_hidden_size = lstm_hidden_size
 		self.f0_dim = f0_dim
@@ -69,6 +70,8 @@ class PHRASE_LSTM(nn.Module):
 		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
 		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
+		self.vowel_ch_embed = nn.Embedding(self.vowel_ch_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.vowel_ch_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
 		self.lstm_layer = 1
@@ -84,7 +87,7 @@ class PHRASE_LSTM(nn.Module):
 		self.phrase_lstm_layer = 1
 		self.phrase_bidirectional_flag = True
 		self.phrase_direction = 2 if self.phrase_bidirectional_flag else 1
-		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.phrase_hidden_size,
+		self.phrase_lstm = nn.LSTM(self.phrase_num+7*self.tone_emb_size, self.phrase_hidden_size,
 			num_layers=self.phrase_lstm_layer,bidirectional=self.phrase_bidirectional_flag,batch_first=True)
 
 
@@ -148,10 +151,18 @@ class PHRASE_LSTM(nn.Module):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
 		grad_emb = self.grad_embed(sents)
+
 		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
 		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
+
 		tone = self.tone_embed(tone)
 		cons = self.cons_embed(cons)
+
+		vowel_ch = vowel[:,:,1:]
+		vowel_ch = self.vowel_ch_embed(vowel_ch.view(self.batch_size,self.max_length*4))
+		vowel_ch = vowel_ch.view(self.batch_size,self.max_length,4*self.tone_emb_size)
+
+		vowel = vowel[:,:,0]
 		vowel = self.vowel_embed(vowel)
 
 
@@ -171,7 +182,7 @@ class PHRASE_LSTM(nn.Module):
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((tone,cons,vowel,phrase),dim=2)
+		ph_h_0 = torch.cat((tone,cons,vowel,vowel_ch,phrase),dim=2)
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
