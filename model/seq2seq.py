@@ -222,7 +222,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			h_0 = model.init_hidden(batch_size)
 			c_0 = model.init_hidden(batch_size)
 			pre_f0 = None
-			
+
 			if cuda_flag:
 				pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim).cuda(async=True))
 			else:
@@ -246,7 +246,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 					Variable(train_len[i].contiguous().cuda(async=True)),
 					pre_f0,h_0,c_0)
 				pre_f0 = tmp_result
-				outputs[:l:l+1] = tmp_result
+				outputs[:,l:l+1] = tmp_result
 
 			outputs = outputs.view(batch_size,-1)
 			loss = LF(outputs,train_f0_batch)
