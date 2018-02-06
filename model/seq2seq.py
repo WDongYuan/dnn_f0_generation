@@ -185,40 +185,42 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			#GPU OPTION
 			###########################################################
 			if cuda_flag:
-				train_emb_batch = Variable(train_emb[i].cuda(async=True))
-				train_pos_batch = Variable(train_pos[i].cuda(async=True))
-				train_pos_feat_batch = Variable(train_pos_feat[i].cuda(async=True))
-				train_cons_batch = Variable(train_cons[i].cuda(async=True))
-				train_vowel_batch = Variable(train_vowel[i].cuda(async=True))
-				train_tone_batch = Variable(train_tone[i].cuda(async=True))
-				train_pretone_batch = Variable(train_pretone[i].cuda(async=True))
-				train_postone_batch = Variable(train_postone[i].cuda(async=True))
-				train_feat_batch = Variable(train_feat[i].cuda(async=True))
-				train_f0_batch = Variable(train_f0[i].cuda(async=True))
-				train_len_batch = Variable(train_len[i].cuda(async=True))
-				train_phrase_batch = Variable(train_phrase[i].cuda(async=True))
-				train_dep_batch = Variable(train_dep[i].cuda(async=True))
-				pre_f0_batch = Variable(pre_f0[i].cuda(async=True))
+				# train_emb_batch = Variable(train_emb[i].cuda(async=True))
+				# train_pos_batch = Variable(train_pos[i].cuda(async=True))
+				# train_pos_feat_batch = Variable(train_pos_feat[i].cuda(async=True))
+				# train_cons_batch = Variable(train_cons[i].cuda(async=True))
+				# train_vowel_batch = Variable(train_vowel[i].cuda(async=True))
+				# train_tone_batch = Variable(train_tone[i].cuda(async=True))
+				# train_pretone_batch = Variable(train_pretone[i].cuda(async=True))
+				# train_postone_batch = Variable(train_postone[i].cuda(async=True))
+				# train_feat_batch = Variable(train_feat[i].cuda(async=True))
+				# train_f0_batch = Variable(train_f0[i].cuda(async=True))
+				# train_len_batch = Variable(train_len[i].cuda(async=True))
+				# train_phrase_batch = Variable(train_phrase[i].cuda(async=True))
+				# train_dep_batch = Variable(train_dep[i].cuda(async=True))
+				# pre_f0_batch = Variable(pre_f0[i].cuda(async=True))
+				pass
 			else:
-				train_emb_batch = Variable(train_emb[i])
-				train_pos_batch = Variable(train_pos[i])
-				train_pos_feat_batch = Variable(train_pos_feat[i])
-				train_cons_batch = Variable(train_cons[i])
-				train_vowel_batch = Variable(train_vowel[i])
-				train_tone_batch = Variable(train_tone[i])
-				train_pretone_batch = Variable(train_pretone[i])
-				train_postone_batch = Variable(train_postone[i])
-				train_feat_batch = Variable(train_feat[i])
-				train_f0_batch = Variable(train_f0[i])
-				train_len_batch = Variable(train_len[i])
-				train_phrase_batch = Variable(train_phrase[i])
-				train_dep_batch = Variable(train_dep[i])
-				pre_f0_batch = Variable(pre_f0[i])
+				# train_emb_batch = Variable(train_emb[i])
+				# train_pos_batch = Variable(train_pos[i])
+				# train_pos_feat_batch = Variable(train_pos_feat[i])
+				# train_cons_batch = Variable(train_cons[i])
+				# train_vowel_batch = Variable(train_vowel[i])
+				# train_tone_batch = Variable(train_tone[i])
+				# train_pretone_batch = Variable(train_pretone[i])
+				# train_postone_batch = Variable(train_postone[i])
+				# train_feat_batch = Variable(train_feat[i])
+				# train_f0_batch = Variable(train_f0[i])
+				# train_len_batch = Variable(train_len[i])
+				# train_phrase_batch = Variable(train_phrase[i])
+				# train_dep_batch = Variable(train_dep[i])
+				# pre_f0_batch = Variable(pre_f0[i])
+				pass
 			###########################################################
 
 
 			optimizer.zero_grad()
-			batch_size = train_emb_batch.size()[0]
+			batch_size,max_length = train_emb[0].size()
 			h_0 = model.init_hidden(batch_size)
 			c_0 = model.init_hidden(batch_size)
 			pre_f0 = None
@@ -227,8 +229,6 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim).cuda(async=True))
 			else:
 				pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim))
-
-			batch_size,max_length = train_emb_batch.size()
 			outputs = Variable(torch.zeros(batch_size,max_length,model.f0_dim).cuda(async=True))
 			for l in range(max_length):
 				tmp_result,h_0,c_0 = model(
