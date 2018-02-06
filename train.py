@@ -843,7 +843,7 @@ if __name__=="__main__":
 			decay_rate,
 			epoch_num)
 
-	elif mode=="train_phrase_lstm" or mode=="phrase_lstm_predict":
+	elif mode=="phrase_lstm_train" or mode=="phrase_lstm_predict":
 		desc_file = args.desc_file
 		train_data = args.train_data
 		train_label = args.train_label
@@ -892,7 +892,7 @@ if __name__=="__main__":
 			pos_file = "./lstm_data/refine_txt_token_pos"
 			pos_dic = get_pos_dic(pos_file)
 			save_dic(pos_dic,"dic_dir/pos_dic")
-			
+
 			pos_num = len(pos_dic)+1
 			print("pos number: "+str(pos_num))
 			append_pos_to_feature("./lstm_data/train",pos_file,pos_dic)
@@ -1121,19 +1121,19 @@ if __name__=="__main__":
 			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
 
 			#############################################################
-			test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
-			test_pos = torch.LongTensor(ori_train_pos.reshape((len(ori_train_pos),-1)).tolist())
-			test_pos_feat = torch.FloatTensor(ori_train_pos_feat.tolist())
-			test_cons = torch.LongTensor(ori_train_cons.tolist())
-			test_vowel = torch.LongTensor(ori_train_vowel.tolist())
-			test_tone = torch.LongTensor(ori_train_tone.tolist())
-			test_pretone = torch.LongTensor(ori_train_pretone.tolist())
-			test_postone = torch.LongTensor(ori_train_postone.tolist())
-			test_feat = torch.FloatTensor(ori_train_feat.reshape((len(ori_train_feat),max_length,feat_num)).tolist())
-			test_len = torch.LongTensor(ori_train_len.tolist())
-			test_f0 = torch.FloatTensor(ori_train_f0.reshape((len(ori_train_f0),-1)).tolist())
-			test_phrase = torch.FloatTensor(ori_train_phrase.tolist())
-			test_dep = torch.FloatTensor(ori_train_dep.tolist())
+			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
+			# test_pos = torch.LongTensor(ori_train_pos.reshape((len(ori_train_pos),-1)).tolist())
+			# test_pos_feat = torch.FloatTensor(ori_train_pos_feat.tolist())
+			# test_cons = torch.LongTensor(ori_train_cons.tolist())
+			# test_vowel = torch.LongTensor(ori_train_vowel.tolist())
+			# test_tone = torch.LongTensor(ori_train_tone.tolist())
+			# test_pretone = torch.LongTensor(ori_train_pretone.tolist())
+			# test_postone = torch.LongTensor(ori_train_postone.tolist())
+			# test_feat = torch.FloatTensor(ori_train_feat.reshape((len(ori_train_feat),max_length,feat_num)).tolist())
+			# test_len = torch.LongTensor(ori_train_len.tolist())
+			# test_f0 = torch.FloatTensor(ori_train_f0.reshape((len(ori_train_f0),-1)).tolist())
+			# test_phrase = torch.FloatTensor(ori_train_phrase.tolist())
+			# test_dep = torch.FloatTensor(ori_train_dep.tolist())
 			#############################################################
 
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")

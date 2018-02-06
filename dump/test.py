@@ -76,11 +76,11 @@ if __name__=="__main__":
 	# 		if word not in myset:
 	# 			print(line)
 	# true_f0_file = "../../mandarine/gen_f0/train_dev_data_vector/dev_data_f0_vector"
-	true_f0_file = "../../seq_op/my_cn_data/train_test_data/test_data/test_f0"
+	true_f0_file = "../../seq_op/my_cn_data/train_test_data/train_data/train_f0"
 	# true_f0_file = "../train_data_f0"
-	base_predict = "../predict_test_f0"
+	base_predict = "../predict_train_f0"
 	true_f0 = np.loadtxt(true_f0_file,delimiter=" ")[:,0:10]
 	predict = np.loadtxt(base_predict,delimiter=" ")
-	# np.savetxt("../test_res",true_f0-predict,delimiter=" ",fmt="%.5f")
-	print(rmse(predict,true_f0))
+	np.savetxt("../train_res",true_f0-predict,delimiter=" ",fmt="%.5f")
+	# print(rmse(predict,true_f0))
 	
