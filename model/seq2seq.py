@@ -300,7 +300,7 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 			# 	Variable(val_tone.cuda(async=True)),Variable(val_postone.cuda(async=True)),Variable(val_feat.cuda(async=True)),
 			# 	Variable(val_phrase.cuda(async=True)),Variable(val_dep.cuda(async=True)),
 			# 	Variable(val_len.cuda(async=True)))
-			result[:,i] = output.cpu().data.numpy()
+			result[:,i:i+1] = output.cpu().data.numpy()
 			pre_f0 = output
 		else:
 			output,h_0,c_0= model(Variable(val_emb[:,i:i+1].contiguous()),
@@ -320,7 +320,7 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 			# 	Variable(val_pretone),Variable(val_tone),Variable(val_postone),
 			# 	Variable(val_feat),Variable(val_phrase),Variable(val_dep),Variable(val_len))
 			# print(result.size())
-			result[:,i] = output.data.numpy()
+			result[:,i:i+1] = output.data.numpy()
 			pre_f0 = output
 	###########################################################
 	val_len = val_len.numpy()
