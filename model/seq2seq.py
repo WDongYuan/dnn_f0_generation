@@ -237,8 +237,9 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 					train_feat_batch[:,l:l+1],
 					train_phrase_batch[:,l:l+1],
 					train_dep_batch[:,l:l+1],
-					train_len_batch[:,l:l+1],
+					train_len_batch,
 					pre_f0,h_0,c_0)
+				pre_f0 = tmp_result
 				outputs[:l:l+1] = tmp_result
 
 			outputs = outputs.view(batch_size,-1)
