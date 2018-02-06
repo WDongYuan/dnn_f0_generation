@@ -76,7 +76,7 @@ class PHRASE_LSTM(nn.Module):
 
 		##LSTM
 		self.lstm_layer = 2
-		self.bidirectional_flag = True
+		self.bidirectional_flag = False
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -86,8 +86,10 @@ class PHRASE_LSTM(nn.Module):
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 		self.phrase_lstm_layer = 1
+		self.phrase_bidirectional_flag = True
+		self.phrase_direction = 2 if self.phrase_bidirectional_flag else 1
 		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.phrase_hidden_size,
-			num_layers=self.phrase_lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+			num_layers=self.phrase_lstm_layer,bidirectional=self.phrase_bidirectional_flag,batch_first=True)
 		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
@@ -109,7 +111,7 @@ class PHRASE_LSTM(nn.Module):
 		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.feat_l2)
 
-		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.direction,self.phrase_linear_size)
+		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.phrase_direction,self.phrase_linear_size)
 		self.linear_init(self.phrase_l1)
 		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
 		self.linear_init(self.phrase_l2)
@@ -137,7 +139,7 @@ class PHRASE_LSTM(nn.Module):
 		###########################################################
 
 	def init_phrase_hidden(self):
-		direction = 2 if self.bidirectional_flag else 1
+		direction = 2 if self.phrase_bidirectional_flag else 1
 		###########################################################
 		#GPU OPTION
 		###########################################################
