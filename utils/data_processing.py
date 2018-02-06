@@ -661,21 +661,45 @@ def get_syl_dic():
 		c_dic[cons] = len(c_dic)+1
 	for vowel in vowel_l:
 		v_dic[vowel] = len(v_dic)+1
-	return c_dic,v_dic
-def decompose_zh_syl(syl_l,c_dic,v_dic):
+
+	##create the dictionary for the splitted vowel
+	v_c_dic = {}
+	for vowel in vowel_l:
+		for c in vowel:
+			if c not in v_c_dic:
+				v_c_dic[c] = len(v_c_dic)+1
+	return c_dic,v_dic,v_c_dic
+def decompose_zh_syl(syl_l,c_dic,v_dic,v_c_dic):
 	result = []
 	for syl in syl_l:
+		split_l = []
+		vowel = ""
 		if syl in v_dic:
-			result.append([0,v_dic[syl]])
+			split_l += [0,v_dic[syl]]
+			vowel = syl
+			# result.append([0,v_dic[syl]])
 		else:
 			p = 0
 			while syl[0:p+1] in c_dic:
 				p += 1
+			vowel = syl[p:]
+			split_l += [c_dic[syl[0:p]],v_dic[syl[p:]]]
 			# print(syl[0:p]+" "+syl[p:])
-			result.append([c_dic[syl[0:p]],v_dic[syl[p:]]])
+			# result.append([c_dic[syl[0:p]],v_dic[syl[p:]]])
+
+		##split the vowel into character and append to the decompose list
+		if vowel=="ue":
+			vowel = "ve"
+		for ch in vowel:
+			split_l.append(v_c_dic[ch])
+		for i in range(4-len(vowel)):
+			split_l.append(0)
+
+		result.append(split_l)
+	# print(result)
 	result = np.array(result).astype(np.int32)
 	return result
-def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic):
+def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic,v_c_dic):
 	data = {}
 	with open(map_file) as f:
 		for line in f:
@@ -694,7 +718,7 @@ def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic):
 		if "data" not in data_name:
 			continue
 		syl_l = data[data_name]
-		cvl = decompose_zh_syl(syl_l,c_dic,v_dic)
+		cvl = decompose_zh_syl(syl_l,c_dic,v_dic,v_c_dic)
 		feat_cont = None
 		with open(feat_dir+"/"+data_name) as f:
 			feat_cont = f.readlines()
@@ -702,10 +726,12 @@ def append_syl_to_feature(feat_dir,map_file,c_dic,v_dic):
 		assert len(feat_cont)==len(cvl)
 		with open(feat_dir+"/"+data_name,"w+") as f:
 			for i in range(len(feat_cont)):
-				feat_cont[i] = feat_cont[i]+" "+str(cvl[i][0])+" "+str(cvl[i][1])+"\n"
+				tup = [str(idx) for idx in cvl[i]]
+				feat_cont[i] = feat_cont[i]+" "+" ".join(tup)+"\n"
+				# feat_cont[i] = feat_cont[i]+" "+str(cvl[i][0])+" "+str(cvl[i][1])+"\n"
 			f.writelines(feat_cont)
 	# print("append 2 syllable features")
-	print("syllable features "+str(feature_before)+" "+str(feature_before+2-1))
+	print("syllable features "+str(feature_before)+" "+str(feature_before+6-1))
 
 def normalize(arr):
 	arr_mean = arr.mean(axis=0)

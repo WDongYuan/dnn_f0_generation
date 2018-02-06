@@ -256,7 +256,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
-		self.lstm_layer = 2
+		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
@@ -268,7 +268,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 
 		# self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.phrase_num+self.feat_size,
 		# 	self.phrase_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.phrase_lstm = nn.LSTM(self.emb_l_size+self.tone_emb_size,
+		self.phrase_lstm = nn.LSTM(self.grad_emb_size+self.tone_emb_size,
 			self.phrase_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 
@@ -300,6 +300,11 @@ class PHRASE_TEST_LSTM(nn.Module):
 		# self.linear_init(self.concat_l2)
 
 		# self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+
+		self.ngram_out = 20
+		self.ngram = NGram(in_dim=self.grad_emb_size,win_size=5,out_dim=self.ngram_out)
+		self.ngram_l = nn.Linear(self.ngram_out,self.f0_dim)
+
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -354,25 +359,31 @@ class PHRASE_TEST_LSTM(nn.Module):
 		# # print(pos.size())
 		# # print(pos_feat.size())
 		# # dep = self.dep_lemb(dep)
-		emb = self.emb_l1(emb)
+		# emb = self.emb_l1(emb)
 		# feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
 		# feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		# feat_h = self.feat_l1(feat_h_n)
 		# feat_h = self.tanh(feat_h)
 		# feat_h = self.feat_l2(feat_h)
 
-		c_0 = self.init_phrase_hidden()
-		h_0 = self.init_phrase_hidden()
+		# c_0 = self.init_phrase_hidden()
+		# h_0 = self.init_phrase_hidden()
 
 		# ph_h_0 = torch.cat((feat,cons,vowel,tone,phrase),dim=2)
-		ph_h_0 = torch.cat((tone,emb),dim=2)
-		ph_h_n, (h_t,c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		ph_h = self.phrase_l1(ph_h_n)
-		ph_h = self.tanh(ph_h)
-		ph_h = self.phrase_l2(ph_h)
+		# ph_h_0 = torch.cat((tone,emb),dim=2)
+		# ph_h_n, (h_t,c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		# ph_h = self.phrase_l1(ph_h_n)
+		# ph_h = self.tanh(ph_h)
+		# ph_h = self.phrase_l2(ph_h)
 
 		# h = feat_h+ph_h
-		h = ph_h
+		# h = ph_h
+
+
+		out = self.ngram(grad_emb)
+		out = self.relu(out)
+		out = self.ngram_l(out)
+		h = out
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
@@ -380,7 +391,25 @@ class PHRASE_TEST_LSTM(nn.Module):
 		# ph_h = ph_h.view(self.batch_size,self.max_length*self.f0_dim)
 		# return h,feat_h,ph_h
 		################################################################################
+
+
 		return h
+
+class NGram(nn.Module):
+	def __init__(self,in_dim,win_size,out_dim):
+		super(NGram, self).__init__()
+		self.conv1 = nn.Conv1d(1,out_dim,kernel_size=win_size*in_dim,stride=in_dim,padding=(win_size-1)/2*in_dim)
+		self.batch_size = -1
+		self.length = -1
+		self.win_size = win_size
+		self.in_dim = in_dim
+		self.out_dim = out_dim
+	def forward(self,in_data):
+		self.batch_size,self.length,_ = in_data.size()
+		in_data = in_data.view(self.batch_size,1,self.length*self.in_dim)
+		out_data = self.conv1(in_data).permute(0,2,1)
+		return out_data
+
 
 
 def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_pretone,train_tone,train_postone,train_feat,train_phrase,train_dep,train_f0,train_len,

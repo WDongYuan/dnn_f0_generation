@@ -1,14 +1,14 @@
-cuda_flag = True
+cuda_flag = False
 update_data = False
 dct_num = 5
 dct_flag = False
 
-learning_rate = 0.001
+learning_rate = 0.0001
 decay_step = 1
 decay_rate = 0.95
 epoch_num = 100
 voc_size = 2500
-batch_size = 1
+batch_size = 20
 emb_size = 300
 pos_emb_size = 10
 tone_emb_size = 10

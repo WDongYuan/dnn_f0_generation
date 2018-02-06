@@ -51,6 +51,7 @@ from model import emb_pos_feat_lstm
 from model import tone_lstm
 from model import dct_lstm
 from model import phrase_lstm
+from model import seq2seq
 
 cuda_flag = config.cuda_flag
 # from model import expand_emb
@@ -895,9 +896,10 @@ if __name__=="__main__":
 
 
 			############################################
-			consonant_dic,vowel_dic = get_syl_dic()
-			append_syl_to_feature("./lstm_data/train",train_map,consonant_dic,vowel_dic)
-			append_syl_to_feature("./lstm_data/test",test_map,consonant_dic,vowel_dic)
+			consonant_dic,vowel_dic,vowel_char_dic = get_syl_dic()
+			append_syl_to_feature("./lstm_data/train",train_map,consonant_dic,vowel_dic,vowel_char_dic)
+			append_syl_to_feature("./lstm_data/test",test_map,consonant_dic,vowel_dic,vowel_char_dic)
+			print(vowel_char_dic)
 			cons_num = len(consonant_dic)+1
 			vowel_num = len(vowel_dic)+1
 			############################################
@@ -985,8 +987,8 @@ if __name__=="__main__":
 		train_pos = train_pos[:,:,0:3]
 		train_cons = train_feat[:,:,77].astype(np.int32)
 		train_vowel = train_feat[:,:,78].astype(np.int32)
-		train_phrase = train_feat[:,:,79:85]
-		train_dep = train_feat[:,:,85:145]
+		train_phrase = train_feat[:,:,83:89]
+		train_dep = train_feat[:,:,89:149]
 		train_feat = train_feat[:,:,0:71]
 		tmp_shape = train_feat.shape
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -1004,8 +1006,8 @@ if __name__=="__main__":
 		test_pos = test_pos[:,:,0:3]
 		test_cons = test_feat[:,:,77].astype(np.int32)
 		test_vowel = test_feat[:,:,78].astype(np.int32)
-		test_phrase = test_feat[:,:,79:85]
-		test_dep = test_feat[:,:,85:145]
+		test_phrase = test_feat[:,:,83:89]
+		test_dep = test_feat[:,:,89:149]
 		test_feat = test_feat[:,:,0:71]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -1014,7 +1016,7 @@ if __name__=="__main__":
 		##delete pitch feature
 		# test_feat = np.delete(test_feat,range(3,21),2)
 
-		batch_num = int(train_f0.shape[0]/config.batch_size)
+		batch_num = int(train_f0.shape[0]/config.batch_size)/10
 		max_length = train_emb.shape[1]
 		feat_num = train_feat.shape[2]
 		phrase_num = train_phrase.shape[2]
@@ -1130,7 +1132,12 @@ if __name__=="__main__":
 		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		##if predict mean
-		model = phrase_lstm.PHRASE_TEST_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# model = phrase_lstm.PHRASE_TEST_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		#############################################################
+		##if predict mean
+		model = seq2seq.Seq2Seq(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
@@ -1153,7 +1160,8 @@ if __name__=="__main__":
 		decay_step = config.decay_step
 		decay_rate = config.decay_rate
 		epoch_num = config.epoch_num
-		phrase_lstm.Train(
+		# phrase_lstm.Train(
+		seq2seq.Train(
 			train_emb,
 			train_pos,
 			train_pos_feat,
