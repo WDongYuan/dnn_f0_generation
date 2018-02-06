@@ -1016,7 +1016,7 @@ if __name__=="__main__":
 		##delete pitch feature
 		# test_feat = np.delete(test_feat,range(3,21),2)
 
-		batch_num = int(train_f0.shape[0]/config.batch_size)/10
+		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
 		feat_num = train_feat.shape[2]
 		phrase_num = train_phrase.shape[2]
