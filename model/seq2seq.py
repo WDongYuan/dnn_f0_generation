@@ -232,18 +232,18 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			outputs = Variable(torch.zeros(batch_size,max_length,model.f0_dim).cuda(async=True))
 			for l in range(max_length):
 				tmp_result,h_0,c_0 = model(
-					train_emb_batch[:,l:l+1],
-					train_pos_batch[:,l:l+1],
-					train_pos_feat_batch[:,l:l+1],
-					train_cons_batch[:,l:l+1],
-					train_vowel_batch[:,l:l+1],
-					train_pretone_batch[:,l:l+1],
-					train_tone_batch[:,l:l+1],
-					train_postone_batch[:,l:l+1],
-					train_feat_batch[:,l:l+1],
-					train_phrase_batch[:,l:l+1],
-					train_dep_batch[:,l:l+1],
-					train_len_batch,
+					train_emb_batch[:,l:l+1].cuda(),
+					train_pos_batch[:,l:l+1].cuda(),
+					train_pos_feat_batch[:,l:l+1].cuda(),
+					train_cons_batch[:,l:l+1].cuda(),
+					train_vowel_batch[:,l:l+1].cuda(),
+					train_pretone_batch[:,l:l+1].cuda(),
+					train_tone_batch[:,l:l+1].cuda(),
+					train_postone_batch[:,l:l+1].cuda(),
+					train_feat_batch[:,l:l+1].cuda(),
+					train_phrase_batch[:,l:l+1].cuda(),
+					train_dep_batch[:,l:l+1].cuda(),
+					train_len_batch.cuda(),
 					pre_f0,h_0,c_0)
 				pre_f0 = tmp_result
 				outputs[:,l:l+1] = tmp_result
