@@ -152,7 +152,7 @@ class Seq2Seq(nn.Module):
 
 		h = feat_h
 
-		h = h.view(self.batch_size,self.max_length*self.f0_dim)
+		h = h.view(self.batch_size,self.max_length,self.f0_dim)
 		return h,h_t,c_t
 
 
@@ -301,6 +301,7 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 			# 	Variable(val_phrase.cuda(async=True)),Variable(val_dep.cuda(async=True)),
 			# 	Variable(val_len.cuda(async=True)))
 			result[:,i] = output.cpu().data.numpy()
+			pre_f0 = output
 		else:
 			output,h_0,c_0= model(Variable(val_emb[:,i:i+1].contiguous()),
 				Variable(val_pos[:,i:i+1].contiguous()),
@@ -320,6 +321,7 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 			# 	Variable(val_feat),Variable(val_phrase),Variable(val_dep),Variable(val_len))
 			# print(result.size())
 			result[:,i] = output.data.numpy()
+			pre_f0 = output
 	###########################################################
 	val_len = val_len.numpy()
 	loss = []
