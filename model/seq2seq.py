@@ -88,7 +88,7 @@ class Seq2Seq(nn.Module):
 		self.relu = nn.ReLU()
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
-		self.drop = nn.Dropout(0.8)
+		self.drop = nn.Dropout(0)
 
 		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.feat_l1)
