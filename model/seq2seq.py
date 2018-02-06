@@ -282,7 +282,7 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 		#GPU OPTION
 		###########################################################
 		if cuda_flag:
-			output,h_0,c_0 = model(Variable(val_emb[:,i:i+1].cuda(async=True)),Variable(val_pos[:,i:i+1].cuda(async=True)),Variable(val_pos_feat[:,i:i+1].cuda(async=True)),
+			output,h_0,c_0 = model(Variable(val_emb[:,i:i+1].cuda(async=True)),Variable(val_pos[:,i:i+1].contiguous().cuda(async=True)),Variable(val_pos_feat[:,i:i+1].cuda(async=True)),
 				Variable(val_cons[:,i:i+1].cuda(async=True)),Variable(val_vowel[:,i:i+1].cuda(async=True)),Variable(val_pretone[:,i:i+1].cuda(async=True)),
 				Variable(val_tone[:,i:i+1].cuda(async=True)),Variable(val_postone[:,i:i+1].cuda(async=True)),Variable(val_feat[:,i:i+1].cuda(async=True)),
 				Variable(val_phrase[:,i:i+1].cuda(async=True)),Variable(val_dep[:,i:i+1].cuda(async=True)),
