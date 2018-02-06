@@ -75,7 +75,7 @@ class PHRASE_LSTM(nn.Module):
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
-		self.lstm_layer = 1
+		self.lstm_layer = 2
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
@@ -85,6 +85,7 @@ class PHRASE_LSTM(nn.Module):
 		# self.feat_lstm = nn.LSTM(self.grad_emb_size,self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
+		self.phrase_lstm_layer = 1
 		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.phrase_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		# self.syl_lstm = nn.LSTM(3*self.tone_emb_size, self.lstm_hidden_size,
@@ -141,9 +142,9 @@ class PHRASE_LSTM(nn.Module):
 		#GPU OPTION
 		###########################################################
 		if cuda_flag:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size).cuda(async=True))
+			return Variable(torch.rand(self.phrase_lstm_layer*direction,self.batch_size,self.phrase_hidden_size).cuda(async=True))
 		else:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
+			return Variable(torch.rand(self.phrase_lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
 		###########################################################
 
 	def get_embedding(self,emb_file,voc_size,emb_size):

@@ -1128,9 +1128,9 @@ if __name__=="__main__":
 			print("rmse: "+str(loss))
 			exit()
 		#############################################################
-		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		##if predict mean
 		# model = phrase_lstm.PHRASE_TEST_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
@@ -1138,9 +1138,9 @@ if __name__=="__main__":
 		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		##if predict mean
-		model = seq2seq.Seq2Seq(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		# model = seq2seq.Seq2Seq(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
 		param_list = []
@@ -1161,8 +1161,8 @@ if __name__=="__main__":
 		decay_step = config.decay_step
 		decay_rate = config.decay_rate
 		epoch_num = config.epoch_num
-		# phrase_lstm.Train(
-		seq2seq.Train(
+		phrase_lstm.Train(
+		# seq2seq.Train(
 			train_emb,
 			train_pos,
 			train_pos_feat,
