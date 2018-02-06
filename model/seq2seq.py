@@ -75,8 +75,8 @@ class Seq2Seq(nn.Module):
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
-		self.lstm_layer = 1
-		self.bidirectional_flag = True
+		self.lstm_layer = 2
+		self.bidirectional_flag = False
 		self.direction = 2 if self.bidirectional_flag else 1
 		self.feat_lstm = nn.LSTM(self.f0_dim+self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -223,7 +223,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			batch_size,max_length = train_emb[i].size()
 			h_0 = model.init_hidden(batch_size)
 			c_0 = model.init_hidden(batch_size)
-			
+
 			# pre_f0 = None
 			# if cuda_flag:
 			# 	pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim).cuda(async=True))
