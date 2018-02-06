@@ -145,6 +145,7 @@ class Seq2Seq(nn.Module):
 		vowel = self.vowel_embed(vowel)
 
 		emb = self.emb_l1(emb)
+		print((emb,feat,pos,pos_feat,pre_f0))
 		feat_h_0 = torch.cat((emb,feat,pos,pos_feat,pre_f0),dim=2)
 		h_0 = self.drop(h_0)
 		c_0 = self.drop(c_0)
@@ -199,7 +200,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				train_phrase_batch = Variable(train_phrase[i].cuda(async=True))
 				train_dep_batch = Variable(train_dep[i].cuda(async=True))
 				pre_f0_batch = Variable(pre_f0[i].cuda(async=True))
-				pass
+				
 			else:
 				train_emb_batch = Variable(train_emb[i])
 				train_pos_batch = Variable(train_pos[i])
@@ -215,7 +216,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				train_phrase_batch = Variable(train_phrase[i])
 				train_dep_batch = Variable(train_dep[i])
 				pre_f0_batch = Variable(pre_f0[i])
-				pass
+				
 			###########################################################
 
 
