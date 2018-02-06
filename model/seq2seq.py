@@ -282,11 +282,19 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 		#GPU OPTION
 		###########################################################
 		if cuda_flag:
-			output,h_0,c_0 = model(Variable(val_emb[:,i:i+1].cuda(async=True)),Variable(val_pos[:,i:i+1].contiguous().cuda(async=True)),Variable(val_pos_feat[:,i:i+1].cuda(async=True)),
-				Variable(val_cons[:,i:i+1].cuda(async=True)),Variable(val_vowel[:,i:i+1].cuda(async=True)),Variable(val_pretone[:,i:i+1].cuda(async=True)),
-				Variable(val_tone[:,i:i+1].cuda(async=True)),Variable(val_postone[:,i:i+1].cuda(async=True)),Variable(val_feat[:,i:i+1].cuda(async=True)),
-				Variable(val_phrase[:,i:i+1].cuda(async=True)),Variable(val_dep[:,i:i+1].cuda(async=True)),
-				Variable(val_len.cuda(async=True)),pre_f0,h_0,c_0)
+			output,h_0,c_0 = model(Variable(val_emb[:,i:i+1].cuda(async=True)),
+				Variable(val_pos[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_pos_feat[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_cons[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_vowel[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_pretone[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_tone[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_postone[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_feat[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_phrase[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_dep[:,i:i+1].contiguous().cuda(async=True)),
+				Variable(val_len.contiguous().cuda(async=True))
+				,pre_f0,h_0,c_0)
 			# result,h_0,c_0 = model(Variable(val_emb.cuda(async=True)),Variable(val_pos.cuda(async=True)),Variable(val_pos_feat.cuda(async=True)),
 			# 	Variable(val_cons.cuda(async=True)),Variable(val_vowel.cuda(async=True)),Variable(val_pretone.cuda(async=True)),
 			# 	Variable(val_tone.cuda(async=True)),Variable(val_postone.cuda(async=True)),Variable(val_feat.cuda(async=True)),
@@ -294,9 +302,18 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 			# 	Variable(val_len.cuda(async=True)))
 			result[:,i] = output.cpu().data.numpy()
 		else:
-			output,h_0,c_0= model(Variable(val_emb[:,i:i+1]),Variable(val_pos[:,i:i+1]),Variable(val_pos_feat[:,i:i+1]),Variable(val_cons[:,i:i+1]),Variable(val_vowel[:,i:i+1]),
-				Variable(val_pretone[:,i:i+1]),Variable(val_tone[:,i:i+1]),Variable(val_postone[:,i:i+1]),
-				Variable(val_feat[:,i:i+1]),Variable(val_phrase[:,i:i+1]),Variable(val_dep[:,i:i+1]),Variable(val_len),
+			output,h_0,c_0= model(Variable(val_emb[:,i:i+1].contiguous()),
+				Variable(val_pos[:,i:i+1].contiguous()),
+				Variable(val_pos_feat[:,i:i+1].contiguous()),
+				Variable(val_cons[:,i:i+1].contiguous()),
+				Variable(val_vowel[:,i:i+1].contiguous()),
+				Variable(val_pretone[:,i:i+1].contiguous()),
+				Variable(val_tone[:,i:i+1].contiguous()),
+				Variable(val_postone[:,i:i+1].contiguous()),
+				Variable(val_feat[:,i:i+1].contiguous()),
+				Variable(val_phrase[:,i:i+1].contiguous()),
+				Variable(val_dep[:,i:i+1].contiguous()),
+				Variable(val_len.contiguous()),
 				pre_f0,h_0,c_0)
 			# output,h_0,c_0= model(Variable(val_emb),Variable(val_pos),Variable(val_pos_feat),Variable(val_cons),Variable(val_vowel),
 			# 	Variable(val_pretone),Variable(val_tone),Variable(val_postone),
