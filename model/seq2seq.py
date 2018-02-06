@@ -221,12 +221,27 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			batch_size = train_emb_batch.size()[0]
 			h_0 = model.init_hidden(batch_size)
 			c_0 = model.init_hidden(batch_size)
+			pre_f0 = Variable(torch.zeros(batch_size,1,model.f0_dim))
+			batch_size,max_length = train_emb_batch.size()
+			outputs = Variable(torch.zeros(batch_size,max_length,model.f0_dim))
+			for l in range(max_length):
+				tmp_result,h_0,c_0 = model(
+					train_emb_batch[:,l:l+1],
+					train_pos_batch[:,l:l+1],
+					train_pos_feat_batch[:,l:l+1],
+					train_cons_batch[:,l:l+1],
+					train_vowel_batch[:,l:l+1],
+					train_pretone_batch[:,l:l+1],
+					train_tone_batch[:,l:l+1],
+					train_postone_batch[:,l:l+1],
+					train_feat_batch[:,l:l+1],
+					train_phrase_batch[:,l:l+1],
+					train_dep_batch[:,l:l+1],
+					train_len_batch[:,l:l+1],
+					pre_f0,h_0,c_0)
+				outputs[:l:l+1] = tmp_result
 
-			outputs,_,_ = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
-				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch,
-				pre_f0_batch,h_0,c_0)
-
-
+			outputs = outputs.view(batch_size,-1)
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
 			optimizer.step()
