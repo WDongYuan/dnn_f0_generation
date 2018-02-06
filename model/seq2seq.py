@@ -78,7 +78,7 @@ class Seq2Seq(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.feat_lstm = nn.LSTM(self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
+		self.feat_lstm = nn.LSTM(3*self.tone_emb_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		self.phrase_lstm = nn.LSTM(self.phrase_num+3*self.tone_emb_size, self.phrase_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
@@ -146,7 +146,7 @@ class Seq2Seq(nn.Module):
 
 		emb = self.emb_l1(emb)
 		# print((emb,feat,pos,pos_feat,pre_f0))
-		feat_h_0 = torch.cat((feat,pos,pos_feat),dim=2)
+		feat_h_0 = torch.cat((cons,vowel,tone,feat,pos,pos_feat),dim=2)
 		h_0 = self.drop(h_0)
 		c_0 = self.drop(c_0)
 		feat_h_n, (h_t,c_t) = self.feat_lstm(feat_h_0,(h_0,c_0))
