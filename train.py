@@ -39,6 +39,7 @@ from utils.data_processing import append_dep_to_feature
 from utils.data_processing import dep_refine
 from utils.data_processing import generate_word_embedding
 from utils.data_processing import new_word2index
+from utils.data_processing import save_dic
 
 from model.mlp import MLP
 from model import embedding_lstm
@@ -856,6 +857,7 @@ if __name__=="__main__":
 		predict_file = args.predict_file
 		pos_num = -1
 		if config.update_data:
+			os.system("mkdir dic_dir")
 			############################################
 			encode_feature = EncodeFeature(desc_file)
 			convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
@@ -867,6 +869,8 @@ if __name__=="__main__":
 			os.system("mkdir lstm_data")
 			# word_index = word2index(txt_file,config.voc_size)
 			word_index = new_word2index(txt_file,"./lstm_data/emb_dic")
+			save_dic(word_index,"dic_dir/word_dic")
+
 			config.voc_size = len(word_index)+1
 			print("vocab size: "+str(config.voc_size))
 
@@ -887,6 +891,8 @@ if __name__=="__main__":
 			pos_refine("./lstm_data/pos_convert_map","./lstm_data/txt_token_pos","./lstm_data/refine_txt_token_pos")
 			pos_file = "./lstm_data/refine_txt_token_pos"
 			pos_dic = get_pos_dic(pos_file)
+			save_dic(pos_dic,"dic_dir/pos_dic")
+			
 			pos_num = len(pos_dic)+1
 			print("pos number: "+str(pos_num))
 			append_pos_to_feature("./lstm_data/train",pos_file,pos_dic)
@@ -898,6 +904,10 @@ if __name__=="__main__":
 
 			############################################
 			consonant_dic,vowel_dic,vowel_char_dic = get_syl_dic()
+			save_dic(consonant_dic,"dic_dir/cons_dic")
+			save_dic(vowel_dic,"dic_dir/vowel_dic")
+			save_dic(vowel_char_dic,"dic_dir/vowel_char_dic")
+
 			append_syl_to_feature("./lstm_data/train",train_map,consonant_dic,vowel_dic,vowel_char_dic)
 			append_syl_to_feature("./lstm_data/test",test_map,consonant_dic,vowel_dic,vowel_char_dic)
 			print(vowel_char_dic)
@@ -921,6 +931,8 @@ if __name__=="__main__":
 			dep_file = "./lstm_data/refine_txt_token_dep"
 			# parse_txt_file_dep(txt_file,dep_file)
 			dep_dic = get_dep_dic(dep_file,"./lstm_data/dependency_dic")
+			save_dic(dep_dic,"dic_dir/dep_dic")
+
 			dep_num = len(dep_dic)*2
 			print("dep_num: "+str(dep_num))
 			append_dep_to_feature("./lstm_data/train",dep_file,dep_dic)

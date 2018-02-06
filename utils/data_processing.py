@@ -837,6 +837,12 @@ def generate_word_embedding(word_dic,emb_dic,word_num,emb_dim,out_file):
 	np.savetxt(out_file,arr,delimiter=" ",fmt="%.5f")
 	return
 
+def save_dic(dic,save_file):
+	with open(save_file,"w+") as f:
+		for key,val in dic.items():
+			f.write(str(key)+" "+str(val)+"\n")
+
+
 
 
 
