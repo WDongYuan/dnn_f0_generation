@@ -58,7 +58,7 @@ class PHRASE_LSTM(nn.Module):
 		self.grad_embed = nn.Embedding(self.voc_size, self.grad_emb_size,padding_idx=0)
 		init.uniform(self.grad_embed.weight,a=-0.01,b=0.01)
 
-		self.embed = self.get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
+		self.embed = self.get_embedding("./lstm_data/my_pretrain_emb",self.voc_size,self.emb_size)
 
 		self.pos_embed = nn.Embedding(self.pos_num, self.pos_emb_size,padding_idx=0)
 		init.uniform(self.pos_embed.weight,a=-0.01,b=0.01)
