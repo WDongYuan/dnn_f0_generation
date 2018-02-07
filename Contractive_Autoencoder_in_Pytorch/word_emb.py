@@ -28,9 +28,9 @@ class CAE(nn.Module):
 		self.emb_size = 100
 		self.batch_size = -1
 
-		# self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
+		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
 		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
-		self.embed = self.get_embedding()
+		# self.embed = self.get_embedding()
 		self.l1 = nn.Linear((self.win_size-1)*self.emb_size,self.h_size)
 		self.l2 = nn.Linear(self.h_size,self.vocab_size)
 
@@ -45,10 +45,10 @@ class CAE(nn.Module):
 	def forward(self,word):
 		self.batch_size = word.size()[0]
 		emb = self.embed(word.view(-1,1))
-		emb = self.embl(emb)
+		# emb = self.embl(emb)
 		emb = emb.view(self.batch_size,(self.win_size-1)*self.emb_size)
 		emb = self.l1(emb)
-		# emb = emb.view(self.batch_size,self.win_size-1,self.h_size)
+		emb = emb.view(self.batch_size,self.win_size-1,self.h_size)
 		# emb = torch.sum(emb,dim=1)
 		emb = self.tanh(emb)
 		emb = self.l2(emb)
@@ -144,7 +144,7 @@ if __name__=="__main__":
 		beat_model = None
 		# one_arr = torch.ones(batch_size).long()
 		print("begin training...")
-		for epoch in range(1000):
+		for epoch in range(100):
 			start_time = time.time()
 			loss_val = 0
 			for i in range(batch_num):
