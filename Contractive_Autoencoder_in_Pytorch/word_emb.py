@@ -53,7 +53,7 @@ def Validate(model,x,y):
 	prob = prob.cpu().data.numpy()
 	predict = np.argmax(prob,axis=1)
 	y = y.cpu().data.numpy()
-	# print(predict[0:10])
+	print(predict[0:10])
 	# print(y[0:10])
 	count = 0
 	for i in range(len(y)):
