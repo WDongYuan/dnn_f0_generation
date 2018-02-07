@@ -28,11 +28,13 @@ class CAE(nn.Module):
 		self.emb_size = 100
 		self.batch_size = -1
 
-		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
+		# self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
 		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
-		# self.embed = self.get_embedding()
+		self.embed = self.get_embedding()
 		self.l1 = nn.Linear((self.win_size-1)*self.emb_size,self.h_size)
 		self.l2 = nn.Linear(self.h_size,self.vocab_size)
+
+		self.embl = nn.Linear(300,self.emb_size)
 
 		self.relu = nn.ReLU()
 		self.sigmoid = nn.Sigmoid()
@@ -43,6 +45,7 @@ class CAE(nn.Module):
 	def forward(self,word):
 		self.batch_size = word.size()[0]
 		emb = self.embed(word.view(-1,1))
+		emb = self.embl(emb)
 		emb = emb.view(self.batch_size,(self.win_size-1)*self.emb_size)
 		emb = self.l1(emb)
 		# emb = emb.view(self.batch_size,self.win_size-1,self.h_size)
@@ -83,7 +86,8 @@ def get_data_label(in_dir,win_size):
 		arr = np.loadtxt(in_dir+"/"+file)[:,81]
 		arr = np.hstack(padding+[arr]+padding)
 		for i in range(half_win,len(arr)-half_win):
-			if arr[i]<10 or arr[i]==2499:
+			# if arr[i]<10 or arr[i]==2499:
+			if arr[i]<10:
 				if random.random()>0.3:
 					continue
 			train_data.append([arr[i-half_win:i],arr[i+1:i+1+half_win]])
@@ -100,7 +104,7 @@ if __name__=="__main__":
 		# print(train_data[0:100])
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
 		# print(test_label[0:100])
-		vocab_size = 2500
+		vocab_size = 3601
 		# print(test_data.shape)
 		# print(test_label.shape)
 		

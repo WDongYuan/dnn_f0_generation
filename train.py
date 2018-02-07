@@ -867,8 +867,8 @@ if __name__=="__main__":
 			############################################
 			print("--->collect data according to the data name")
 			os.system("mkdir lstm_data")
-			word_index = word2index(txt_file,config.voc_size)
-			# word_index = new_word2index(txt_file,"./lstm_data/emb_dic")
+			# word_index = word2index(txt_file,config.voc_size)
+			word_index = new_word2index(txt_file,"./lstm_data/emb_dic")
 			save_dic(word_index,"dic_dir/word_dic")
 
 			config.voc_size = len(word_index)+1
