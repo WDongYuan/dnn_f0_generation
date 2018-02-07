@@ -13,6 +13,7 @@ import numpy as np
 import copy
 import time
 import torch.nn.init as init
+import torch.backends.cudnn as cudnn
 def show_heatmap(arr):
 	plt.imshow(arr, cmap='hot', interpolation='nearest')
 	plt.show()
@@ -49,9 +50,9 @@ class CAE(nn.Module):
 def Validate(model,x,y):
 	model.eval()
 	prob = model(x)
-	prob = prob.data.numpy()
+	prob = prob.cpu()data.numpy()
 	predict = np.argmax(prob,axis=1)
-	y = y.data.numpy()
+	y = y.cpu().data.numpy()
 	# print(predict[0:10])
 	# print(y[0:10])
 	count = 0
@@ -103,12 +104,16 @@ if __name__=="__main__":
 		test_data = torch.LongTensor(test_data.tolist())
 		test_label = torch.LongTensor(test_label.tolist())
 
-		test_data = Variable(test_data)
-		test_label = Variable(test_label)
+		test_data = Variable(test_data).cuda()
+		test_label = Variable(test_label).cuda()
 
 
 		ce_loss = nn.CrossEntropyLoss()
 		model = CAE(win_size,vocab_size)
+
+		torch.backends.cudnn.benchmark = True
+		model.cuda()
+
 		# model.load_state_dict(torch.load("best_model_con"))
 		optimizer = optim.Adam(model.parameters(), lr = 0.01)
 		# optimizer = optim.SGD(model.parameters(), lr=0.00001, momentum=0.9)
@@ -121,12 +126,12 @@ if __name__=="__main__":
 			start_time = time.time()
 			loss_val = 0
 			for i in range(batch_num):
-				train_data_batch = Variable(train_data[i])
+				train_data_batch = Variable(train_data[i]).cuda()
 				# train_label_batch = torch.zeros(batch_size,vocab_size).long()
 				# print(train_label[i].size())
 				# print(train_label_batch.size())
 				# train_label_batch.scatter_(1,train_label[i].view(-1,1),1)
-				train_label_batch = Variable(train_label[i])
+				train_label_batch = Variable(train_label[i]).cuda()
 
 				optimizer.zero_grad()
 
