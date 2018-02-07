@@ -97,11 +97,11 @@ if __name__=="__main__":
 		
 
 		print(train_data.shape)
-		train_data = train_data[0:55000]
-		train_label = train_label[0:55000]
+		train_data = train_data[0:54500]
+		train_label = train_label[0:54500]
 
 		batch_size = 10
-		batch_num = int(55000/batch_size)
+		batch_num = int(54500/batch_size)
 		train_data = train_data.reshape((batch_num,batch_size,win_size-1))
 		train_label = train_label.reshape((batch_num,batch_size))
 
