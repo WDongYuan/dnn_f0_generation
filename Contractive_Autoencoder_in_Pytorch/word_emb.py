@@ -182,6 +182,7 @@ if __name__=="__main__":
 		torch.save(best_model.state_dict(),"best_model")
 
 	elif sys.argv[1]=="save_emb":
+		model = CAE(3,3601)
 		model.load_state_dict(torch.load("best_model"))
 		emb = model.state_dict()['embed.weight'].numpy()
 		print(emb.shape)
