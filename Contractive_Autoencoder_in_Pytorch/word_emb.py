@@ -25,7 +25,7 @@ class CAE(nn.Module):
 		self.h_size = 100
 		self.vocab_size = vocab_size
 		self.win_size = win_size
-		self.emb_size = 100
+		self.emb_size = 200
 		self.batch_size = -1
 
 		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
@@ -167,7 +167,7 @@ if __name__=="__main__":
 				loss_val += loss.data[0]
 
 			for param_group in optimizer.param_groups:
-				param_group["lr"] *= 0.98
+				param_group["lr"] *= 0.99
 
 			print("Epoch "+str(epoch))
 			print("train loss: "+str(loss_val/batch_num))
