@@ -43,7 +43,7 @@ class CAE(nn.Module):
 	def forward(self,word):
 		self.batch_size = word.size()[0]
 		emb = self.embed(word.view(-1,1))
-		emb = emb.view(self.batch_size,(self.win_size-1)*self.h_size)
+		emb = emb.view(self.batch_size,(self.win_size-1)*self.emb_size)
 		emb = self.l1(emb)
 		# emb = emb.view(self.batch_size,self.win_size-1,self.h_size)
 		# emb = torch.sum(emb,dim=1)
