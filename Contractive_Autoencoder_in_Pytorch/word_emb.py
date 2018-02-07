@@ -22,11 +22,11 @@ def show_heatmap(arr):
 class CAE(nn.Module):
 	def __init__(self,win_size,vocab_size):
 		super(CAE, self).__init__()
-		self.h_size = 200
+		self.h_size = 100
 		self.vocab_size = vocab_size
 		self.win_size = win_size
-		self.emb_size = 300
-		self.batch_siz = -1
+		self.emb_size = 200
+		self.batch_size = -1
 
 		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
 		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
