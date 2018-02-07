@@ -88,7 +88,7 @@ if __name__=="__main__":
 		win_size = 5
 		print("reading data...")
 		train_data,train_label = get_data_label("../lstm_data/train",win_size)
-		print(train_data[0:100])
+		# print(train_data[0:100])
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
 		# print(test_label[0:100])
 		vocab_size = 2500
@@ -97,11 +97,11 @@ if __name__=="__main__":
 		
 
 		print(train_data.shape)
-		train_data = train_data[0:56000]
-		train_label = train_label[0:56000]
+		train_data = train_data[0:55000]
+		train_label = train_label[0:55000]
 
-		batch_size = 50
-		batch_num = int(56000/batch_size)
+		batch_size = 10
+		batch_num = int(55000/batch_size)
 		train_data = train_data.reshape((batch_num,batch_size,win_size-1))
 		train_label = train_label.reshape((batch_num,batch_size))
 
