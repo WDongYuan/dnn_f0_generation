@@ -74,9 +74,9 @@ def get_data_label(in_dir,win_size):
 		arr = np.loadtxt(in_dir+"/"+file)[:,81]
 		arr = np.hstack(padding+[arr]+padding)
 		for i in range(half_win,len(arr)-half_win):
-			# if arr[i]<10 or arr[i]==1999:
-			# 	if random.random()>0.1:
-			# 		continue
+			if arr[i]<10 or arr[i]==2499:
+				if random.random()>0.3:
+					continue
 			train_data.append([arr[i-half_win:i],arr[i+1:i+1+half_win]])
 			train_label.append(arr[i])
 	train_data = np.array(train_data).reshape((-1,win_size-1)).astype(np.int16)
@@ -91,17 +91,17 @@ if __name__=="__main__":
 		# print(train_data[0:100])
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
 		# print(test_label[0:100])
-		vocab_size = 2000
+		vocab_size = 2500
 		# print(test_data.shape)
 		# print(test_label.shape)
 		
 
 		print(train_data.shape)
-		train_data = train_data[0:53000]
-		train_label = train_label[0:53000]
+		train_data = train_data[0:56000]
+		train_label = train_label[0:56000]
 
 		batch_size = 50
-		batch_num = int(53000/batch_size)
+		batch_num = int(56000/batch_size)
 		train_data = train_data.reshape((batch_num,batch_size,win_size-1))
 		train_label = train_label.reshape((batch_num,batch_size))
 
