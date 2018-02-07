@@ -122,7 +122,7 @@ if __name__=="__main__":
 		model.cuda()
 
 		# model.load_state_dict(torch.load("best_model_con"))
-		optimizer = optim.Adam(model.parameters(), lr = 0.005,weight_decay=0)
+		optimizer = optim.Adam(model.parameters(), lr = 0.01,weight_decay=0)
 		# optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 		val_recons = None
 		max_acc = 0
@@ -152,7 +152,7 @@ if __name__=="__main__":
 				loss_val += loss.data[0]
 
 			for param_group in optimizer.param_groups:
-				param_group["lr"] *= 0.98
+				param_group["lr"] *= 0.95
 
 			print("Epoch "+str(epoch))
 			print("train loss: "+str(loss_val/batch_num))
