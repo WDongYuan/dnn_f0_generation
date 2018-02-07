@@ -88,7 +88,7 @@ if __name__=="__main__":
 		win_size = 5
 		print("reading data...")
 		train_data,train_label = get_data_label("../lstm_data/train",win_size)
-		# print(train_label[0:100])
+		print(train_data[0:100])
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
 		# print(test_label[0:100])
 		vocab_size = 3601
