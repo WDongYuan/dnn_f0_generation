@@ -28,7 +28,7 @@ class CAE(nn.Module):
 		self.batch_siz = -1
 
 		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
-		init.uniform(self.embed.weight,a=-0.01,b=0.01)
+		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
 		self.l1 = nn.Linear((self.win_size-1)*self.emb_size,self.h_size)
 		self.l2 = nn.Linear(self.h_size,self.vocab_size)
 
