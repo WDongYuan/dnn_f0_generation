@@ -85,7 +85,7 @@ def get_data_label(in_dir,win_size):
 
 if __name__=="__main__":
 	if sys.argv[1]=="train":
-		win_size = 5
+		win_size = 3
 		print("reading data...")
 		train_data,train_label = get_data_label("../lstm_data/train",win_size)
 		# print(train_data[0:100])
