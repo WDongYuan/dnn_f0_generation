@@ -185,6 +185,7 @@ if __name__=="__main__":
 		model = CAE(3,3601)
 		model.load_state_dict(torch.load("best_model"))
 		emb = model.state_dict()['embed.weight'].numpy()
+		np.savetxt("pretrain_emb",emb,delimiter=" ")
 		print(emb.shape)
 		
 
