@@ -84,7 +84,7 @@ if __name__=="__main__":
 		train_data,train_label = get_data_label("../lstm_data/train",win_size)
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
 		# print(test_label[0:100])
-		vocab_size = 3601
+		vocab_size = 2500
 		# print(test_data.shape)
 		# print(test_label.shape)
 		
