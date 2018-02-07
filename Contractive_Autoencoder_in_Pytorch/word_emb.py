@@ -65,8 +65,8 @@ def get_data_label(in_dir,win_size):
 	train_file = os.listdir(in_dir)
 	train_data = []
 	train_label = []
-	padding = [0 for i in range((win_size-1)/2)]
-	half_win = (win_size-1)/2
+	padding = [0 for i in range(int((win_size-1)/2))]
+	half_win = int((win_size-1)/2)
 	for file in train_file:
 		arr = np.loadtxt(in_dir+"/"+file)[:,81]
 		arr = np.hstack(padding+[arr]+padding)
