@@ -25,12 +25,12 @@ class CAE(nn.Module):
 		self.h_size = 100
 		self.vocab_size = vocab_size
 		self.win_size = win_size
-		self.emb_size = 300
+		self.emb_size = 200
 		self.batch_size = -1
 
-		# self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
+		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
 		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
-		self.embed = self.get_embedding()
+		# self.embed = self.get_embedding()
 		self.l1 = nn.Linear(self.emb_size,self.h_size)
 		self.l2 = nn.Linear(self.h_size,self.vocab_size)
 
@@ -83,7 +83,7 @@ def get_data_label(in_dir,win_size):
 		arr = np.hstack(padding+[arr]+padding)
 		for i in range(half_win,len(arr)-half_win):
 			if arr[i]<10:
-				if random.random()>0.1:
+				if random.random()>0.3:
 					continue
 			train_data.append([arr[i-half_win:i],arr[i+1:i+1+half_win]])
 			train_label.append(arr[i])
@@ -99,7 +99,7 @@ if __name__=="__main__":
 		# print(train_data[0:100])
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
 		# print(test_label[0:100])
-		vocab_size = 3601
+		vocab_size = 2500
 		# print(test_data.shape)
 		# print(test_label.shape)
 		
