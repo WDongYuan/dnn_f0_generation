@@ -115,8 +115,8 @@ if __name__=="__main__":
 		model.cuda()
 
 		# model.load_state_dict(torch.load("best_model_con"))
-		optimizer = optim.Adam(model.parameters(), lr = 0.0001)
-		# optimizer = optim.SGD(model.parameters(), lr=0.00001, momentum=0.9)
+		# optimizer = optim.Adam(model.parameters(), lr = 0.001)
+		optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 		val_recons = None
 		max_acc = 0
 		beat_model = None
