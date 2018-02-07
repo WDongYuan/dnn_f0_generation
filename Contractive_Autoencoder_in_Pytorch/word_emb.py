@@ -25,11 +25,12 @@ class CAE(nn.Module):
 		self.h_size = 100
 		self.vocab_size = vocab_size
 		self.win_size = win_size
-		self.emb_size = 200
+		self.emb_size = 300
 		self.batch_size = -1
 
-		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
+		# self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
 		# init.uniform(self.embed.weight,a=-0.01,b=0.01)
+		self.embed = self.get_embedding()
 		self.l1 = nn.Linear(self.emb_size,self.h_size)
 		self.l2 = nn.Linear(self.h_size,self.vocab_size)
 
@@ -49,6 +50,13 @@ class CAE(nn.Module):
 		emb = self.l2(emb)
 		prob = self.softmax(emb)
 		return prob
+
+	def get_embedding(self,emb_file="../lstm_data/pretrain_emb",voc_size=3601,emb_size=300):
+		arr = np.loadtxt(emb_file)
+		embed = nn.Embedding(voc_size, emb_size)
+		embed.weight.data.copy_(torch.from_numpy(arr))
+		embed.weight.requires_grad = False
+		return embed
 
 def Validate(model,x,y):
 	model.eval()
@@ -122,7 +130,7 @@ if __name__=="__main__":
 		model.cuda()
 
 		# model.load_state_dict(torch.load("best_model_con"))
-		optimizer = optim.Adam(model.parameters(), lr = 0.005,weight_decay=0)
+		optimizer = optim.Adam([param for param in model.parameters() if param.requires_grad], lr = 0.005,weight_decay=0)
 		# optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 		val_recons = None
 		max_acc = 0
