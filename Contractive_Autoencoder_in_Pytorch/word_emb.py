@@ -100,7 +100,7 @@ if __name__=="__main__":
 		train_data = train_data[0:54500]
 		train_label = train_label[0:54500]
 
-		batch_size = 10
+		batch_size = 50
 		batch_num = int(54500/batch_size)
 		train_data = train_data.reshape((batch_num,batch_size,win_size-1))
 		train_label = train_label.reshape((batch_num,batch_size))
@@ -122,7 +122,7 @@ if __name__=="__main__":
 		model.cuda()
 
 		# model.load_state_dict(torch.load("best_model_con"))
-		optimizer = optim.Adam(model.parameters(), lr = 0.01,weight_decay=0)
+		optimizer = optim.Adam(model.parameters(), lr = 0.1,weight_decay=0)
 		# optimizer = optim.SGD(model.parameters(), lr=10, momentum=0)
 		val_recons = None
 		max_acc = 0
