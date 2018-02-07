@@ -82,7 +82,7 @@ if __name__=="__main__":
 		win_size = 5
 		print("reading data...")
 		train_data,train_label = get_data_label("../lstm_data/train",win_size)
-		print(train_label[0:100])
+		# print(train_label[0:100])
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
 		# print(test_label[0:100])
 		vocab_size = 2500
@@ -117,7 +117,7 @@ if __name__=="__main__":
 
 		# model.load_state_dict(torch.load("best_model_con"))
 		# optimizer = optim.Adam(model.parameters(), lr = 0.001)
-		optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
+		optimizer = optim.SGD(model.parameters(), lr=10, momentum=0)
 		val_recons = None
 		max_acc = 0
 		beat_model = None
@@ -146,7 +146,7 @@ if __name__=="__main__":
 				loss_val += loss.data[0]
 
 			for param_group in optimizer.param_groups:
-				param_group["lr"] *= 1
+				param_group["lr"] *= 0.8
 
 			print("Epoch "+str(epoch))
 			print("train loss: "+str(loss_val/batch_num))
