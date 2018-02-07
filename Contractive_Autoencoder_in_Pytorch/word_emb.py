@@ -74,7 +74,7 @@ def get_data_label(in_dir,win_size):
 		arr = np.loadtxt(in_dir+"/"+file)[:,81]
 		arr = np.hstack(padding+[arr]+padding)
 		for i in range(half_win,len(arr)-half_win):
-			if arr[i]<10 or arr[i]==2499:
+			if arr[i]<10:
 				if random.random()>0.3:
 					continue
 			train_data.append([arr[i-half_win:i],arr[i+1:i+1+half_win]])
@@ -91,7 +91,7 @@ if __name__=="__main__":
 		# print(train_data[0:100])
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
 		# print(test_label[0:100])
-		vocab_size = 2500
+		vocab_size = 3601
 		# print(test_data.shape)
 		# print(test_label.shape)
 		
