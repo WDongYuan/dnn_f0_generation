@@ -22,7 +22,7 @@ def show_heatmap(arr):
 class CAE(nn.Module):
 	def __init__(self,win_size,vocab_size):
 		super(CAE, self).__init__()
-		self.h_size = 200
+		self.h_size = 100
 		self.vocab_size = vocab_size
 		self.win_size = win_size
 		self.emb_size = 200
@@ -131,7 +131,7 @@ if __name__=="__main__":
 
 		# model.load_state_dict(torch.load("best_model_con"))
 		# optimizer = optim.Adam([param for param in model.parameters() if param.requires_grad], lr = 0.005,weight_decay=0)
-		print(len([param for param in model.parameters() if param.requires_grad]))
+		# print(len([param for param in model.parameters() if param.requires_grad]))
 		optimizer = optim.Adam([param for param in model.parameters() if param.requires_grad], lr = 0.005,weight_decay=0)
 		# optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 		val_recons = None
