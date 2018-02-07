@@ -43,7 +43,7 @@ class CAE(nn.Module):
 		self.batch_size = word.size()[0]
 		emb = self.embed(word.view(-1,1)).view(self.batch_size,(self.win_size-1)*self.emb_size)
 		emb = self.l1(emb)
-		emb = self.sigmoid(emb)
+		emb = self.tanh(emb)
 		emb = self.l2(emb)
 		prob = self.softmax(emb)
 		return prob
