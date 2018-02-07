@@ -181,91 +181,10 @@ if __name__=="__main__":
 				best_model = copy.deepcopy(model)
 		torch.save(best_model.state_dict(),"best_model")
 
-	elif sys.argv[1]=="encode":
-		model = CAE()
-		model.load_state_dict(torch.load("best_model_4"))
-		weight1 = model.state_dict()['fc1.weight'].numpy()
-		weight2 = model.state_dict()['fc2.weight'].numpy()
-		aff = weight1.T.dot(weight2.T)
-		show_heatmap(aff)
-		exit()
-		# new_arr = np.copy(weight)
-		# new_arr[:,0] = weight[:,1]
-		# new_arr[:,1] = weight[:,0]
-		# print(np.around(new_arr,decimals=3))
-		# show_heatmap(new_arr)
+	elif sys.argv[1]=="save_emb":
+		model.load_state_dict(torch.load("best_model"))
+		emb = model.state_dict()['embed.weight'].numpy()
+		print(emb.shape)
+		
 
-		test_data = np.loadtxt("../../seq_op/my_data/train_test_data/train_data/train_f0")
-		test_data = torch.FloatTensor(test_data.tolist())
-		test_data = Variable(test_data)
-
-		enc_data = model.encoder(test_data)
-		np.savetxt("train_encode_data",enc_data.data.numpy(),fmt="%.5f")
-
-	elif sys.argv[1]=="decode":
-		model = CAE()
-		model.load_state_dict(torch.load("best_model_4"))
-
-		encode_data = np.loadtxt("predict")
-		encode_data = torch.FloatTensor(encode_data.tolist())
-		encode_data = Variable(encode_data)
-
-		dec_data = model.decoder(encode_data)
-		np.savetxt("decode_predict",dec_data.data.numpy(),fmt="%.5f")
-
-	elif sys.argv[1]=="visualize":
-		model = CAE()
-		model.load_state_dict(torch.load("best_model_hehe"))
-		weight2 = model.state_dict()['fc2.weight'].numpy()
-		weight4 = model.state_dict()['fc4.weight'].numpy()
-		weight1 = model.state_dict()['fc1.weight'].numpy()
-		weight3 = model.state_dict()['fc3.weight'].numpy()
-		print(weight2)
-		print(weight4)
-		print(weight1)
-		print(weight3)
-		# new_arr = np.copy(weight)
-		# new_arr[:,0] = weight[:,1]
-		# new_arr[:,1] = weight[:,0]
-		# print(np.around(new_arr,decimals=3))
-		# show_heatmap(new_arr)
-
-		encode_data = np.loadtxt("train_encode_data")
-		# sample_idx = 910
-		# sample = encode_data[sample_idx,:]
-
-		# for i in range(len(sample)):
-		# 	plt.plot(weight[:,i]*sample[i],label="dimension "+str(i))
-		# plt.legend()
-		# plt.savefig(str(sample_idx)+".jpg")
-
-		# plt.plot(encode_data[0][0]*weight[:,0],label=str(0)+": pei2")
-		# plt.plot(encode_data[1][0]*weight[:,0],label=str(1)+": tong2")
-		# plt.plot(encode_data[839][0]*weight[:,0],label=str(839)+": tong1")
-		# plt.plot(encode_data[910][0]*weight[:,0],label=str(910)+": tong4")
-		# plt.plot(encode_data[1000][0]*weight[:,0],label=str(1000)+": guo2")
-		# plt.plot(encode_data[200][0]*weight[:,0],label=str(200)+": tuan2")
-		# plt.legend()
-		# plt.show()
-		# next, use decision tree to deal with relationship between the individual values and the coefficients
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	
