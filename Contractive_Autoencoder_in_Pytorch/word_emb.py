@@ -50,7 +50,7 @@ class CAE(nn.Module):
 def Validate(model,x,y):
 	model.eval()
 	prob = model(x)
-	prob = prob.cpu()data.numpy()
+	prob = prob.cpu().data.numpy()
 	predict = np.argmax(prob,axis=1)
 	y = y.cpu().data.numpy()
 	# print(predict[0:10])
