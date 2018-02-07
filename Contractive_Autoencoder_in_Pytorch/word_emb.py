@@ -152,7 +152,7 @@ if __name__=="__main__":
 				loss_val += loss.data[0]
 
 			for param_group in optimizer.param_groups:
-				param_group["lr"] *= 1
+				param_group["lr"] *= 0.98
 
 			print("Epoch "+str(epoch))
 			print("train loss: "+str(loss_val/batch_num))
