@@ -83,7 +83,7 @@ def get_data_label(in_dir,win_size):
 		arr = np.hstack(padding+[arr]+padding)
 		for i in range(half_win,len(arr)-half_win):
 			if arr[i]<10:
-				if random.random()>0.3:
+				if random.random()>0.1:
 					continue
 			train_data.append([arr[i-half_win:i],arr[i+1:i+1+half_win]])
 			train_label.append(arr[i])
