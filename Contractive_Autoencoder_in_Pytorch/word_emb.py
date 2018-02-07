@@ -94,7 +94,7 @@ if __name__=="__main__":
 		# print(test_label.shape)
 		
 
-
+		print(train_data.shape)
 		train_data = train_data[0:60000]
 		train_label = train_label[0:60000]
 
