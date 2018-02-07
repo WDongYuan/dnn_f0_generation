@@ -48,7 +48,7 @@ class CAE(nn.Module):
 		# emb = self.embl(emb)
 		emb = emb.view(self.batch_size,(self.win_size-1)*self.emb_size)
 		emb = self.l1(emb)
-		emb = emb.view(self.batch_size,self.win_size-1,self.h_size)
+		# emb = emb.view(self.batch_size,self.win_size-1,self.h_size)
 		# emb = torch.sum(emb,dim=1)
 		emb = self.tanh(emb)
 		emb = self.l2(emb)
