@@ -14,6 +14,7 @@ import copy
 import time
 import torch.nn.init as init
 import torch.backends.cudnn as cudnn
+import random
 def show_heatmap(arr):
 	plt.imshow(arr, cmap='hot', interpolation='nearest')
 	plt.show()
@@ -71,6 +72,9 @@ def get_data_label(in_dir,win_size):
 		arr = np.loadtxt(in_dir+"/"+file)[:,81]
 		arr = np.hstack(padding+[arr]+padding)
 		for i in range(half_win,len(arr)-half_win):
+			if arr[i]==2:
+				if random.random()>0.3:
+					continue
 			train_data.append([arr[i-half_win:i],arr[i+1:i+1+half_win]])
 			train_label.append(arr[i])
 	train_data = np.array(train_data).reshape((-1,win_size-1)).astype(np.int16)
@@ -116,8 +120,8 @@ if __name__=="__main__":
 		model.cuda()
 
 		# model.load_state_dict(torch.load("best_model_con"))
-		# optimizer = optim.Adam(model.parameters(), lr = 0.001)
-		optimizer = optim.SGD(model.parameters(), lr=10, momentum=0)
+		optimizer = optim.Adam(model.parameters(), lr = 0.001)
+		# optimizer = optim.SGD(model.parameters(), lr=10, momentum=0)
 		val_recons = None
 		max_acc = 0
 		beat_model = None
@@ -146,7 +150,7 @@ if __name__=="__main__":
 				loss_val += loss.data[0]
 
 			for param_group in optimizer.param_groups:
-				param_group["lr"] *= 0.8
+				param_group["lr"] *= 1
 
 			print("Epoch "+str(epoch))
 			print("train loss: "+str(loss_val/batch_num))
