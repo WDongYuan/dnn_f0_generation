@@ -25,7 +25,7 @@ class CAE(nn.Module):
 		self.h_size = 100
 		self.vocab_size = vocab_size
 		self.win_size = win_size
-		self.emb_size = 200
+		self.emb_size = 100
 		self.batch_siz = -1
 
 		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
