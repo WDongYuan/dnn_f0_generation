@@ -79,7 +79,7 @@ def get_data_label(in_dir,win_size):
 
 if __name__=="__main__":
 	if sys.argv[1]=="train":
-		win_size = 3
+		win_size = 5
 		print("reading data...")
 		train_data,train_label = get_data_label("../lstm_data/train",win_size)
 		test_data,test_label = get_data_label("../lstm_data/test",win_size)
@@ -116,7 +116,7 @@ if __name__=="__main__":
 
 		# model.load_state_dict(torch.load("best_model_con"))
 		# optimizer = optim.Adam(model.parameters(), lr = 0.001)
-		optimizer = optim.SGD(model.parameters(), lr=1, momentum=0.9)
+		optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
 		val_recons = None
 		max_acc = 0
 		beat_model = None
