@@ -25,7 +25,7 @@ class CAE(nn.Module):
 		self.h_size = 100
 		self.vocab_size = vocab_size
 		self.win_size = win_size
-		self.emb_size = 100
+		self.emb_size = 200
 		self.batch_siz = -1
 
 		self.embed = nn.Embedding(self.vocab_size, self.emb_size,padding_idx=0)
@@ -85,7 +85,7 @@ def get_data_label(in_dir,win_size):
 
 if __name__=="__main__":
 	if sys.argv[1]=="train":
-		win_size = 3
+		win_size = 5
 		print("reading data...")
 		train_data,train_label = get_data_label("../lstm_data/train",win_size)
 		# print(train_data[0:100])
