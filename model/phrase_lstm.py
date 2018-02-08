@@ -87,7 +87,7 @@ class PHRASE_LSTM(nn.Module):
 		self.phrase_lstm_layer = 1
 		self.phrase_bidirectional_flag = True
 		self.phrase_direction = 2 if self.phrase_bidirectional_flag else 1
-		self.phrase_lstm = nn.LSTM(self.feat_size+self.phrase_num+3*self.tone_emb_size, self.phrase_hidden_size,
+		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size, self.phrase_hidden_size,
 			num_layers=self.phrase_lstm_layer,bidirectional=self.phrase_bidirectional_flag,batch_first=True)
 
 
@@ -182,14 +182,15 @@ class PHRASE_LSTM(nn.Module):
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((feat,tone,cons,vowel,phrase),dim=2)
+		# ph_h_0 = torch.cat((feat,tone,cons,vowel,phrase),dim=2)
+		ph_h_0 = torch.cat((tone,cons,vowel),dim=2)
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
 		# h = feat_h+ph_h
-		h = feat_h+ph_h
+		h = ph_h
 
 		h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
