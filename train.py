@@ -282,8 +282,8 @@ if __name__=="__main__":
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
-		# test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
-		test_f0,test_feat,test_len = get_f0_feature("./self_generated_test_data")
+		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+		# test_f0,test_feat,test_len = get_f0_feature("./self_generated_test_data")
 
 		############################################
 		#append the previous f0 and next f0 value
@@ -357,7 +357,7 @@ if __name__=="__main__":
 		test_vowel = test_feat[:,:,79:84].astype(np.int32)
 		test_phrase = test_feat[:,:,84:90]
 		test_dep = test_feat[:,:,90:150]
-		print(test_feat.shape)
+		# print(test_feat.shape)
 		test_feat = test_feat[:,:,0:72]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -433,7 +433,7 @@ if __name__=="__main__":
 		test_f0 = test_f0.reshape((len(test_f0),test_emb.shape[1],-1))
 		test_len = test_len
 		test_phrase = test_phrase.reshape((len(test_phrase),-1,phrase_num))
-		print(test_dep.shape)
+		# print(test_dep.shape)
 		test_dep = test_dep.reshape((len(test_dep),-1,dep_num))
 
 		# print(np.sum(test_len))
