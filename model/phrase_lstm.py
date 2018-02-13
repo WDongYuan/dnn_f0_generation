@@ -150,7 +150,7 @@ class PHRASE_LSTM(nn.Module):
 		embed.weight.requires_grad = False
 		return embed
 
-	def get_f0_delta(self,data):
+	def get_self_f0_delta(self,data):
 		batch_size,max_length,f0_dim = data.size()
 		delta = data[:,:,1:f0_dim]-data[:,:,0:f0_dim-1]
 		# delta = Variable(delta)
@@ -167,6 +167,21 @@ class PHRASE_LSTM(nn.Module):
 		delta[:,0:max_length-1,1] = mean[:,1:max_length]-mean[:,0:max_length-1]
 		delta[:,:,2] = delta[:,:,1]-delta[:,:,0]
 		delta_length = 3
+		# delta = Variable(delta)
+		# print(delta.size())
+		return delta,delta_length
+
+	def get_f0_delta(self,data):
+		batch_size,max_length,f0_dim = data.size()
+		if cuda_flag:
+			delta = Variable(torch.zeros(batch_size,max_length,3,f0_dim).cuda(async=True))
+		else:
+			delta = Variable(torch.zeros(batch_size,max_length,2,f0_dim))
+		delta[:,1:max_length,0,:] = data[:,1:max_length,:]-data[:,0:max_length-1,:]
+		delta[:,0:max_length-1,1,:] = data[:,1:max_length,:]-data[:,0:max_length-1,:]
+		delta[:,:,2,:] = delta[:,:,1,:]-delta[:,:,0,:]
+		delta = delta.view(batch_size,max_length,3*f0_dim)
+		delta_length = 3*f0_dim
 		# delta = Variable(delta)
 		# print(delta.size())
 		return delta,delta_length
@@ -214,8 +229,8 @@ class PHRASE_LSTM(nn.Module):
 		ph_h = self.phrase_l2(ph_h)
 
 		h = feat_h+ph_h
-		# delta,delta_length = self.get_f0_delta(h)
-		delta,delta_length = self.get_mean_delta(h)
+		delta,delta_length = self.get_f0_delta(h)
+		# delta,delta_length = self.get_mean_delta(h)
 		h = torch.cat((h,delta),dim=2)
 		
 
@@ -496,8 +511,8 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			outputs = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 			
-			# delta,delta_length = model.get_f0_delta(train_f0_batch)
-			delta,delta_length = model.get_mean_delta(train_f0_batch)
+			delta,delta_length = model.get_f0_delta(train_f0_batch)
+			# delta,delta_length = model.get_mean_delta(train_f0_batch)
 			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 
 			loss = LF(outputs,train_f0_batch)
