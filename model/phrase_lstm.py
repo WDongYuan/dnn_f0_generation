@@ -151,7 +151,7 @@ class PHRASE_LSTM(nn.Module):
 		return embed
 
 	def get_f0_delta(self,data):
-		batch_size,mat_length,f0_dim = data.size()
+		batch_size,max_length,f0_dim = data.size()
 		delta = torch.zeros(batch_size,max_length,f0_dim-1)
 		delta = data[:,:,1:f0_dim]-data[:,:,0:f0_dim-1]
 		delta = Variable(new_arr)
