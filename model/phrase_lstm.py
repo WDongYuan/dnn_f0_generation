@@ -164,6 +164,7 @@ class PHRASE_LSTM(nn.Module):
 		delta[:,0:max_length-1,1] = mean[:,1:max_length]-mean[:,0:max_length-1]
 		delta[:,:,2] = delta[:,:,1]-delta[:,:,0]
 		delta_length = 3
+		delta = Variable(delta)
 		print(delta.size())
 		return delta,delta_length
 
