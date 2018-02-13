@@ -67,6 +67,8 @@ class EncodeFeature():
 				self.encode_dic.append(tmp_dic)
 				self.feature_pos.append([feat[0],[feat_pos,feat_pos+len(tmp_dic)-1]])
 				feat_pos += len(tmp_dic)
+				# print(feat[0])
+				# print(tmp_dic)
 
 		print("feature position:")
 		for tup in self.feature_pos:
@@ -325,6 +327,7 @@ def get_f0_feature(data_dir):
 		if "data" not in file:
 			continue
 		file_cont = np.loadtxt(data_dir+"/"+file,delimiter=" ")
+		file_cont = file_cont.reshape((-1,file_cont.shape[-1]))
 		max_length = max(file_cont.shape[0],max_length)
 		f0.append(file_cont[:,0:10])
 		feature.append(file_cont[:,10:])

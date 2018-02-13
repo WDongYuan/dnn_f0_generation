@@ -30,17 +30,20 @@ in_pos: 63 63
 out_pos: 64 64
 in_percent: 65 65
 tone: 66 70
+duration: 71 71
 --->collect data according to the data name
 mkdir: lstm_data: File exists
-mkdir: ./lstm_data/train: File exists
-mkdir: ./lstm_data/test: File exists
+word number: 3618
+vocab size: 3601
+find UNK
 pos number: 18
-pos features 72 76
-pos features 72 76
-syllable features 77 78
-syllable features 77 78
-phrase features 79 84
-phrase features 79 84
-dep_num: 45
-dependency features 85 264
-dependency features 85 264
+pos features 73 77
+pos features 73 77
+syllable features 78 83
+syllable features 78 83
+{'a': 1, 'e': 7, 'g': 5, 'i': 2, 'o': 3, 'n': 4, 'r': 8, 'u': 6, 'v': 9}
+phrase features 84 89
+phrase features 84 89
+dep_num: 60
+dependency features 90 149
+dependency features 90 149

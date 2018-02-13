@@ -19,6 +19,10 @@ if cuda_flag:
 	import torch.backends.cudnn as cudnn
 ###########################################################
 
+
+
+
+
 class PHRASE_LSTM(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
 		cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
@@ -87,7 +91,7 @@ class PHRASE_LSTM(nn.Module):
 		self.phrase_lstm_layer = 1
 		self.phrase_bidirectional_flag = True
 		self.phrase_direction = 2 if self.phrase_bidirectional_flag else 1
-		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size, self.phrase_hidden_size,
+		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.feat_size+self.phrase_num, self.phrase_hidden_size,
 			num_layers=self.phrase_lstm_layer,bidirectional=self.phrase_bidirectional_flag,batch_first=True)
 
 
@@ -146,6 +150,13 @@ class PHRASE_LSTM(nn.Module):
 		embed.weight.requires_grad = False
 		return embed
 
+	def get_f0_delta(self,data):
+		batch_size,mat_length,f0_dim = data.size()
+		delta = torch.zeros(batch_size,max_length,f0_dim-1)
+		delta = data[:,:,1:f0_dim]-data[:,:,0:f0_dim-1]
+		delta = Variable(new_arr)
+		delta_length = f0_dim-1
+		return delta,delta_length
 
 	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,dep,sent_length):
 		self.batch_size,self.max_length = sents.size()
@@ -182,17 +193,20 @@ class PHRASE_LSTM(nn.Module):
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		# ph_h_0 = torch.cat((feat,tone,cons,vowel,phrase),dim=2)
-		ph_h_0 = torch.cat((tone,cons,vowel),dim=2)
+		ph_h_0 = torch.cat((feat,tone,cons,vowel,phrase),dim=2)
+		# ph_h_0 = torch.cat((tone,cons,vowel),dim=2)
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
-		# h = feat_h+ph_h
-		h = ph_h
+		h = feat_h+ph_h
+		delta,delta_length = self.get_f0_delta(h)
+		h = torch.cat((h,delta),dim=2)
+		# h = ph_h
 
-		h = h.view(self.batch_size,self.max_length*self.f0_dim)
+		# h = h.view(self.batch_size,self.max_length*self.f0_dim)
+		# h = h.view(self.batch_size,self.max_length*(self.f0_dim+delta_length))
 		################################################################################
 		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
 		# ph_h = ph_h.view(self.batch_size,self.max_length*self.f0_dim)
@@ -340,6 +354,7 @@ class PHRASE_TEST_LSTM(nn.Module):
 		return embed
 
 
+
 	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,dep,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
@@ -466,8 +481,9 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			optimizer.zero_grad()
 			outputs = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
-			# print(outputs.size())
-			# print(train_label_batch.size())
+			
+			delta,delta_length = model.get_f0_delta(train_f0_batch)
+			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
 			optimizer.step()
@@ -514,18 +530,20 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 			Variable(val_cons.cuda(async=True)),Variable(val_vowel.cuda(async=True)),Variable(val_pretone.cuda(async=True)),
 			Variable(val_tone.cuda(async=True)),Variable(val_postone.cuda(async=True)),Variable(val_feat.cuda(async=True)),
 			Variable(val_phrase.cuda(async=True)),Variable(val_dep.cuda(async=True)),
-			Variable(val_len.cuda(async=True))).data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
-		val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+			Variable(val_len.cuda(async=True)))
+		# result = result.data.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		result = result.data.cpu().numpy()[:,:,0:model.f0_dim]
+		# val_f0 = val_f0.cpu().numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		val_f0 = val_f0.cpu().numpy()
 	else:
-		# result,res_h,emb_h = model(Variable(val_emb),Variable(val_pos),Variable(val_pos_feat),Variable(val_cons),Variable(val_vowel),
-		# 	Variable(val_pretone),Variable(val_tone),Variable(val_postone),
-		# 	Variable(val_feat),Variable(val_phrase),Variable(val_dep),Variable(val_len))
 		result = model(Variable(val_emb),Variable(val_pos),Variable(val_pos_feat),Variable(val_cons),Variable(val_vowel),
 			Variable(val_pretone),Variable(val_tone),Variable(val_postone),
 			Variable(val_feat),Variable(val_phrase),Variable(val_dep),Variable(val_len))
-		# print(result.size())
-		result = result.data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
-		val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		
+		# result = result.data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		result = result.data.numpy()[:,:,0:model.f0_dim]
+		# val_f0 = val_f0.numpy().reshape((batch_size,model.max_length,model.f0_dim))
+		val_f0 = val_f0.numpy()
 		################################################################################
 		# val_len = val_len.numpy()
 		# emb_h = emb_h.data.numpy().reshape((batch_size,model.max_length,model.f0_dim))
