@@ -154,7 +154,7 @@ class PHRASE_LSTM(nn.Module):
 		batch_size,max_length,f0_dim = data.size()
 		delta = torch.zeros(batch_size,max_length,f0_dim-1)
 		delta = data[:,:,1:f0_dim]-data[:,:,0:f0_dim-1]
-		delta = Variable(new_arr)
+		delta = Variable(delta)
 		delta_length = f0_dim-1
 		return delta,delta_length
 
