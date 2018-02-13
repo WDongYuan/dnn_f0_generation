@@ -155,7 +155,7 @@ class PHRASE_LSTM(nn.Module):
 		delta = data[:,:,1:f0_dim]-data[:,:,0:f0_dim-1]
 		# delta = Variable(delta)
 		delta_length = f0_dim-1
-		return delta,delta_length
+		return delta*5,delta_length
 
 	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,dep,sent_length):
 		self.batch_size,self.max_length = sents.size()
@@ -200,8 +200,8 @@ class PHRASE_LSTM(nn.Module):
 		ph_h = self.phrase_l2(ph_h)
 
 		h = feat_h+ph_h
-		# delta,delta_length = self.get_f0_delta(h)
-		# h = torch.cat((h,delta),dim=2)
+		delta,delta_length = self.get_f0_delta(h)
+		h = torch.cat((h,delta),dim=2)
 		
 
 		# h = h.view(self.batch_size,self.max_length*self.f0_dim)
@@ -481,9 +481,9 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			outputs = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 			
-			# delta,delta_length = model.get_f0_delta(train_f0_batch)
-			# train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
-			
+			delta,delta_length = model.get_f0_delta(train_f0_batch)
+			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
+
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
 			optimizer.step()
