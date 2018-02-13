@@ -160,7 +160,7 @@ class PHRASE_LSTM(nn.Module):
 		delta = data[:,:,1:f0_dim]-data[:,:,0:f0_dim-1]
 		# delta = Variable(delta)
 		delta_length = f0_dim-1
-		return delta,delta_length
+		return delta*5,delta_length
 	def get_mean_delta(self,data):
 		batch_size,max_length,f0_dim = data.size()
 		mean = torch.mean(data,dim=2)
