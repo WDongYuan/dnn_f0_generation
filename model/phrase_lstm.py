@@ -159,7 +159,10 @@ class PHRASE_LSTM(nn.Module):
 	def get_mean_delta(self,data):
 		batch_size,max_length,f0_dim = data.size()
 		mean = torch.mean(data,dim=2)
-		delta = Variable(torch.zeros(batch_size,max_length,3))
+		if cuda_flag:
+			delta = Variable(torch.zeros(batch_size,max_length,3).cuda(async=True))
+		else:
+			delta = Variable(torch.zeros(batch_size,max_length,3))
 		delta[:,1:max_length,0] = mean[:,1:max_length]-mean[:,0:max_length-1]
 		delta[:,0:max_length-1,1] = mean[:,1:max_length]-mean[:,0:max_length-1]
 		delta[:,:,2] = delta[:,:,1]-delta[:,:,0]
