@@ -427,11 +427,12 @@ if __name__=="__main__":
 		test_tone = test_tone.reshape((len(test_tone),-1))
 		test_pretone = test_pretone.reshape((len(test_pretone),-1))
 		test_postone = test_postone.reshape((len(test_postone),-1))
-		print(test_feat.shape)
+		# print(test_feat.shape)
 		test_feat = test_feat.reshape((len(test_feat),-1,feat_num))
 		test_f0 = test_f0.reshape((len(test_f0),test_emb.shape[1],-1))
 		test_len = test_len
 		test_phrase = test_phrase.reshape((len(test_phrase),-1,phrase_num))
+		print(test_dep.shape)
 		test_dep = test_dep.reshape((len(test_dep),-1,dep_num))
 
 		# print(np.sum(test_len))
