@@ -371,7 +371,7 @@ if __name__=="__main__":
 		ori_train_phrase = train_phrase
 		ori_train_dep = train_dep
 
-		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_f0 = train_f0[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,-1))
 		train_emb = train_emb[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_pos = train_pos[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,-1))
 		train_pos_feat = train_pos_feat[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,-1))
@@ -410,9 +410,9 @@ if __name__=="__main__":
 		test_tone = test_tone.reshape((len(test_tone),-1))
 		test_pretone = test_pretone.reshape((len(test_pretone),-1))
 		test_postone = test_postone.reshape((len(test_postone),-1))
-		print(test_feat.shape)
+		# print(test_feat.shape)
 		test_feat = test_feat.reshape((len(test_feat),-1,feat_num))
-		test_f0 = test_f0.reshape((len(test_f0),-1))
+		test_f0 = test_f0.reshape((len(test_f0),test_emb.shape[1],-1))
 		test_len = test_len
 		test_phrase = test_phrase.reshape((len(test_phrase),-1,phrase_num))
 		test_dep = test_dep.reshape((len(test_dep),-1,dep_num))
