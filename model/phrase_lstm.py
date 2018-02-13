@@ -233,10 +233,10 @@ class PHRASE_LSTM(nn.Module):
 
 		h = feat_h+ph_h
 		# h = feat_h
-		delta,delta_length = self.get_f0_delta(h)
+		# delta,delta_length = self.get_f0_delta(h)
 		# delta,delta_length = self.get_self_f0_delta(h)
 		# delta,delta_length = self.get_mean_delta(h)
-		h = torch.cat((h,delta),dim=2)
+		# h = torch.cat((h,delta),dim=2)
 
 		# h = h.view(self.batch_size,self.max_length*self.f0_dim)
 		################################################################################
@@ -485,9 +485,9 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 
 			# delta,delta_length = model.get_self_f0_delta(train_f0_batch)
-			delta,delta_length = model.get_f0_delta(train_f0_batch)
+			# delta,delta_length = model.get_f0_delta(train_f0_batch)
 			# delta,delta_length = model.get_mean_delta(train_f0_batch)
-			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
+			# train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
