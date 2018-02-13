@@ -357,6 +357,7 @@ if __name__=="__main__":
 		test_vowel = test_feat[:,:,79:84].astype(np.int32)
 		test_phrase = test_feat[:,:,84:90]
 		test_dep = test_feat[:,:,90:150]
+		print(test_feat.shape)
 		test_feat = test_feat[:,:,0:72]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
