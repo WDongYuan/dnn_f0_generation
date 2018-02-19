@@ -244,11 +244,12 @@ class PHRASE_LSTM(nn.Module):
 		################################################################################
 		return h
 
-class PHRASE_TEST_LSTM(nn.Module):
+
+class TEST_MODEL(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
-		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
+		cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
 		lstm_hidden_size,f0_dim,linear_h1):
-		super(PHRASE_TEST_LSTM, self).__init__()
+		super(TEST_MODEL, self).__init__()
 		self.emb_size = emb_size
 		self.feat_size = feat_size
 		self.pos_emb_size = pos_emb_size
@@ -257,14 +258,15 @@ class PHRASE_TEST_LSTM(nn.Module):
 		self.phrase_num = phrase_num
 		self.dep_num = dep_num
 		self.dep_lemb_size = 20
-		self.emb_l_size = 100
-		self.grad_emb_size = 5
+		self.emb_l_size = 10
+		self.grad_emb_size = 10
 
 		self.pretone_num = pretone_num
 		self.tone_num = tone_num
 		self.postone_num = postone_num
 		self.cons_num = cons_num
 		self.vowel_num = vowel_num
+		self.vowel_ch_num = vowel_ch_num
 
 		self.lstm_hidden_size = lstm_hidden_size
 		self.f0_dim = f0_dim
@@ -289,66 +291,47 @@ class PHRASE_TEST_LSTM(nn.Module):
 
 		self.tone_embed = nn.Embedding(self.tone_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.tone_embed.weight,a=-0.01,b=0.01)
-		self.pretone_embed = nn.Embedding(self.pretone_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.pretone_embed.weight,a=-0.01,b=0.01)
-		self.postone_embed = nn.Embedding(self.postone_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.postone_embed.weight,a=-0.01,b=0.01)
 
 		self.cons_embed = nn.Embedding(self.cons_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
 		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
-
-		##LSTM
-		self.lstm_layer = 1
-		self.bidirectional_flag = True
-		self.direction = 2 if self.bidirectional_flag else 1
-		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
-		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		# self.feat_lstm = nn.LSTM(self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num,self.lstm_hidden_size,
-		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.feat_lstm = nn.LSTM(self.emb_l_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num+self.feat_size,
-			self.lstm_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-
-		# self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.phrase_num+self.feat_size,
-		# 	self.phrase_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		self.phrase_lstm = nn.LSTM(self.grad_emb_size+self.tone_emb_size,
-			self.phrase_hidden_size,num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-
+		self.vowel_ch_embed = nn.Embedding(self.vowel_ch_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.vowel_ch_embed.weight,a=-0.01,b=0.01)
 
 		self.non_linear = nn.ReLU()
 		self.relu = nn.ReLU()
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
 
+		self.all_feat_length = self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num+\
+			3*self.tone_emb_size+self.phrase_num
+
+
+		##LSTM
+		self.lstm_layer = 1
+		self.bidirectional_flag = True
+		self.direction = 2 if self.bidirectional_flag else 1
+		self.feat_lstm = nn.LSTM(self.all_feat_length,self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+		self.lstm_l = nn.Sequential(
+			nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1),
+			nn.ReLU(),
+			nn.Linear(self.linear_h1,self.f0_dim)
+			)
+
+		self.mlp = nn.Sequential(
+			nn.Linear(self.all_feat_length,300),
+			nn.Sigmoid(),
+			nn.Linear(300,200),
+			nn.Sigmoid(),
+			nn.Linear(200,100),
+			nn.ReLU(),
+			nn.Linear(100,self.f0_dim)
+			)
+
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
-		# self.linear_init(self.emb_l1)
-		# self.emb_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		# self.linear_init(self.emb_l2)
-		self.dep_lemb = nn.Linear(self.dep_num,self.dep_lemb_size)
-		self.linear_init(self.dep_lemb)
-
-		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-		self.linear_init(self.feat_l1)
-		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		self.linear_init(self.feat_l2)
-
-		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.direction,self.phrase_linear_size)
-		self.linear_init(self.phrase_l1)
-		self.phrase_l2 = nn.Linear(self.phrase_linear_size,self.f0_dim)
-		self.linear_init(self.phrase_l2,lower=0,upper=10)
-
-		# self.concat_l1 = nn.Linear(2*self.lstm_hidden_size*self.direction,self.linear_h1)
-		# self.linear_init(self.concat_l1)
-		# self.concat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
-		# self.linear_init(self.concat_l2)
-
-		# self.mean_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
-
-		self.ngram_out = 20
-		self.ngram = NGram(in_dim=self.grad_emb_size,win_size=5,out_dim=self.ngram_out)
-		self.ngram_l = nn.Linear(self.ngram_out,self.f0_dim)
-
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -365,17 +348,6 @@ class PHRASE_TEST_LSTM(nn.Module):
 			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
 		###########################################################
 
-	def init_phrase_hidden(self):
-		direction = 2 if self.bidirectional_flag else 1
-		###########################################################
-		#GPU OPTION
-		###########################################################
-		if cuda_flag:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size).cuda(async=True))
-		else:
-			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.phrase_hidden_size))
-		###########################################################
-
 	def get_embedding(self,emb_file,voc_size,emb_size):
 		arr = np.loadtxt(emb_file)
 		embed = nn.Embedding(voc_size, emb_size)
@@ -383,62 +355,34 @@ class PHRASE_TEST_LSTM(nn.Module):
 		embed.weight.requires_grad = False
 		return embed
 
-
-
 	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,dep,sent_length):
 		self.batch_size,self.max_length = sents.size()
 		emb = self.embed(sents)
 		grad_emb = self.grad_embed(sents)
+
 		pos = self.pos_embed(pos.view(self.batch_size,self.max_length*self.pos_emb_length))
 		pos = pos.view(self.batch_size,self.max_length,self.pos_emb_length*self.pos_emb_size)
-		# pretone = self.pretone_embed(pretone)
+
 		tone = self.tone_embed(tone)
-		# postone = self.postone_embed(postone)
 		cons = self.cons_embed(cons)
+
+		vowel_ch = vowel[:,:,1:].contiguous()
+		vowel_ch = self.vowel_ch_embed(vowel_ch.view(self.batch_size,self.max_length*4))
+		vowel_ch = vowel_ch.view(self.batch_size,self.max_length,4*self.tone_emb_size)
+
+		vowel = vowel[:,:,0].contiguous()
 		vowel = self.vowel_embed(vowel)
 
+		emb = self.emb_l1(emb)
 
-		# c_0 = self.init_hidden()
-		# h_0 = self.init_hidden()
+		all_feat = torch.cat((emb,feat,pos,pos_feat,tone,cons,vowel,phrase),dim=2)
+		# y = self.mlp(all_feat)
 
-		# # print(pos.size())
-		# # print(pos_feat.size())
-		# # dep = self.dep_lemb(dep)
-		# emb = self.emb_l1(emb)
-		# feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
-		# feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
-		# feat_h = self.feat_l1(feat_h_n)
-		# feat_h = self.tanh(feat_h)
-		# feat_h = self.feat_l2(feat_h)
-
-		# c_0 = self.init_phrase_hidden()
-		# h_0 = self.init_phrase_hidden()
-
-		# ph_h_0 = torch.cat((feat,cons,vowel,tone,phrase),dim=2)
-		# ph_h_0 = torch.cat((tone,emb),dim=2)
-		# ph_h_n, (h_t,c_t) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		# ph_h = self.phrase_l1(ph_h_n)
-		# ph_h = self.tanh(ph_h)
-		# ph_h = self.phrase_l2(ph_h)
-
-		# h = feat_h+ph_h
-		# h = ph_h
-
-
-		out = self.ngram(grad_emb)
-		out = self.relu(out)
-		out = self.ngram_l(out)
-		h = out
-
-		h = h.view(self.batch_size,self.max_length*self.f0_dim)
-		################################################################################
-		# feat_h = feat_h.view(self.batch_size,self.max_length*self.f0_dim)
-		# ph_h = ph_h.view(self.batch_size,self.max_length*self.f0_dim)
-		# return h,feat_h,ph_h
-		################################################################################
-
-
-		return h
+		c_0 = self.init_hidden()
+		h_0 = self.init_hidden()
+		h_n, (_,_) = self.feat_lstm(all_feat,(h_0,c_0))
+		y = self.lstm_l(h_n)
+		return y
 
 class NGram(nn.Module):
 	def __init__(self,in_dim,win_size,out_dim):
@@ -454,7 +398,6 @@ class NGram(nn.Module):
 		in_data = in_data.view(self.batch_size,1,self.length*self.in_dim)
 		out_data = self.conv1(in_data).permute(0,2,1)
 		return out_data
-
 
 
 def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_pretone,train_tone,train_postone,train_feat,train_phrase,train_dep,train_f0,train_len,
@@ -512,10 +455,10 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			outputs = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 			
-			delta,delta_length = model.get_self_f0_delta(train_f0_batch)
-			# delta,delta_length = model.get_f0_delta(train_f0_batch)
-			# delta,delta_length = model.get_mean_delta(train_f0_batch)
-			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
+			# delta,delta_length = model.get_self_f0_delta(train_f0_batch)
+			# # delta,delta_length = model.get_f0_delta(train_f0_batch)
+			# # delta,delta_length = model.get_mean_delta(train_f0_batch)
+			# train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
@@ -613,13 +556,15 @@ def Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,v
 	# true_f0 = true_f0[:,0:-1]
 	###########################################################
 
-	loss = np.sqrt(np.square(prediction-true_f0).mean(axis=1)).mean()
-	# print("abs:")
-	# print(np.abs(prediction-true_f0).mean(axis=0))
-	print("mean abs:")
-	print(np.abs(prediction.mean(axis=1)-true_f0.mean(axis=1)).mean())
-	print("std abs:")
-	print(np.abs(prediction.std(axis=1)-true_f0.std(axis=1)).mean())
+	loss_arr = np.sqrt(np.square(prediction-true_f0).mean(axis=1))
+	np.random.shuffle(loss_arr)
+	print("first half loss:"+str(loss_arr[0:int(len(loss_arr)/2)].mean()))
+	print("second half loss:"+str(loss_arr[int(len(loss_arr)/2):].mean()))
+	# print("mean abs:")
+	# print(np.abs(prediction.mean(axis=1)-true_f0.mean(axis=1)).mean())
+	# print("std abs:")
+	# print(np.abs(prediction.std(axis=1)-true_f0.std(axis=1)).mean())
+	loss = loss_arr.mean()
 
 	if save_prediction!="":
 		np.savetxt(save_prediction,prediction,delimiter=" ",fmt="%.3f")

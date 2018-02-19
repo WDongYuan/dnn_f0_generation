@@ -1,9 +1,9 @@
-cuda_flag = True
+cuda_flag = False
 update_data = False
 dct_num = 5
 dct_flag = False
 
-learning_rate = 0.005
+learning_rate = 0.003
 decay_step = 1
 decay_rate = 0.98
 epoch_num = 100

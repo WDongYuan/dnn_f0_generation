@@ -54,6 +54,7 @@ from model import dct_lstm
 from model import phrase_lstm
 from model import seq2seq
 
+
 cuda_flag = config.cuda_flag
 # from model import expand_emb
 ###########################################################
@@ -330,15 +331,15 @@ if __name__=="__main__":
 
 
 
-		train_emb = train_feat[:,:,72].astype(np.int32)
-		train_pos = train_feat[:,:,73:78].astype(np.int32)
+		train_emb = train_feat[:,:,68].astype(np.int32)
+		train_pos = train_feat[:,:,69:74].astype(np.int32)
 		train_pos_feat = train_pos[:,:,3:]
 		train_pos = train_pos[:,:,0:3]
-		train_cons = train_feat[:,:,78].astype(np.int32)
-		train_vowel = train_feat[:,:,79:84].astype(np.int32)
-		train_phrase = train_feat[:,:,84:90]
-		train_dep = train_feat[:,:,90:150]
-		train_feat = train_feat[:,:,0:72]
+		train_cons = train_feat[:,:,74].astype(np.int32)
+		train_vowel = train_feat[:,:,75:80].astype(np.int32)
+		train_phrase = train_feat[:,:,80:86]
+		train_dep = train_feat[:,:,86:146]
+		train_feat = train_feat[:,:,0:68]
 		tmp_shape = train_feat.shape
 		train_tone = one_hot_to_index(train_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -349,16 +350,16 @@ if __name__=="__main__":
 		# print(train_pos_feat.shape)
 		# exit()
 
-		test_emb = test_feat[:,:,72].astype(np.int32)
-		test_pos = test_feat[:,:,73:78].astype(np.int32)
+		test_emb = test_feat[:,:,68].astype(np.int32)
+		test_pos = test_feat[:,:,69:74].astype(np.int32)
 		test_pos_feat = test_pos[:,:,3:]
 		test_pos = test_pos[:,:,0:3]
-		test_cons = test_feat[:,:,78].astype(np.int32)
-		test_vowel = test_feat[:,:,79:84].astype(np.int32)
-		test_phrase = test_feat[:,:,84:90]
-		test_dep = test_feat[:,:,90:150]
+		test_cons = test_feat[:,:,74].astype(np.int32)
+		test_vowel = test_feat[:,:,75:80].astype(np.int32)
+		test_phrase = test_feat[:,:,80:86]
+		test_dep = test_feat[:,:,86:146]
 		# print(test_feat.shape)
-		test_feat = test_feat[:,:,0:72]
+		test_feat = test_feat[:,:,0:68]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:8].astype(np.int32).reshape((-1,5))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
@@ -453,8 +454,8 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			# model = torch.load("my_best_model.model")
-			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
+			model = torch.load(trained_model)
+			# model = torch.load(trained_model, map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -472,23 +473,21 @@ if __name__=="__main__":
 			# test_dep = torch.FloatTensor(ori_train_dep.tolist())
 			#############################################################
 
-			print(test_cons)
-			print(test_vowel)
-			print(test_tone)
+			
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
 			loss,_ = phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
 				test_feat,test_phrase,test_dep,test_f0,test_len,predict_file)
 			print("rmse: "+str(loss))
 			exit()
 		#############################################################
-		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		#############################################################
+		#if predict mean
+		model = phrase_lstm.TEST_MODEL(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 			cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
-		#############################################################
-		##if predict mean
-		# model = phrase_lstm.PHRASE_TEST_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		##if predict mean
 		# model = seq2seq.Seq2Seq(config.emb_size,config.pos_emb_size,config.tone_emb_size,
