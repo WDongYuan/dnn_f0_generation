@@ -36,7 +36,7 @@ class PHRASE_LSTM(nn.Module):
 		self.phrase_num = phrase_num
 		self.dep_num = dep_num
 		self.dep_lemb_size = 20
-		self.emb_l_size = 20
+		self.emb_l_size = 10
 		self.grad_emb_size = 10
 
 		self.pretone_num = pretone_num
@@ -304,7 +304,7 @@ class TEST_MODEL(nn.Module):
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
 
-		self.all_feat_length = self.emb_l_size+self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num+\
+		self.all_feat_length = self.feat_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num+\
 			3*self.tone_emb_size+self.phrase_num
 
 
@@ -375,7 +375,7 @@ class TEST_MODEL(nn.Module):
 
 		emb = self.emb_l1(emb)
 
-		all_feat = torch.cat((emb,feat,pos,pos_feat,tone,cons,vowel,phrase),dim=2)
+		all_feat = torch.cat((feat,pos,pos_feat,tone,cons,vowel,phrase),dim=2)
 		# y = self.mlp(all_feat)
 
 		c_0 = self.init_hidden()
