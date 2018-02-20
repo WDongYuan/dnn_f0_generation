@@ -345,7 +345,7 @@ if __name__=="__main__":
 		train_pretone = one_hot_to_index(train_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_postone = one_hot_to_index(train_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
-		# train_feat = np.delete(train_feat,range(3,21),2)
+		train_feat = np.delete(train_feat,range(21,27),2)
 
 		# print(train_pos_feat.shape)
 		# exit()
@@ -365,7 +365,7 @@ if __name__=="__main__":
 		test_pretone = one_hot_to_index(test_feat[:,:,8:14].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_postone = one_hot_to_index(test_feat[:,:,14:20].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
-		# test_feat = np.delete(test_feat,range(3,21),2)
+		test_feat = np.delete(test_feat,range(21,27),2)
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
@@ -454,8 +454,8 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			model = torch.load(trained_model)
-			# model = torch.load(trained_model, map_location=lambda storage, loc: storage)
+			# model = torch.load(trained_model)
+			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
