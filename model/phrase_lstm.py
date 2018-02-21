@@ -333,7 +333,41 @@ class TEST_MODEL(nn.Module):
 			nn.Linear(100,self.f0_dim)
 			)
 
+		self.ngram_side = 1
+		self.ngram_mlp = nn.Sequential(
+			nn.Linear(self.all_feat_length*(2*self.ngram_side+1),300),
+			nn.Sigmoid(),
+			nn.Linear(300,200),
+			nn.Sigmoid(),
+			nn.Linear(200,100),
+			nn.ReLU(),
+			nn.Linear(100,self.f0_dim)
+			)
+
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
+
+	def get_ngram(self,data,n):
+		batch_size,max_length,feat_size = data.size()
+		ngram = None
+		data_list = []
+		for i in range(n):
+			if cuda_flag:
+				tmp = Variable(torch.zeros(batch_size,max_length,feat_size).cuda(async=True))
+			else:
+				tmp = Variable(torch.zeros(batch_size,max_length,feat_size))
+			tmp[:,n-i:,:] = data[:,0:-i-1,:]
+			data_list.append(tmp)
+		data_list.append(tmp)
+		for i in range(n):
+			if cuda_flag:
+				tmp = Variable(torch.zeros(batch_size,max_length,feat_size).cuda(async=True))
+			else:
+				tmp = Variable(torch.zeros(batch_size,max_length,feat_size))
+			tmp[:,0:-i-1,:] = data[:,i+1:,:]
+			data_list.append(tmp)
+		ngram = torch.cat(data_list,dim=2)
+		return ngram
+
 
 
 	def linear_init(self,layer,lower=-1,upper=1):
@@ -380,10 +414,12 @@ class TEST_MODEL(nn.Module):
 		all_feat = torch.cat((emb,feat,pos,pos_feat,tone,cons,vowel,phrase),dim=2)
 		# y = self.mlp(all_feat)
 
-		c_0 = self.init_hidden()
-		h_0 = self.init_hidden()
-		h_n, (_,_) = self.feat_lstm(all_feat,(h_0,c_0))
-		y = self.lstm_l(h_n)
+		# c_0 = self.init_hidden()
+		# h_0 = self.init_hidden()
+		# h_n, (_,_) = self.feat_lstm(all_feat,(h_0,c_0))
+		# y = self.lstm_l(h_n)
+
+		y = self.ngram_mlp(get_ngram(all_feat,self.ngram_side))
 		return y
 
 class NGram(nn.Module):
