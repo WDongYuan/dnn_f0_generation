@@ -430,7 +430,7 @@ class TEST_MODEL(nn.Module):
 class NGram(nn.Module):
 	def __init__(self,in_dim,win_size,out_dim):
 		super(NGram, self).__init__()
-		self.conv1 = nn.Conv1d(1,out_dim,kernel_size=win_size*in_dim,stride=in_dim,padding=(win_size-1)/2*in_dim)
+		self.conv1 = nn.Conv1d(1,out_dim,kernel_size=win_size*in_dim,stride=in_dim,padding=int((win_size-1)/2)*in_dim)
 		self.batch_size = -1
 		self.length = -1
 		self.win_size = win_size
