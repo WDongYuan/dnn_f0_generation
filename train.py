@@ -266,6 +266,7 @@ if __name__=="__main__":
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
 		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+		print(train_feat.shape)
 
 		############################################
 		#append the previous f0 and next f0 value
