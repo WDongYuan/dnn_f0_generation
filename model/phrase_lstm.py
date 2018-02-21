@@ -200,11 +200,11 @@ class PHRASE_LSTM(nn.Module):
 		tone = self.tone_embed(tone)
 		cons = self.cons_embed(cons)
 
-		vowel_ch = vowel[:,:,1:].contiguous()
-		vowel_ch = self.vowel_ch_embed(vowel_ch.view(self.batch_size,self.max_length*4))
-		vowel_ch = vowel_ch.view(self.batch_size,self.max_length,4*self.tone_emb_size)
+		# vowel_ch = vowel[:,:,1:].contiguous()
+		# vowel_ch = self.vowel_ch_embed(vowel_ch.view(self.batch_size,self.max_length*4))
+		# vowel_ch = vowel_ch.view(self.batch_size,self.max_length,4*self.tone_emb_size)
 
-		vowel = vowel[:,:,0].contiguous()
+		# vowel = vowel[:,:,0].contiguous()
 		vowel = self.vowel_embed(vowel)
 
 
