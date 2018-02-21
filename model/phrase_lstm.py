@@ -324,9 +324,7 @@ class TEST_MODEL(nn.Module):
 			)
 
 		self.mlp = nn.Sequential(
-			nn.Linear(self.all_feat_length,400),
-			nn.Sigmoid(),
-			nn.Linear(400,300),
+			nn.Linear(self.all_feat_length,300),
 			nn.Sigmoid(),
 			nn.Linear(300,200),
 			nn.Sigmoid(),
