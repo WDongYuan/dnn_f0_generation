@@ -436,7 +436,8 @@ if __name__=="__main__":
 		if "predict" in mode:
 			print("predicting...")
 			# model = torch.load("my_best_model.model")
-			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
+			model = torch.load(trained_model)
+			# model = torch.load(trained_model, map_location=lambda storage, loc: storage)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
