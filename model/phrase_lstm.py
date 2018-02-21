@@ -372,7 +372,7 @@ class TEST_MODEL(nn.Module):
 		# vowel_ch = self.vowel_ch_embed(vowel_ch.view(self.batch_size,self.max_length*4))
 		# vowel_ch = vowel_ch.view(self.batch_size,self.max_length,4*self.tone_emb_size)
 
-		vowel = vowel[:,:,0].contiguous()
+		# vowel = vowel[:,:,0].contiguous()
 		vowel = self.vowel_embed(vowel)
 
 		emb = self.emb_l1(emb)
