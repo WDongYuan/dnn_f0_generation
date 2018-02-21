@@ -3,10 +3,10 @@ update_data = False
 dct_num = 5
 dct_flag = False
 
-learning_rate = 0.002
+learning_rate = 0.003
 decay_step = 1
 decay_rate = 0.97
-epoch_num = 100
+epoch_num = 150
 voc_size = 2500
 batch_size = 20
 emb_size = 300
