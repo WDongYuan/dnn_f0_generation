@@ -348,6 +348,8 @@ class TEST_MODEL(nn.Module):
 
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
 
+		self.ngram = NGram(self.all_feat_length,3,self.all_feat_length)
+
 	def get_ngram(self,data,n):
 		batch_size,max_length,feat_size = data.size()
 		ngram = None
@@ -421,7 +423,8 @@ class TEST_MODEL(nn.Module):
 		# h_n, (_,_) = self.feat_lstm(all_feat,(h_0,c_0))
 		# y = self.lstm_l(h_n)
 
-		y = self.ngram_mlp(self.get_ngram(all_feat,self.ngram_side))
+		# y = self.ngram_mlp(self.get_ngram(all_feat,self.ngram_side))
+		y = self.mlp(self.ngram(all_feat))
 		return y
 
 class NGram(nn.Module):
