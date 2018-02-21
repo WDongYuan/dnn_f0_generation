@@ -25,7 +25,7 @@ if cuda_flag:
 
 class PHRASE_LSTM(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
-		cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
+		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
 		lstm_hidden_size,f0_dim,linear_h1):
 		super(PHRASE_LSTM, self).__init__()
 		self.emb_size = emb_size
@@ -44,7 +44,6 @@ class PHRASE_LSTM(nn.Module):
 		self.postone_num = postone_num
 		self.cons_num = cons_num
 		self.vowel_num = vowel_num
-		self.vowel_ch_num = vowel_ch_num
 
 		self.lstm_hidden_size = lstm_hidden_size
 		self.f0_dim = f0_dim
@@ -270,7 +269,6 @@ class TEST_MODEL(nn.Module):
 		self.postone_num = postone_num
 		self.cons_num = cons_num
 		self.vowel_num = vowel_num
-		self.vowel_ch_num = vowel_ch_num
 
 		self.lstm_hidden_size = lstm_hidden_size
 		self.f0_dim = f0_dim
