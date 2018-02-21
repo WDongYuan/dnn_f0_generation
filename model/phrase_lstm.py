@@ -335,11 +335,11 @@ class TEST_MODEL(nn.Module):
 
 		self.ngram_side = 1
 		self.ngram_mlp = nn.Sequential(
-			nn.Linear(self.all_feat_length*(2*self.ngram_side+1),400),
+			nn.Linear(self.all_feat_length*(2*self.ngram_side+1),300),
 			nn.Sigmoid(),
-			nn.Linear(400,300),
+			nn.Linear(300,200),
 			nn.Sigmoid(),
-			nn.Linear(300,100),
+			nn.Linear(200,100),
 			nn.ReLU(),
 			nn.Linear(100,self.f0_dim)
 			)
