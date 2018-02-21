@@ -412,14 +412,14 @@ class TEST_MODEL(nn.Module):
 		emb = self.emb_l1(emb)
 
 		all_feat = torch.cat((emb,feat,pos,pos_feat,tone,cons,vowel,phrase),dim=2)
-		# y = self.mlp(all_feat)
+		y = self.mlp(all_feat)
 
 		# c_0 = self.init_hidden()
 		# h_0 = self.init_hidden()
 		# h_n, (_,_) = self.feat_lstm(all_feat,(h_0,c_0))
 		# y = self.lstm_l(h_n)
 
-		y = self.ngram_mlp(self.get_ngram(all_feat,self.ngram_side))
+		# y = self.ngram_mlp(self.get_ngram(all_feat,self.ngram_side))
 		return y
 
 class NGram(nn.Module):
