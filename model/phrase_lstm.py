@@ -458,9 +458,9 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 			
 			# delta,delta_length = model.get_self_f0_delta(train_f0_batch)
-			delta,delta_length = model.get_f0_delta(train_f0_batch)
-			# # delta,delta_length = model.get_mean_delta(train_f0_batch)
-			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
+			# delta,delta_length = model.get_f0_delta(train_f0_batch)
+			# # # delta,delta_length = model.get_mean_delta(train_f0_batch)
+			# train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
