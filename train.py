@@ -312,41 +312,41 @@ if __name__=="__main__":
 
 
 
-		train_emb = train_feat[:,:,75].astype(np.int32)
-		train_pos = train_feat[:,:,76:81].astype(np.int32)
+		train_emb = train_feat[:,:,71].astype(np.int32)
+		train_pos = train_feat[:,:,72:77].astype(np.int32)
 		train_pos_feat = train_pos[:,:,3:]
 		train_pos = train_pos[:,:,0:3]
-		train_cons = train_feat[:,:,81].astype(np.int32)
-		train_vowel = train_feat[:,:,82].astype(np.int32)
-		train_phrase = train_feat[:,:,83:89]
-		train_dep = train_feat[:,:,89:179]
-		train_feat = train_feat[:,:,0:75]
+		train_cons = train_feat[:,:,77].astype(np.int32)
+		train_vowel = train_feat[:,:,78].astype(np.int32)
+		train_phrase = train_feat[:,:,79:85]
+		train_dep = train_feat[:,:,85:175]
+		train_feat = train_feat[:,:,0:71]
 		tmp_shape = train_feat.shape
 		# print(train_feat[:,:,3:9][0,0:5,:])
 		train_tone = one_hot_to_index(train_feat[:,:,3:9].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_pretone = one_hot_to_index(train_feat[:,:,9:16].astype(np.int32).reshape((-1,7))).reshape((tmp_shape[0],tmp_shape[1]))
 		train_postone = one_hot_to_index(train_feat[:,:,16:23].astype(np.int32).reshape((-1,7))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
-		# train_feat = np.delete(train_feat,range(3,21),2)
+		train_feat = np.delete(train_feat,range(24,30),2)
 
 		# print(train_pos_feat.shape)
 		# exit()
 
-		test_emb = test_feat[:,:,75].astype(np.int32)
-		test_pos = test_feat[:,:,76:81].astype(np.int32)
+		test_emb = test_feat[:,:,71].astype(np.int32)
+		test_pos = test_feat[:,:,72:77].astype(np.int32)
 		test_pos_feat = test_pos[:,:,3:]
 		test_pos = test_pos[:,:,0:3]
-		test_cons = test_feat[:,:,81].astype(np.int32)
-		test_vowel = test_feat[:,:,82].astype(np.int32)
-		test_phrase = test_feat[:,:,83:89]
-		test_dep = test_feat[:,:,89:179]
-		test_feat = test_feat[:,:,0:75]
+		test_cons = test_feat[:,:,77].astype(np.int32)
+		test_vowel = test_feat[:,:,78].astype(np.int32)
+		test_phrase = test_feat[:,:,79:85]
+		test_dep = test_feat[:,:,85:175]
+		test_feat = test_feat[:,:,0:71]
 		tmp_shape = test_feat.shape
 		test_tone = one_hot_to_index(test_feat[:,:,3:9].astype(np.int32).reshape((-1,6))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_pretone = one_hot_to_index(test_feat[:,:,9:16].astype(np.int32).reshape((-1,7))).reshape((tmp_shape[0],tmp_shape[1]))
 		test_postone = one_hot_to_index(test_feat[:,:,16:23].astype(np.int32).reshape((-1,7))).reshape((tmp_shape[0],tmp_shape[1]))
 		##delete pitch feature
-		# test_feat = np.delete(test_feat,range(3,21),2)
+		test_feat = np.delete(test_feat,range(24,30),2)
 
 		batch_num = int(train_f0.shape[0]/config.batch_size)
 		max_length = train_emb.shape[1]
@@ -458,14 +458,14 @@ if __name__=="__main__":
 				test_feat,test_phrase,test_dep,test_f0,test_len,predict_file)
 			exit()
 		#############################################################
-		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
-		#############################################################
-		##if predict mean
-		# model = phrase_lstm.PHRASE_TEST_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		#############################################################
+		##if predict mean
+		model = phrase_lstm.TEST_MODEL(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
 		param_list = []
