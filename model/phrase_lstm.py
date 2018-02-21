@@ -73,8 +73,8 @@ class PHRASE_LSTM(nn.Module):
 		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
 		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
-		self.vowel_ch_embed = nn.Embedding(self.vowel_ch_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.vowel_ch_embed.weight,a=-0.01,b=0.01)
+		# self.vowel_ch_embed = nn.Embedding(self.vowel_ch_num, self.tone_emb_size,padding_idx=0)
+		# init.uniform(self.vowel_ch_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
 		self.lstm_layer = 1
@@ -298,8 +298,8 @@ class TEST_MODEL(nn.Module):
 		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
 		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
 		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
-		self.vowel_ch_embed = nn.Embedding(self.vowel_ch_num, self.tone_emb_size,padding_idx=0)
-		init.uniform(self.vowel_ch_embed.weight,a=-0.01,b=0.01)
+		# self.vowel_ch_embed = nn.Embedding(self.vowel_ch_num, self.tone_emb_size,padding_idx=0)
+		# init.uniform(self.vowel_ch_embed.weight,a=-0.01,b=0.01)
 
 		self.non_linear = nn.ReLU()
 		self.relu = nn.ReLU()
