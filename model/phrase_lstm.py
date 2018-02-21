@@ -328,9 +328,9 @@ class TEST_MODEL(nn.Module):
 			nn.Sigmoid(),
 			nn.Linear(300,200),
 			nn.Sigmoid(),
-			nn.Linear(200,100),
+			nn.Linear(200,200),
 			nn.ReLU(),
-			nn.Linear(100,self.f0_dim)
+			nn.Linear(200,self.f0_dim)
 			)
 
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
