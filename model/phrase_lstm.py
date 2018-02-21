@@ -232,10 +232,10 @@ class PHRASE_LSTM(nn.Module):
 
 		h = feat_h+ph_h
 
-		delta,delta_length = self.get_f0_delta(h)
+		# delta,delta_length = self.get_f0_delta(h)
 		# delta,delta_length = self.get_self_f0_delta(h)
 		# delta,delta_length = self.get_mean_delta(h)
-		h = torch.cat((h,delta),dim=2)
+		# h = torch.cat((h,delta),dim=2)
 		
 
 		# h = h.view(self.batch_size,self.max_length*self.f0_dim)
