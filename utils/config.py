@@ -3,7 +3,7 @@ update_data = False
 dct_num = 5
 dct_flag = False
 
-learning_rate = 0.001
+learning_rate = 0.002
 decay_step = 1
 decay_rate = 0.97
 epoch_num = 100
