@@ -376,7 +376,7 @@ if __name__=="__main__":
 		train_pos = train_pos[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,-1))
 		train_pos_feat = train_pos_feat[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,-1))
 		train_cons = train_cons[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
-		train_vowel = train_vowel[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
+		train_vowel = train_vowel[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,max_length,-1))
 		train_tone = train_tone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_pretone = train_pretone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
 		train_postone = train_postone[0:batch_num*config.batch_size].reshape((batch_num,config.batch_size,-1))
@@ -406,7 +406,7 @@ if __name__=="__main__":
 		test_pos = test_pos.reshape((test_pos.shape[0],test_pos.shape[1],-1))
 		test_pos_feat = test_pos_feat.reshape((test_pos_feat.shape[0],test_pos_feat.shape[1],-1))
 		test_cons = test_cons.reshape((len(test_cons),-1))
-		test_vowel = test_vowel.reshape((len(test_vowel),-1))
+		test_vowel = test_vowel.reshape((len(test_vowel),-1,5))
 		test_tone = test_tone.reshape((len(test_tone),-1))
 		test_pretone = test_pretone.reshape((len(test_pretone),-1))
 		test_postone = test_postone.reshape((len(test_postone),-1))
@@ -415,6 +415,7 @@ if __name__=="__main__":
 		test_f0 = test_f0.reshape((len(test_f0),test_emb.shape[1],-1))
 		test_len = test_len
 		test_phrase = test_phrase.reshape((len(test_phrase),-1,phrase_num))
+		# print(test_dep.shape)
 		test_dep = test_dep.reshape((len(test_dep),-1,dep_num))
 
 		# print(np.sum(test_len))
@@ -434,7 +435,7 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
-			# model = torch.load("my_best_model.model")
+			# model = torch.load(trained_model)
 			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
 
 			#############################################################
@@ -453,18 +454,25 @@ if __name__=="__main__":
 			# test_dep = torch.FloatTensor(ori_train_dep.tolist())
 			#############################################################
 
+			
 			# tone_lstm.Validate(model,test_emb,test_pos,test_pretone,test_tone,test_postone,test_feat,test_f0,test_len,"./emb_pos_feat_prediction")
-			phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
+			loss,_ = phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
 				test_feat,test_phrase,test_dep,test_f0,test_len,predict_file)
+			print("rmse: "+str(loss))
 			exit()
 		#############################################################
 		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+			cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
-		##if predict mean
+		#if predict mean
 		# model = phrase_lstm.TEST_MODEL(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 		# 	cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		#############################################################
+		##if predict mean
+		# model = seq2seq.Seq2Seq(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
@@ -487,6 +495,7 @@ if __name__=="__main__":
 		decay_rate = config.decay_rate
 		epoch_num = config.epoch_num
 		phrase_lstm.Train(
+		# seq2seq.Train(
 			train_emb,
 			train_pos,
 			train_pos_feat,
@@ -519,6 +528,36 @@ if __name__=="__main__":
 			decay_step,
 			decay_rate,
 			epoch_num)
+	
+	elif mode=="generate_test_data":
+		data = [
+		["w","u",1],
+		["w","u",2],
+		["w","u",3],
+		["w","u",4]
+		]
+		def read_dic(file):
+			dic = {}
+			with open(file) as f:
+				for line in f:
+					line = line.strip().split(" ")
+					dic[line[0]] = int(line[1])
+			return dic
+		cons_dic = read_dic("dic_dir/cons_dic")
+		vowel_dic = read_dic("dic_dir/vowel_dic")
+		tone_dic = {1: 0, 3: 1, 2: 2, 5: 3, 4: 4}
+		feat = np.zeros((len(data),159))
+		for i in range(len(data)):
+			if data[i][0]!="":
+				feat[i][87] = cons_dic[data[i][0]]
+			if data[i][1]!="":
+				feat[i][88] = vowel_dic[data[i][1]]
+			feat[i][13+tone_dic[data[i][2]]] = 1
+
+		test_dir = "self_generated_test_data"
+		os.system("mkdir "+test_dir)
+		for i in range(len(feat)):
+			np.savetxt(test_dir+"/data_"+"".join(["0" for j in range(5-len(str(i)))])+str(i),feat[i:i+1],delimiter=" ",fmt="%.5f")
 		
 
 
