@@ -232,11 +232,12 @@ class PHRASE_LSTM(nn.Module):
 		ph_h = self.phrase_l2(ph_h)
 
 		h = feat_h+ph_h
+		# h = feat_h
 
-		delta,delta_length = self.get_f0_delta(h)
+		# delta,delta_length = self.get_f0_delta(h)
 		# delta,delta_length = self.get_self_f0_delta(h)
 		# delta,delta_length = self.get_mean_delta(h)
-		h = torch.cat((h,delta),dim=2)
+		# h = torch.cat((h,delta),dim=2)
 		
 
 		# h = h.view(self.batch_size,self.max_length*self.f0_dim)
@@ -404,6 +405,102 @@ class NGram(nn.Module):
 		return out_data
 
 
+class SYL_LSTM(nn.Module):
+	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
+		cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
+		lstm_hidden_size,f0_dim,linear_h1):
+		super(SYL_LSTM, self).__init__()
+		self.emb_size = emb_size
+		self.feat_size = feat_size
+		self.pos_emb_size = pos_emb_size
+		self.pos_emb_length = 3##how many pos emb per sample (pre,current,post)
+		self.tone_emb_size = tone_emb_size
+		self.phrase_num = phrase_num
+		self.dep_num = dep_num
+		self.dep_lemb_size = 20
+		self.emb_l_size = 10
+		self.grad_emb_size = 10
+
+		self.pretone_num = pretone_num
+		self.tone_num = tone_num
+		self.postone_num = postone_num
+		self.cons_num = cons_num
+		self.vowel_num = vowel_num
+		self.vowel_ch_num = vowel_ch_num
+
+		self.lstm_hidden_size = lstm_hidden_size
+		self.f0_dim = f0_dim
+		# self.f0_dim = 1
+		self.linear_h1 = linear_h1
+		self.voc_size = voc_size
+		self.pos_num = pos_num
+		self.pos_feat_num = pos_feat_num
+		self.batch_size = -1
+		self.max_length = -1
+
+		self.phrase_hidden_size = self.lstm_hidden_size
+		self.phrase_linear_size = self.linear_h1
+
+		self.tone_embed = nn.Embedding(self.tone_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.tone_embed.weight,a=-0.01,b=0.01)
+
+		self.cons_embed = nn.Embedding(self.cons_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.cons_embed.weight,a=-0.01,b=0.01)
+		self.vowel_embed = nn.Embedding(self.vowel_num, self.tone_emb_size,padding_idx=0)
+		init.uniform(self.vowel_embed.weight,a=-0.01,b=0.01)
+
+		self.non_linear = nn.ReLU()
+		self.relu = nn.ReLU()
+		self.tanh = nn.Tanh()
+		self.sigmoid = nn.Sigmoid()
+
+		##LSTM
+		self.lstm_layer = 1
+		self.bidirectional_flag = True
+		self.direction = 2 if self.bidirectional_flag else 1
+		self.feat_lstm = nn.LSTM(self.tone_emb_size*3,self.lstm_hidden_size,
+			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+
+		self.lstm_l = nn.Sequential(
+			nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1),
+			nn.ReLU(),
+			nn.Linear(self.linear_h1,self.f0_dim)
+			)
+
+
+	def linear_init(self,layer,lower=-1,upper=1):
+		layer.weight.data.uniform_(lower, upper)
+		layer.bias.data.uniform_(lower, upper)
+	def init_hidden(self):
+		direction = 2 if self.bidirectional_flag else 1
+		###########################################################
+		#GPU OPTION
+		###########################################################
+		if cuda_flag:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size).cuda(async=True))
+		else:
+			return Variable(torch.rand(self.lstm_layer*direction,self.batch_size,self.lstm_hidden_size))
+		###########################################################
+
+
+	def forward(self,sents,pos,pos_feat,cons,vowel,pretone,tone,postone,feat,phrase,dep,sent_length):
+		self.batch_size,self.max_length = sents.size()
+
+		tone = self.tone_embed(tone)
+		cons = self.cons_embed(cons)
+
+		vowel = vowel[:,:,0].contiguous()
+		vowel = self.vowel_embed(vowel)
+
+		syl_feat = torch.cat((tone,cons,vowel),dim=2)
+
+		c_0 = self.init_hidden()
+		h_0 = self.init_hidden()
+		h_n, (_,_) = self.feat_lstm(syl_feat,(h_0,c_0))
+		y = self.lstm_l(h_n)
+		return y
+
+
 def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_pretone,train_tone,train_postone,train_feat,train_phrase,train_dep,train_f0,train_len,
 	val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,val_tone,val_postone,val_feat,val_phrase,val_dep,val_f0,val_len,
 	model,optimizer,learning_rate,decay_step,decay_rate,epoch_num):
@@ -460,9 +557,9 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 			
 			# delta,delta_length = model.get_self_f0_delta(train_f0_batch)
-			delta,delta_length = model.get_f0_delta(train_f0_batch)
-			# # delta,delta_length = model.get_mean_delta(train_f0_batch)
-			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
+			# delta,delta_length = model.get_f0_delta(train_f0_batch)
+			# # # delta,delta_length = model.get_mean_delta(train_f0_batch)
+			# train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()

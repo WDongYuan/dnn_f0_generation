@@ -119,6 +119,8 @@ if __name__=="__main__":
 		val_feat_desc = data_dir+"/new_feature_desc_val"
 		predict_f0 = args.predict_file
 
+		os.system("mkdir "+out_dir)
+
 		######################################################################
 		print("")
 		print(">>>>>>>>>> test statistics <<<<<<<<<<")
@@ -149,4 +151,4 @@ if __name__=="__main__":
 		######################################################################
 
 		os.system("rm -r "+f0_in_file)
-		os.system("rm -r "+f0_timeline_dir)
+		# os.system("rm -r "+f0_timeline_dir)

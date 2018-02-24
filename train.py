@@ -135,6 +135,10 @@ if __name__=="__main__":
 	parser.add_argument('--phrase_syl_dir', dest='phrase_syl_dir')
 	parser.add_argument('--model', dest='model',default="./my_best_model.model")
 	parser.add_argument('--predict_file',dest='predict_file',default="./predict_f0")
+	parser.add_argument('--out_dir',dest='out_dir')
+	parser.add_argument('--timeline',dest='timeline',type=int,default=0)
+	parser.add_argument('--voice_dir',dest='voice_dir')
+	parser.add_argument('--data_dir',dest='data_dir')
 	args = parser.parse_args()
 	mode = args.mode
 	if mode=="how_to_run":
@@ -176,19 +180,44 @@ if __name__=="__main__":
 			" --test_map ../mandarine/gen_f0/train_dev_data_vector/dev_data/syllable_map"+
 			" --phrase_syl_dir ../mandarine/gen_f0/phrase_dir/phrase_syllable"+
 			" --mode train_phrase_lstm/emb_phrase_predict")
+		print("python train.py"+
+			" --mode phrase_lstm_predict"+
+			" --data_dir ../mandarine/dnn_data_dir"+
+			" --voice_dir ../mandarine/cmu_yue_wdy_cn"+
+			" --txt_file ../mandarine/txt.done.data.word"+
+			# " --desc_file ../cantonese/dnn_data_dir/feature_desc_vector"+
+			# " --train_data ../cantonese/dnn_data_dir/train_test_data/train_data/train_feat"+
+			# " --train_label ../cantonese/dnn_data_dir/train_test_data/train_data/train_f0"+
+			# " --train_map ../cantonese/dnn_data_dir/train_test_data/train_data/train_syllable_map"+
+			# " --test_data ../cantonese/dnn_data_dir/train_test_data/test_data/test_feat"+
+			# " --test_label ../cantonese/dnn_data_dir/train_test_data/test_data/test_f0"+
+			# " --test_map ../cantonese/dnn_data_dir/train_test_data/test_data/test_syllable_map"+
+			# " --phrase_syl_dir ../cantonese/dnn_data_dir/phrase_dir/phrase_syllable"+
+			" --model ./trained_model/add_lstm_model"+
+			" --predict_file add_lstm_predict_f0"+
+			" --timeline 0/1(optional 0 default)"+
+			" --out_dir(mandatory if timeline=1)")
 
 	elif mode=="phrase_lstm_train" or mode=="phrase_lstm_predict":
-		desc_file = args.desc_file
-		train_data = args.train_data
-		train_label = args.train_label
-		train_map = args.train_map
-		test_data = args.test_data
-		test_label = args.test_label
-		test_map = args.test_map
+		data_dir = args.data_dir
+		voice_dir = args.voice_dir
+		desc_file = data_dir+"/feature_desc_vector"
+		train_data = data_dir+"/train_test_data/train_data/train_feat"
+		train_label = data_dir+"/train_test_data/train_data/train_f0"
+		train_map = data_dir+"/train_test_data/train_data/train_syllable_map"
+		test_data = data_dir+"/train_test_data/test_data/test_feat"
+		test_label = data_dir+"/train_test_data/test_data/test_f0"
+		test_map = data_dir+"/train_test_data/test_data/test_syllable_map"
+		phrase_syl_dir = data_dir+"/phrase_dir/phrase_syllable"
+		# desc_file = args.desc_file
+		# train_data = args.train_data
+		# train_label = args.train_label
+		# train_map = args.train_map
+		# test_data = args.test_data
+		# test_label = args.test_label
+		# test_map = args.test_map
+		# phrase_syl_dir = args.phrase_syl_dir
 		txt_file = args.txt_file
-		phrase_syl_dir = args.phrase_syl_dir
-		trained_model = args.model
-		predict_file = args.predict_file
 		pos_num = -1
 		if config.update_data:
 			os.system("mkdir dic_dir")
@@ -454,6 +483,10 @@ if __name__=="__main__":
 
 		if "predict" in mode:
 			print("predicting...")
+			trained_model = args.model
+			predict_file = args.predict_file
+			voice_dir = args.voice_dir
+			data_dir = args.data_dir
 			# model = torch.load(trained_model)
 			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
 
@@ -478,21 +511,31 @@ if __name__=="__main__":
 			loss,_ = phrase_lstm.Validate(model,test_emb,test_pos,test_pos_feat,test_cons,test_vowel,test_pretone,test_tone,test_postone,
 				test_feat,test_phrase,test_dep,test_f0,test_len,predict_file)
 			print("rmse: "+str(loss))
+
+			timeline = args.timeline
+			if timeline == 1:
+				out_dir = args.out_dir
+				os.system("python dnn_prediction_statistics.py"+
+					" --mode stat"+
+					" --voice_dir "+voice_dir+
+					" --data_dir "+data_dir+
+					" --predict_file "+predict_file+
+					" --out_dir "+out_dir)
 			exit()
 		#############################################################
-		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
-		#if predict mean
+		#if mlp or single LSTM
 		# model = phrase_lstm.TEST_MODEL(config.emb_size,config.pos_emb_size,config.tone_emb_size,
 		# 	cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
-		##if predict mean
-		# model = seq2seq.Seq2Seq(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		##if syllable lstm
+		model = phrase_lstm.SYL_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+			cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
 		param_list = []
