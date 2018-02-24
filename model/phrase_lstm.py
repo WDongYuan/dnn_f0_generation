@@ -515,7 +515,7 @@ class SYL_LSTM(nn.Module):
 		########################################################
 		# syl_feat = torch.cat((tone,cons,vowel),dim=2)
 		########################################################
-		emb = self.emb_l1(emb)
+		emb = self.emb_l1(embed(sents))
 		syl_feat = emb
 		########################################################
 
