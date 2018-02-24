@@ -471,7 +471,7 @@ class SYL_LSTM(nn.Module):
 			embed.weight.requires_grad = False
 			return embed
 		self.embed = get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
-		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
+		self.emb_l1 = nn.Linear(self.grad_emb_size,self.emb_l_size)
 		self.feat_lstm = nn.LSTM(self.emb_l_size,self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		########################################################
