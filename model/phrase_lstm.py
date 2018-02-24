@@ -462,7 +462,7 @@ class SYL_LSTM(nn.Module):
 		self.postone_num = postone_num
 		self.cons_num = cons_num
 		self.vowel_num = vowel_num
-		self.vowel_ch_num = vowel_ch_num
+		# self.vowel_ch_num = vowel_ch_num
 
 		self.lstm_hidden_size = lstm_hidden_size
 		self.f0_dim = f0_dim
