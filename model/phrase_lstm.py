@@ -458,14 +458,22 @@ class SYL_LSTM(nn.Module):
 		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
-		self.feat_lstm = nn.LSTM(self.tone_emb_size*3,self.lstm_hidden_size,
+		########################################################
+		# self.feat_lstm = nn.LSTM(self.tone_emb_size*3,self.lstm_hidden_size,
+		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		########################################################
+		self.embed = self.get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
+		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
+		self.feat_lstm = nn.LSTM(self.emb_l_size,self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		########################################################
 
 		self.lstm_l = nn.Sequential(
 			nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1),
 			nn.ReLU(),
 			nn.Linear(self.linear_h1,self.f0_dim)
 			)
+
 
 	def get_self_f0_delta(self,data):
 		batch_size,max_length,f0_dim = data.size()
@@ -498,7 +506,12 @@ class SYL_LSTM(nn.Module):
 		vowel = vowel[:,:,0].contiguous()
 		vowel = self.vowel_embed(vowel)
 
-		syl_feat = torch.cat((tone,cons,vowel),dim=2)
+		########################################################
+		# syl_feat = torch.cat((tone,cons,vowel),dim=2)
+		########################################################
+		emb = self.emb_l1(emb)
+		syl_feat = emb
+		########################################################
 
 		c_0 = self.init_hidden()
 		h_0 = self.init_hidden()
