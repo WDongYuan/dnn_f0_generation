@@ -462,7 +462,13 @@ class SYL_LSTM(nn.Module):
 		# self.feat_lstm = nn.LSTM(self.tone_emb_size*3,self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		########################################################
-		self.embed = self.get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
+		def get_embedding(emb_file,voc_size,emb_size):
+			arr = np.loadtxt(emb_file)
+			embed = nn.Embedding(voc_size, emb_size)
+			embed.weight.data.copy_(torch.from_numpy(arr))
+			embed.weight.requires_grad = False
+			return embed
+		self.embed = get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
 		self.feat_lstm = nn.LSTM(self.emb_l_size,self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
