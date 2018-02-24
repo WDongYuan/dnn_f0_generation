@@ -504,9 +504,9 @@ class SYL_LSTM(nn.Module):
 		h_0 = self.init_hidden()
 		h_n, (_,_) = self.feat_lstm(syl_feat,(h_0,c_0))
 		y = self.lstm_l(h_n)
-		
+
 		delta,delta_length = self.get_self_f0_delta(y)
-		y = torch.cat((h,delta),dim=2)
+		y = torch.cat((y,delta),dim=2)
 
 		return y
 
