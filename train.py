@@ -511,6 +511,10 @@ if __name__=="__main__":
 		# 	cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
 		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
+		model = phrase_lstm.SYL_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+			cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		#############################################################
 		learning_rate = config.learning_rate
 		param_list = []
 		for name,param in model.named_parameters():
