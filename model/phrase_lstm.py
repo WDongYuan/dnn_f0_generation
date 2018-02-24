@@ -419,7 +419,7 @@ class SYL_LSTM(nn.Module):
 		self.dep_num = dep_num
 		self.dep_lemb_size = 20
 		self.emb_l_size = 100
-		self.grad_emb_size = 10
+		self.grad_emb_size = 20
 
 		self.pretone_num = pretone_num
 		self.tone_num = tone_num
@@ -462,6 +462,8 @@ class SYL_LSTM(nn.Module):
 		# self.feat_lstm = nn.LSTM(self.tone_emb_size*3,self.lstm_hidden_size,
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		########################################################
+		self.grad_embed = nn.Embedding(self.voc_size, self.grad_emb_size,padding_idx=0)
+		init.uniform(self.grad_embed.weight,a=-0.01,b=0.01)
 		def get_embedding(emb_file,voc_size,emb_size):
 			arr = np.loadtxt(emb_file)
 			embed = nn.Embedding(voc_size, emb_size)
@@ -515,8 +517,8 @@ class SYL_LSTM(nn.Module):
 		########################################################
 		# syl_feat = torch.cat((tone,cons,vowel),dim=2)
 		########################################################
-		emb = self.emb_l1(self.embed(sents))
-		syl_feat = emb
+		# emb = self.emb_l1(self.embed(sents))
+		syl_feat = self.grad_embed(sents)
 		########################################################
 
 		c_0 = self.init_hidden()
