@@ -459,21 +459,21 @@ class SYL_LSTM(nn.Module):
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		########################################################
-		# self.feat_lstm = nn.LSTM(self.tone_emb_size*3,self.lstm_hidden_size,
-		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
-		########################################################
-		self.grad_embed = nn.Embedding(self.voc_size, self.grad_emb_size,padding_idx=0)
-		init.uniform(self.grad_embed.weight,a=-0.01,b=0.01)
-		def get_embedding(emb_file,voc_size,emb_size):
-			arr = np.loadtxt(emb_file)
-			embed = nn.Embedding(voc_size, emb_size)
-			embed.weight.data.copy_(torch.from_numpy(arr))
-			embed.weight.requires_grad = False
-			return embed
-		self.embed = get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
-		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
-		self.feat_lstm = nn.LSTM(self.grad_emb_size,self.lstm_hidden_size,
+		self.feat_lstm = nn.LSTM(self.tone_emb_size*3,self.lstm_hidden_size,
 			num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
+		########################################################
+		# self.grad_embed = nn.Embedding(self.voc_size, self.grad_emb_size,padding_idx=0)
+		# init.uniform(self.grad_embed.weight,a=-0.01,b=0.01)
+		# def get_embedding(emb_file,voc_size,emb_size):
+		# 	arr = np.loadtxt(emb_file)
+		# 	embed = nn.Embedding(voc_size, emb_size)
+		# 	embed.weight.data.copy_(torch.from_numpy(arr))
+		# 	embed.weight.requires_grad = False
+		# 	return embed
+		# self.embed = get_embedding("./lstm_data/pretrain_emb",self.voc_size,self.emb_size)
+		# self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
+		# self.feat_lstm = nn.LSTM(self.grad_emb_size,self.lstm_hidden_size,
+		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 		########################################################
 
 		self.lstm_l = nn.Sequential(
@@ -515,10 +515,10 @@ class SYL_LSTM(nn.Module):
 		vowel = self.vowel_embed(vowel)
 
 		########################################################
-		# syl_feat = torch.cat((tone,cons,vowel),dim=2)
+		syl_feat = torch.cat((tone,cons,vowel),dim=2)
 		########################################################
 		# emb = self.emb_l1(self.embed(sents))
-		syl_feat = self.grad_embed(sents)
+		# syl_feat = self.grad_embed(sents)
 		########################################################
 
 		c_0 = self.init_hidden()

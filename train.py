@@ -489,6 +489,8 @@ if __name__=="__main__":
 			data_dir = args.data_dir
 			# model = torch.load(trained_model)
 			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
+			for name,param in model.named_parameters():
+				print(name)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
