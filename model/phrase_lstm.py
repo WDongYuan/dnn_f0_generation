@@ -467,6 +467,12 @@ class SYL_LSTM(nn.Module):
 			nn.Linear(self.linear_h1,self.f0_dim)
 			)
 
+	def get_self_f0_delta(self,data):
+		batch_size,max_length,f0_dim = data.size()
+		delta = data[:,:,1:f0_dim]-data[:,:,0:f0_dim-1]
+		# delta = Variable(delta)
+		delta_length = f0_dim-1
+		return delta,delta_length
 
 	def linear_init(self,layer,lower=-1,upper=1):
 		layer.weight.data.uniform_(lower, upper)
@@ -498,6 +504,10 @@ class SYL_LSTM(nn.Module):
 		h_0 = self.init_hidden()
 		h_n, (_,_) = self.feat_lstm(syl_feat,(h_0,c_0))
 		y = self.lstm_l(h_n)
+		
+		delta,delta_length = self.get_self_f0_delta(y)
+		y = torch.cat((h,delta),dim=2)
+
 		return y
 
 
@@ -556,10 +566,10 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			outputs = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 			
-			# delta,delta_length = model.get_self_f0_delta(train_f0_batch)
+			delta,delta_length = model.get_self_f0_delta(train_f0_batch)
 			# delta,delta_length = model.get_f0_delta(train_f0_batch)
 			# # # delta,delta_length = model.get_mean_delta(train_f0_batch)
-			# train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
+			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
