@@ -443,7 +443,7 @@ class NGram(nn.Module):
 		
 class SYL_LSTM(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
-		cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
+		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
 		lstm_hidden_size,f0_dim,linear_h1):
 		super(SYL_LSTM, self).__init__()
 		self.emb_size = emb_size
@@ -547,7 +547,7 @@ class SYL_LSTM(nn.Module):
 		tone = self.tone_embed(tone)
 		cons = self.cons_embed(cons)
 
-		vowel = vowel[:,:,0].contiguous()
+		# vowel = vowel[:,:,0].contiguous()
 		vowel = self.vowel_embed(vowel)
 
 		########################################################
