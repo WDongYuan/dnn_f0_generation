@@ -91,15 +91,11 @@ if __name__=="__main__":
 
 
 
-
-	syl = "wu"
-	arr = np.loadtxt("../self_gen_data_predict",delimiter=" ")
-	for i in range(len(arr)):
-		plt.plot(arr[i],label=syl+str(i+1))
-	plt.legend()
-	# plt.show()
-	plt.title(syl)
-	plt.savefig(syl+".jpg")
+	arr = np.loadtxt("self_syllable_lstm_f0",delimiter=" ")
+	plt.plot(arr[8].flatten())
+	plt.plot(arr[21].flatten())
+	plt.show()
+	
 
 
 

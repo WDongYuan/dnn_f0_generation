@@ -68,7 +68,7 @@ class EncodeFeature():
 				self.feature_pos.append([feat[0],[feat_pos,feat_pos+len(tmp_dic)-1]])
 				feat_pos += len(tmp_dic)
 				# print(feat[0])
-				# print(tmp_dic)
+				print(tmp_dic)
 
 		print("feature position:")
 		for tup in self.feature_pos:
@@ -844,6 +844,15 @@ def save_dic(dic,save_file):
 	with open(save_file,"w+") as f:
 		for key,val in dic.items():
 			f.write(str(key)+" "+str(val)+"\n")
+
+
+def read_dic(read_file):
+	dic = {}
+	with open(read_file) as f:
+		for line in f:
+			line = line.strip().split(" ")
+			dic[line[0]] = int(line[1])
+	return dic
 
 
 

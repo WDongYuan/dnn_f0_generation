@@ -40,6 +40,8 @@ from utils.data_processing import dep_refine
 from utils.data_processing import generate_word_embedding
 from utils.data_processing import new_word2index
 from utils.data_processing import save_dic
+from utils.data_processing import decompose_zh_syl
+from utils.data_processing import read_dic
 
 from model.mlp import MLP
 from model import embedding_lstm
@@ -138,7 +140,7 @@ if __name__=="__main__":
 	parser.add_argument('--out_dir',dest='out_dir')
 	parser.add_argument('--timeline',dest='timeline',type=int,default=0)
 	parser.add_argument('--voice_dir',dest='voice_dir')
-	parser.add_argument('--data_dir',dest='data_dir')
+	parser.add_argument('--data_dir',dest='data_dir',default="")
 	args = parser.parse_args()
 	mode = args.mode
 	if mode=="how_to_run":
@@ -170,16 +172,18 @@ if __name__=="__main__":
 			" --test_map ../mandarine/gen_f0/train_dev_data_vector/dev_data/syllable_map"+
 			" --mode train_emb_lstm/emb_lstm_predict")
 		print("python train.py"+
-			" --desc_file ../mandarine/gen_f0/train_dev_data_vector/feature_desc_vector"+
-			" --txt_file ./data/txt.done.data-all"+
-			" --train_data ../mandarine/gen_f0/train_dev_data_vector/train_data/dct_0"+
-			" --train_label ../mandarine/gen_f0/train_dev_data_vector/train_data_f0_vector"+
-			" --train_map ../mandarine/gen_f0/train_dev_data_vector/train_data/syllable_map"+
-			" --test_data ../mandarine/gen_f0/train_dev_data_vector/dev_data/dct_0"+
-			" --test_label ../mandarine/gen_f0/train_dev_data_vector/dev_data_f0_vector"+
-			" --test_map ../mandarine/gen_f0/train_dev_data_vector/dev_data/syllable_map"+
-			" --phrase_syl_dir ../mandarine/gen_f0/phrase_dir/phrase_syllable"+
-			" --mode train_phrase_lstm/emb_phrase_predict")
+			" --desc_file ../mandarine/dnn_data_dir/feature_desc_vector"+
+			" --txt_file ../mandarine/txt.done.data-all"+
+			" --train_data ../mandarine/dnn_data_dir/train_test_data/train_data/train_feat"+
+			" --train_label ../mandarine/dnn_data_dir/train_test_data/train_data/train_f0"+
+			" --train_map ../mandarine/dnn_data_dir/train_test_data/train_data/train_syllable_map"+
+			" --test_data ../mandarine/dnn_data_dir/train_test_data/test_data/test_feat"+
+			" --test_label ../mandarine/dnn_data_dir/train_test_data/test_data/test_f0"+
+			" --test_map ../mandarine/dnn_data_dir/train_test_data/test_data/test_syllable_map"+
+			" --phrase_syl_dir ../mandarine/dnn_data_dir/phrase_dir/phrase_syllable"+
+			" --mode phrase_lstm_predict"+
+			" --model ./trained_model/syllable_lstm"+
+			" --predict_file model_prediction/syllable_lstm_f0")
 		print("python train.py"+
 			" --mode phrase_lstm_predict"+
 			" --data_dir ../mandarine/dnn_data_dir"+
@@ -194,35 +198,38 @@ if __name__=="__main__":
 			# " --test_map ../cantonese/dnn_data_dir/train_test_data/test_data/test_syllable_map"+
 			# " --phrase_syl_dir ../cantonese/dnn_data_dir/phrase_dir/phrase_syllable"+
 			" --model ./trained_model/add_lstm_model"+
-			" --predict_file add_lstm_predict_f0"+
-			" --timeline 0/1(optional 0 default)"+
-			" --out_dir(mandatory if timeline=1)")
+			" --predict_file add_lstm_predict_f0")
+			# " --timeline 0/1(optional 0 default)"+
+			# " --out_dir(mandatory if timeline=1)")
 
 	elif mode=="phrase_lstm_train" or mode=="phrase_lstm_predict":
-		data_dir = args.data_dir
-		voice_dir = args.voice_dir
-		desc_file = data_dir+"/feature_desc_vector"
-		train_data = data_dir+"/train_test_data/train_data/train_feat"
-		train_label = data_dir+"/train_test_data/train_data/train_f0"
-		train_map = data_dir+"/train_test_data/train_data/train_syllable_map"
-		test_data = data_dir+"/train_test_data/test_data/test_feat"
-		test_label = data_dir+"/train_test_data/test_data/test_f0"
-		test_map = data_dir+"/train_test_data/test_data/test_syllable_map"
-		phrase_syl_dir = data_dir+"/phrase_dir/phrase_syllable"
-		# desc_file = args.desc_file
-		# train_data = args.train_data
-		# train_label = args.train_label
-		# train_map = args.train_map
-		# test_data = args.test_data
-		# test_label = args.test_label
-		# test_map = args.test_map
-		# phrase_syl_dir = args.phrase_syl_dir
+		if args.data_dir != "":
+			data_dir = args.data_dir
+			voice_dir = args.voice_dir
+			desc_file = data_dir+"/feature_desc_vector"
+			train_data = data_dir+"/train_test_data/train_data/train_feat"
+			train_label = data_dir+"/train_test_data/train_data/train_f0"
+			train_map = data_dir+"/train_test_data/train_data/train_syllable_map"
+			test_data = data_dir+"/train_test_data/test_data/test_feat"
+			test_label = data_dir+"/train_test_data/test_data/test_f0"
+			test_map = data_dir+"/train_test_data/test_data/test_syllable_map"
+			phrase_syl_dir = data_dir+"/phrase_dir/phrase_syllable"
+		else:
+			desc_file = args.desc_file
+			train_data = args.train_data
+			train_label = args.train_label
+			train_map = args.train_map
+			test_data = args.test_data
+			test_label = args.test_label
+			test_map = args.test_map
+			phrase_syl_dir = args.phrase_syl_dir
 		txt_file = args.txt_file
 		pos_num = -1
 		if config.update_data:
 			os.system("mkdir dic_dir")
 			############################################
 			encode_feature = EncodeFeature(desc_file)
+			# exit()
 			convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
 			convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
 			############################################
@@ -312,8 +319,11 @@ if __name__=="__main__":
 
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
-		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
-		# test_f0,test_feat,test_len = get_f0_feature("./self_generated_test_data")
+		############################################
+		# test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+		############################################
+		test_f0,test_feat,test_len = get_f0_feature("./self_generated_test_data/data_dir")
+		############################################
 
 		############################################
 		#append the previous f0 and next f0 value
@@ -485,12 +495,9 @@ if __name__=="__main__":
 			print("predicting...")
 			trained_model = args.model
 			predict_file = args.predict_file
-			voice_dir = args.voice_dir
-			data_dir = args.data_dir
-			# model = torch.load(trained_model)
 			model = torch.load(trained_model, map_location=lambda storage, loc: storage)
-			for name,param in model.named_parameters():
-				print(name)
+			# for name,param in model.named_parameters():
+			# 	print(name)
 
 			#############################################################
 			# test_emb = torch.LongTensor(ori_train_emb.reshape((len(ori_train_emb),-1)).tolist())
@@ -514,20 +521,20 @@ if __name__=="__main__":
 				test_feat,test_phrase,test_dep,test_f0,test_len,predict_file)
 			print("rmse: "+str(loss))
 
-			timeline = args.timeline
-			if timeline == 1:
-				out_dir = args.out_dir
-				os.system("python dnn_prediction_statistics.py"+
-					" --mode stat"+
-					" --voice_dir "+voice_dir+
-					" --data_dir "+data_dir+
-					" --predict_file "+predict_file+
-					" --out_dir "+out_dir)
+			# timeline = args.timeline
+			# if timeline == 1:
+			# 	out_dir = args.out_dir
+			# 	os.system("python dnn_prediction_statistics.py"+
+			# 		" --mode stat"+
+			# 		" --voice_dir "+voice_dir+
+			# 		" --data_dir "+data_dir+
+			# 		" --predict_file "+predict_file+
+			# 		" --out_dir "+out_dir)
 			exit()
 		#############################################################
-		# model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-		# 	cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		model = phrase_lstm.PHRASE_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+			cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		#if mlp or single LSTM
 		# model = phrase_lstm.TEST_MODEL(config.emb_size,config.pos_emb_size,config.tone_emb_size,
@@ -535,9 +542,9 @@ if __name__=="__main__":
 		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		##if syllable lstm
-		model = phrase_lstm.SYL_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
-			cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
-			config.lstm_hidden_size,config.f0_dim,config.linear_h1)
+		# model = phrase_lstm.SYL_LSTM(config.emb_size,config.pos_emb_size,config.tone_emb_size,
+		# 	cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_num,phrase_num,dep_num,config.voc_size,pos_num,pos_feat_num,
+		# 	config.lstm_hidden_size,config.f0_dim,config.linear_h1)
 		#############################################################
 		learning_rate = config.learning_rate
 		param_list = []
@@ -592,36 +599,8 @@ if __name__=="__main__":
 			decay_step,
 			decay_rate,
 			epoch_num)
-	
-	elif mode=="generate_test_data":
-		data = [
-		["w","u",1],
-		["w","u",2],
-		["w","u",3],
-		["w","u",4]
-		]
-		def read_dic(file):
-			dic = {}
-			with open(file) as f:
-				for line in f:
-					line = line.strip().split(" ")
-					dic[line[0]] = int(line[1])
-			return dic
-		cons_dic = read_dic("dic_dir/cons_dic")
-		vowel_dic = read_dic("dic_dir/vowel_dic")
-		tone_dic = {1: 0, 3: 1, 2: 2, 5: 3, 4: 4}
-		feat = np.zeros((len(data),159))
-		for i in range(len(data)):
-			if data[i][0]!="":
-				feat[i][87] = cons_dic[data[i][0]]
-			if data[i][1]!="":
-				feat[i][88] = vowel_dic[data[i][1]]
-			feat[i][13+tone_dic[data[i][2]]] = 1
 
-		test_dir = "self_generated_test_data"
-		os.system("mkdir "+test_dir)
-		for i in range(len(feat)):
-			np.savetxt(test_dir+"/data_"+"".join(["0" for j in range(5-len(str(i)))])+str(i),feat[i:i+1],delimiter=" ",fmt="%.5f")
+
 
 
 
