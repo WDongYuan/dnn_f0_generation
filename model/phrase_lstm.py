@@ -602,7 +602,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			val_loss,result = Validate(model,val_emb,val_pos,val_pos_feat,val_cons,val_vowel,val_pretone,val_tone,val_postone,val_feat,val_phrase,val_dep,val_f0,val_len)
 			print("val loss: "+str(val_loss))
 			if val_loss<min_loss:
-				torch.save(model,"./my_best_model.model")
+				torch.save(model,"./phrase_lstm_best_model")
 				min_loss = val_loss
 		if (epoch+1)%decay_step==0:
 			learning_rate *= decay_rate
