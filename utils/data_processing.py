@@ -91,7 +91,7 @@ class EncodeFeature():
 		new_feat = []
 		# print(feat)
 		# print(self.encode_dic)
-		assert len(feat)==len(self.encode_dic)
+		assert len(feat)==len(self.encode_dic),feat
 		for i in range(len(feat)):
 			if len(self.encode_dic[i])==0:
 				new_feat.append(feat[i])

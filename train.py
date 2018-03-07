@@ -188,7 +188,7 @@ if __name__=="__main__":
 			" --mode phrase_lstm_predict"+
 			" --data_dir ../mandarine/dnn_data_dir"+
 			" --voice_dir ../mandarine/cmu_yue_wdy_cn"+
-			" --txt_file ../mandarine/txt.done.data.word"+
+			" --txt_file ../mandarine/txt.done.data-all"+
 			# " --desc_file ../cantonese/dnn_data_dir/feature_desc_vector"+
 			# " --train_data ../cantonese/dnn_data_dir/train_test_data/train_data/train_feat"+
 			# " --train_label ../cantonese/dnn_data_dir/train_test_data/train_data/train_f0"+
@@ -210,15 +210,22 @@ if __name__=="__main__":
 			train_data = data_dir+"/train_test_data/train_data/train_feat"
 			train_label = data_dir+"/train_test_data/train_data/train_f0"
 			train_map = data_dir+"/train_test_data/train_data/train_syllable_map"
+			############################################
 			test_data = data_dir+"/train_test_data/test_data/test_feat"
 			test_label = data_dir+"/train_test_data/test_data/test_f0"
 			test_map = data_dir+"/train_test_data/test_data/test_syllable_map"
+			############################################
+			# test_data = "../experiment/mandarine/dnn_data_dir/all_data/test_feat"
+			# test_label = "../experiment/mandarine/dnn_data_dir/all_data/test_f0"
+			# test_map = "../experiment/mandarine/dnn_data_dir/all_data/test_syllable_map"
+			############################################
 			phrase_syl_dir = data_dir+"/phrase_dir/phrase_syllable"
 		else:
 			desc_file = args.desc_file
 			train_data = args.train_data
 			train_label = args.train_label
 			train_map = args.train_map
+			############################################
 			test_data = args.test_data
 			test_label = args.test_label
 			test_map = args.test_map
@@ -229,7 +236,6 @@ if __name__=="__main__":
 			os.system("mkdir dic_dir")
 			############################################
 			encode_feature = EncodeFeature(desc_file)
-			# exit()
 			convert_feature(train_data,train_label,encode_feature,"./train_data_f0")
 			convert_feature(test_data,test_label,encode_feature,"./test_data_f0")
 			############################################
@@ -320,9 +326,9 @@ if __name__=="__main__":
 		print("--->get the numpy data for training")
 		train_f0,train_feat,train_len = get_f0_feature("./lstm_data/train")
 		############################################
-		# test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
+		test_f0,test_feat,test_len = get_f0_feature("./lstm_data/test")
 		############################################
-		test_f0,test_feat,test_len = get_f0_feature("./self_generated_test_data/data_dir")
+		# test_f0,test_feat,test_len = get_f0_feature("./self_generated_test_data/data_dir")
 		############################################
 
 		############################################

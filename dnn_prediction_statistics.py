@@ -114,6 +114,8 @@ if __name__=="__main__":
 	parser.add_argument('--predict_file',dest='predict_file')
 	parser.add_argument('--predict_file_map',dest='predict_file_map')
 	parser.add_argument('--txt_file',dest='txt_file')
+	parser.add_argument('--true_duration',dest='true_duration',type=int,default=0)
+
 	args = parser.parse_args()
 	
 	mode = args.mode
@@ -128,6 +130,8 @@ if __name__=="__main__":
 			# " --txt_file"+
 			" --predict_file"+
 			" --predict_file_map"+
+			" --true_duration(optional,default=0)"+
+			" --true_f0_dir(only needed when true_duration==1)"+
 			" --out_dir")
 		print("python dnn_prediction_statistics.py"+
 			" --mode generate_syllable_test_data"+
@@ -184,7 +188,7 @@ if __name__=="__main__":
 
 		# os.system("rm -r "+f0_in_file)
 		# os.system("rm -r "+f0_timeline_dir)
-		os.system("rm -r "+out_dir)
+		# os.system("rm -r "+out_dir)
 
 	elif mode=="generate_all_predict_wav":
 		out_dir = args.out_dir
@@ -205,41 +209,46 @@ if __name__=="__main__":
 		predict_f0 = put_predict_f0_in_file(predict_file,predict_file_map,out_dir)
 		f0_in_file = predict_f0
 
-		print(">>>>>>>>>> apply f0 in festival prediction <<<<<<<<<<")
-		os.system("nohup python ../seq_op/apply_f0.py"+
-			" --mode run"+
-			" --voice_dir "+voice_dir+
-			" --out_dir "+out_dir+
-			" --modified_clustergen_scm /Users/weidong/GoogleDrive/CMU/NLP/Can2Ch_Speech/my_festival/gen_audio/src/experiment/clustergen.scm"+
-			" --test_txt "+txt_file)
-		ccoef_dir = out_dir+"/ccoefs"
-		f0_tag_dir = out_dir+"/f0_value"
+		if args.true_duration==0:
+			print(">>>>>>>>>> apply f0 in festival prediction <<<<<<<<<<")
+			os.system("nohup python ../seq_op/apply_f0.py"+
+				" --mode run"+
+				" --voice_dir "+voice_dir+
+				" --out_dir "+out_dir+
+				" --modified_clustergen_scm /Users/weidong/GoogleDrive/CMU/NLP/Can2Ch_Speech/my_festival/gen_audio/src/experiment/clustergen.scm"+
+				" --test_txt "+txt_file)
+			ccoef_dir = out_dir+"/ccoefs"
+			f0_tag_dir = out_dir+"/f0_value"
+		else:
+			print(">>>>>>>>>> use true duration for f0 <<<<<<<<<<")
+			f0_tag_dir = args.true_f0_dir
+			ccoef_dir = voice_dir+"/ccoefs"
 
 		################################################
 		#modify the f0 here
-		file_to_modify = os.listdir(f0_in_file)
-		syl_to_modify = []
-		idx_to_modify = [8,9]
-		def modify_operation(arr):
-			mean = arr.mean()
-			std = arr.std()
-			norm = (arr-mean)/std
-			return norm*std*2+mean
+		# file_to_modify = os.listdir(f0_in_file)
+		# syl_to_modify = []
+		# idx_to_modify = [8,9]
+		# def modify_operation(arr):
+		# 	mean = arr.mean()
+		# 	std = arr.std()
+		# 	norm = (arr-mean)/std
+		# 	return norm*std*2+mean
 
-		lines = None
-		for mod_file in file_to_modify:
-			with open(f0_in_file+"/"+mod_file) as f:
-				lines = f.readlines()
-				lines = [line.strip().split(" ") for line in lines]
-				for li in range(len(lines)):
-					line = lines[li]
-					if line[0] in syl_to_modify:
-						lines[li] = [line[0]]+modify_operation(np.array(line[1:]).astype(np.float)).astype(str).tolist()
-					if li in idx_to_modify:
-						lines[li] = [line[0]]+modify_operation(np.array(line[1:]).astype(np.float)).astype(str).tolist()
-			with open(f0_in_file+"/"+mod_file,"w+") as f:
-				for line in lines:
-					f.write(" ".join(line)+"\n")
+		# lines = None
+		# for mod_file in file_to_modify:
+		# 	with open(f0_in_file+"/"+mod_file) as f:
+		# 		lines = f.readlines()
+		# 		lines = [line.strip().split(" ") for line in lines]
+		# 		for li in range(len(lines)):
+		# 			line = lines[li]
+		# 			if line[0] in syl_to_modify:
+		# 				lines[li] = [line[0]]+modify_operation(np.array(line[1:]).astype(np.float)).astype(str).tolist()
+		# 			if li in idx_to_modify:
+		# 				lines[li] = [line[0]]+modify_operation(np.array(line[1:]).astype(np.float)).astype(str).tolist()
+		# 	with open(f0_in_file+"/"+mod_file,"w+") as f:
+		# 		for line in lines:
+		# 			f.write(" ".join(line)+"\n")
 		################################################
 
 		predict_f0 = generate_f0_time_line(f0_in_file,out_dir,f0_tag_dir)
@@ -252,11 +261,6 @@ if __name__=="__main__":
 		print("delete "+f0_in_file)
 		os.system("rm -r "+f0_in_file)
 
-		print("delete "+ccoef_dir)
-		os.system("rm -r "+ccoef_dir)
-
-		print("delete "+f0_tag_dir)
-		os.system("rm -r "+f0_tag_dir)
 
 
 	elif mode=="generate_syllable_test_data":
