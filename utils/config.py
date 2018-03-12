@@ -1,5 +1,5 @@
-cuda_flag = True
-update_data = False
+cuda_flag = False
+update_data = True
 dct_num = 5
 dct_flag = False
 
