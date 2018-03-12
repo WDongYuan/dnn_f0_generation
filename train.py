@@ -181,7 +181,7 @@ if __name__=="__main__":
 		print("python train.py"+
 			" --mode phrase_lstm_predict"+
 			" --data_dir ../cantonese/dnn_data_dir"+
-			" --voice_dir ../cantonese/cmu_yue_wdy_cn"+
+			" --voice_dir ../cantonese/cmu_yue_wdy_can"+
 			" --txt_file ../cantonese/txt.done.data.word"+
 			# " --desc_file ../cantonese/dnn_data_dir/feature_desc_vector"+
 			# " --train_data ../cantonese/dnn_data_dir/train_test_data/train_data/train_feat"+
