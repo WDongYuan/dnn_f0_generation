@@ -253,7 +253,7 @@ class TEST_MODEL(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
 		cons_num,vowel_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
 		lstm_hidden_size,f0_dim,linear_h1):
-		super(TEST_LSTM, self).__init__()
+		super(TEST_MODEL, self).__init__()
 		self.emb_size = emb_size
 		self.feat_size = feat_size
 		self.pos_emb_size = pos_emb_size
