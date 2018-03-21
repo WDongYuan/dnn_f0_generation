@@ -254,7 +254,7 @@ class TEST_MODEL(nn.Module):
 	def __init__(self,emb_size,pos_emb_size,tone_emb_size,
 		cons_num,vowel_num,vowel_ch_num,pretone_num,tone_num,postone_num,feat_size,phrase_num,dep_num,voc_size,pos_num,pos_feat_num,
 		lstm_hidden_size,f0_dim,linear_h1):
-		super(PHRASE_LSTM, self).__init__()
+		super(TEST_MODEL, self).__init__()
 		self.emb_size = emb_size
 		self.feat_size = feat_size
 		self.pos_emb_size = pos_emb_size
@@ -462,9 +462,9 @@ class TEST_MODEL(nn.Module):
 		h = ph_h
 
 		# delta,delta_length = self.get_f0_delta(h)
-		delta,delta_length = self.get_self_f0_delta(h)
+		# delta,delta_length = self.get_self_f0_delta(h)
 		# delta,delta_length = self.get_mean_delta(h)
-		h = torch.cat((h,delta),dim=2)
+		# h = torch.cat((h,delta),dim=2)
 		
 
 		# h = h.view(self.batch_size,self.max_length*self.f0_dim)
@@ -674,10 +674,10 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			outputs = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 			
-			delta,delta_length = model.get_self_f0_delta(train_f0_batch)
+			# delta,delta_length = model.get_self_f0_delta(train_f0_batch)
 			# delta,delta_length = model.get_f0_delta(train_f0_batch)
 			# # # delta,delta_length = model.get_mean_delta(train_f0_batch)
-			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
+			# train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
