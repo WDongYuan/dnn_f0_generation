@@ -447,9 +447,9 @@ class TEST_MODEL(nn.Module):
 		emb = self.emb_l1(emb)
 		feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
-		# att_h = torch.bmm(self.cross_att(feat_h_n),feat_h_n)
+		att_h = torch.bmm(self.cross_att(feat_h_n),feat_h_n)
 		# feat_h_n = torch.cat((att_h,feat_h_n),dim=2)
-		# feat_h_n = att_h+feat_h_n
+		feat_h_n = att_h+feat_h_n
 		# feat_h_n = self.drop(feat_h_n)
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
