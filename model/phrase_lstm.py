@@ -503,10 +503,11 @@ class Attention(nn.Module):
 		super(Attention,self).__init__()
 		self.inter_dim = 50
 		self.tanh = nn.Tanh()
-		self.l1 = nn.Linear(in_h_dim,self.inter_dim)
+		# self.l1 = nn.Linear(in_h_dim,self.inter_dim)
 		self.softmax = nn.Softmax(dim=2)
 	def forward(self,lstm_h):
-		inter_h1 = self.l1(lstm_h)
+		# inter_h1 = self.l1(lstm_h)
+		inter_h1 = lstm_h
 		cross_att = torch.bmm(inter_h1,inter_h1.permute(0,2,1))
 		cross_att = self.tanh(cross_att)
 		cross_att = self.softmax(cross_att)
