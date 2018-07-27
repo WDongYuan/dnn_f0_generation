@@ -326,6 +326,7 @@ class TEST_MODEL(nn.Module):
 		self.relu = nn.ReLU()
 		self.tanh = nn.Tanh()
 		self.sigmoid = nn.Sigmoid()
+		self.drop = nn.Dropout(0.5)
 
 		self.emb_l1 = nn.Linear(self.emb_size,self.emb_l_size)
 		# self.linear_init(self.emb_l1)
@@ -449,6 +450,7 @@ class TEST_MODEL(nn.Module):
 		att_h = torch.bmm(self.cross_att(feat_h_n),feat_h_n)
 		feat_h_n = torch.cat((att_h,feat_h_n),dim=2)
 		# feat_h_n = att_h+feat_h_n
+		feat_h_n = self.drop(feat_h_n)
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
 		feat_h = self.feat_l2(feat_h)
