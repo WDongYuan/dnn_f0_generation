@@ -305,7 +305,7 @@ class TEST_MODEL(nn.Module):
 		init.uniform(self.vowel_ch_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
-		self.lstm_layer = 1
+		self.lstm_layer = 2
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
