@@ -318,7 +318,7 @@ class TEST_MODEL(nn.Module):
 		self.phrase_lstm_layer = 1
 		self.phrase_bidirectional_flag = False
 		self.phrase_direction = 2 if self.phrase_bidirectional_flag else 1
-		self.phrase_lstm = nn.LSTM(self.emb_l_size+self.pos_emb_length*self.pos_emb_size+self.pos_feat_num+3*self.tone_emb_size+self.feat_size+self.phrase_num, self.phrase_hidden_size,
+		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.feat_size+self.phrase_num, self.phrase_hidden_size,
 			num_layers=self.phrase_lstm_layer,bidirectional=self.phrase_bidirectional_flag,batch_first=True)
 
 
@@ -442,24 +442,24 @@ class TEST_MODEL(nn.Module):
 		# print(pos_feat.size())
 		# dep = self.dep_lemb(dep)
 		emb = self.emb_l1(emb)
-		# feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
-		# feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
-		# feat_h = self.feat_l1(feat_h_n)
-		# feat_h = self.tanh(feat_h)
-		# feat_h = self.feat_l2(feat_h)
+		feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
+		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
+		feat_h = self.feat_l1(feat_h_n)
+		feat_h = self.tanh(feat_h)
+		feat_h = self.feat_l2(feat_h)
 
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
-		ph_h_0 = torch.cat((emb,pos,pos_feat,feat,tone,cons,vowel,phrase),dim=2)
-		# ph_h_0 = torch.cat((feat,tone,cons,vowel,phrase),dim=2)
+		# ph_h_0 = torch.cat((emb,pos,pos_feat,feat,tone,cons,vowel,phrase),dim=2)
+		ph_h_0 = torch.cat((feat,tone,cons,vowel,phrase),dim=2)
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
-		# h = feat_h+ph_h
-		h = ph_h
+		h = feat_h+ph_h
+		# h = ph_h
 
 		# delta,delta_length = self.get_f0_delta(h)
 		# delta,delta_length = self.get_self_f0_delta(h)
@@ -490,6 +490,21 @@ class NGram(nn.Module):
 		in_data = in_data.view(self.batch_size,1,self.length*self.in_dim)
 		out_data = self.conv1(in_data).permute(0,2,1)
 		return out_data
+
+class Attention(nn.Module):
+	def __init__(self,in_h_dim):
+		super(Attention,self).__init__()
+		self.inter_dim = 50
+		self.tanh = nn.Tanh()
+		self.l1 = nn.Linear(in_h_dim,self.inter_dim)
+		self.softmax = nn.Softmax(dim=2)
+	def forward(self,lstm_h):
+		inter_h1 = self.l1(lstm_h)
+		cross_att = torch.bmm(inter_h1,inter_h1.permute(0,2,1))
+		cross_att = self.tanh(cross_att)
+		cross_att = self.softmax(cross_att)
+		return cross_att
+
 
 
 class SYL_LSTM(nn.Module):
