@@ -316,7 +316,7 @@ class TEST_MODEL(nn.Module):
 		# 	num_layers=self.lstm_layer,bidirectional=self.bidirectional_flag,batch_first=True)
 
 		self.phrase_lstm_layer = 1
-		self.phrase_bidirectional_flag = False
+		self.phrase_bidirectional_flag = True
 		self.phrase_direction = 2 if self.phrase_bidirectional_flag else 1
 		self.phrase_lstm = nn.LSTM(3*self.tone_emb_size+self.feat_size+self.phrase_num, self.phrase_hidden_size,
 			num_layers=self.phrase_lstm_layer,bidirectional=self.phrase_bidirectional_flag,batch_first=True)
