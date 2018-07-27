@@ -347,6 +347,8 @@ class TEST_MODEL(nn.Module):
 		self.comb_l1 = nn.Linear(2*self.f0_dim,2*self.f0_dim)
 		self.comb_l2 = nn.Linear(2*self.f0_dim,self.f0_dim)
 
+		self.cross_att = Attention(self.lstm_hidden_size*self.direction)
+
 
 	def linear_init(self,layer,lower=-1,upper=1):
 		layer.weight.data.uniform_(lower, upper)
@@ -462,9 +464,9 @@ class TEST_MODEL(nn.Module):
 		# h = ph_h
 
 		# delta,delta_length = self.get_f0_delta(h)
-		# delta,delta_length = self.get_self_f0_delta(h)
+		delta,delta_length = self.get_self_f0_delta(h)
 		# delta,delta_length = self.get_mean_delta(h)
-		# h = torch.cat((h,delta),dim=2)
+		h = torch.cat((h,delta),dim=2)
 		
 
 		# h = h.view(self.batch_size,self.max_length*self.f0_dim)
@@ -690,10 +692,10 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 			outputs = model(train_emb_batch,train_pos_batch,train_pos_feat_batch,train_cons_batch,train_vowel_batch,
 				train_pretone_batch,train_tone_batch,train_postone_batch,train_feat_batch,train_phrase_batch,train_dep_batch,train_len_batch)
 			
-			# delta,delta_length = model.get_self_f0_delta(train_f0_batch)
+			delta,delta_length = model.get_self_f0_delta(train_f0_batch)
 			# delta,delta_length = model.get_f0_delta(train_f0_batch)
 			# # # delta,delta_length = model.get_mean_delta(train_f0_batch)
-			# train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
+			train_f0_batch = torch.cat((train_f0_batch,delta),dim=2)
 
 			loss = LF(outputs,train_f0_batch)
 			loss.backward()
