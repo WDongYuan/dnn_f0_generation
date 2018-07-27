@@ -435,8 +435,8 @@ class TEST_MODEL(nn.Module):
 		vowel = self.vowel_embed(vowel)
 
 
-		# c_0 = self.init_hidden()
-		# h_0 = self.init_hidden()
+		c_0 = self.init_hidden()
+		h_0 = self.init_hidden()
 
 		# print(pos.size())
 		# print(pos_feat.size())
