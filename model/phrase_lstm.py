@@ -461,7 +461,7 @@ class TEST_MODEL(nn.Module):
 		# ph_h_0 = torch.cat((emb,pos,pos_feat,feat,tone,cons,vowel,phrase),dim=2)
 		ph_h_0 = torch.cat((feat,tone,cons,vowel,phrase),dim=2)
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
-		ph_h_n = ph_h_n+feat_h_n
+		# ph_h_n = ph_h_n+feat_h_n
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
