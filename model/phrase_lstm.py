@@ -447,9 +447,9 @@ class TEST_MODEL(nn.Module):
 		emb = self.emb_l1(emb)
 		feat_h_0 = torch.cat((emb,feat,pos,pos_feat),dim=2)
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
-		att_h = torch.bmm(self.cross_att(feat_h_n),feat_h_n)
+		# att_h = torch.bmm(self.cross_att(feat_h_n),feat_h_n)
 		# feat_h_n = torch.cat((att_h,feat_h_n),dim=2)
-		feat_h_n = att_h+feat_h_n
+		# feat_h_n = att_h+feat_h_n
 		# feat_h_n = self.drop(feat_h_n)
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
@@ -461,6 +461,7 @@ class TEST_MODEL(nn.Module):
 		# ph_h_0 = torch.cat((emb,pos,pos_feat,feat,tone,cons,vowel,phrase),dim=2)
 		ph_h_0 = torch.cat((feat,tone,cons,vowel,phrase),dim=2)
 		ph_h_n, (_,_) = self.phrase_lstm(ph_h_0,(h_0,c_0))
+		ph_h_n = ph_h_n+feat_h_n
 		ph_h = self.phrase_l1(ph_h_n)
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
