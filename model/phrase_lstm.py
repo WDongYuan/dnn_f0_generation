@@ -305,7 +305,7 @@ class TEST_MODEL(nn.Module):
 		init.uniform(self.vowel_ch_embed.weight,a=-0.01,b=0.01)
 
 		##LSTM
-		self.lstm_layer = 2
+		self.lstm_layer = 1
 		self.bidirectional_flag = True
 		self.direction = 2 if self.bidirectional_flag else 1
 		# self.emb_lstm = nn.LSTM(self.emb_size+self.pos_emb_size, self.lstm_hidden_size,
@@ -339,6 +339,11 @@ class TEST_MODEL(nn.Module):
 		self.linear_init(self.feat_l1)
 		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.feat_l2)
+
+		self.feat_l1_2 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.linear_init(self.feat_l1_2)
+		self.feat_l2_2 = nn.Linear(self.linear_h1,self.f0_dim)
+		self.linear_init(self.feat_l2_2)
 
 		self.phrase_l1 = nn.Linear(self.phrase_hidden_size*self.phrase_direction,self.phrase_linear_size)
 		self.linear_init(self.phrase_l1)
@@ -455,6 +460,10 @@ class TEST_MODEL(nn.Module):
 		feat_h = self.tanh(feat_h)
 		feat_h = self.feat_l2(feat_h)
 
+		feat_h_2 = self.feat_l1(feat_h_n)
+		feat_h_2 = self.tanh(feat_h_2)
+		feat_h_2 = self.feat_l2(feat_h_2)
+
 		c_0 = self.init_phrase_hidden()
 		h_0 = self.init_phrase_hidden()
 
@@ -466,7 +475,7 @@ class TEST_MODEL(nn.Module):
 		ph_h = self.relu(ph_h)
 		ph_h = self.phrase_l2(ph_h)
 
-		h = feat_h+ph_h
+		h = feat_h+ph_h+feat_h_2
 		# h = ph_h
 
 		# delta,delta_length = self.get_f0_delta(h)
