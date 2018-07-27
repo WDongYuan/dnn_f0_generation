@@ -633,6 +633,7 @@ def Train(train_emb,train_pos,train_pos_feat,train_cons,train_vowel,train_preton
 	min_loss = 100000000
 	print("begin training...")
 	for epoch in range(epoch_num):
+		model.train()
 		start_time = time.time()
 		loss_val = 0
 		for i in range(len(train_emb)):
