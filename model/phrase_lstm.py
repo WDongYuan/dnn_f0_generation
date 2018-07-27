@@ -334,7 +334,7 @@ class TEST_MODEL(nn.Module):
 		self.dep_lemb = nn.Linear(self.dep_num,self.dep_lemb_size)
 		self.linear_init(self.dep_lemb)
 
-		self.feat_l1 = nn.Linear(2*self.lstm_hidden_size*self.direction,self.linear_h1)
+		self.feat_l1 = nn.Linear(self.lstm_hidden_size*self.direction,self.linear_h1)
 		self.linear_init(self.feat_l1)
 		self.feat_l2 = nn.Linear(self.linear_h1,self.f0_dim)
 		self.linear_init(self.feat_l2)
@@ -448,6 +448,7 @@ class TEST_MODEL(nn.Module):
 		feat_h_n, (_,_) = self.feat_lstm(feat_h_0,(h_0,c_0))
 		att_h = torch.bmm(self.cross_att(feat_h_n),feat_h_n)
 		feat_h_n = torch.cat((att_h,feat_h_n),dim=2)
+		# feat_h_n = att_h+feat_h_n
 		feat_h = self.feat_l1(feat_h_n)
 		feat_h = self.tanh(feat_h)
 		feat_h = self.feat_l2(feat_h)
